@@ -1,0 +1,140 @@
+// Only courses with `active: true` are shown on the site. Add a course by adding an
+// object here and setting active: true — no component changes needed.
+// Pricing is demo/placeholder content (marked isDemoPrice) until real pricing is confirmed.
+// demoVideoUrl is left empty until a real YouTube link is provided — the detail page
+// shows a "coming soon" state when empty instead of a broken embed.
+
+export const COURSES = [
+  {
+    slug: 'digital-marketing',
+    active: true,
+    icon: 'megaphone',
+    title: 'Digital Marketing',
+    shortDescription: 'A practical, campaign-focused course covering everything from SEO to paid ads to analytics.',
+    duration: '3 Months',
+    level: 'Beginner to Advanced',
+    mode: 'Online / Offline (Lucknow)',
+    originalPrice: '\u20b99,999',
+    price: '\u20b94,999',
+    discountPercent: 50,
+    isDemoPrice: true,
+    demoVideoUrl: '',
+    hasCertificateSample: true,
+    projects: 4,
+    certificate: true,
+    mentorship: true,
+    topics: [
+      'Digital Marketing Fundamentals', 'SEO', 'Google Ads', 'Meta Ads', 'Social Media Marketing',
+      'Google Business Profile', 'Content Marketing', 'Email Marketing', 'Analytics', 'Lead Generation',
+      'Branding', 'Campaign Strategy',
+    ],
+    whatYouLearn: [
+      'Plan and run real Google Ads and Meta Ads campaigns',
+      'Optimize a Google Business Profile for local visibility',
+      'Build and execute a content and social media strategy',
+      'Read analytics data and turn it into decisions',
+      'Generate and qualify leads for a business',
+    ],
+    whoShouldJoin: ['Students exploring a digital marketing career', 'Business owners who want to market in-house', 'Freelancers looking to add marketing services'],
+    faqs: [
+      { q: 'Do I need prior experience?', a: 'No — the course starts from fundamentals and builds up to campaign management.' },
+      { q: 'Is this hands-on?', a: 'Yes, the course includes real campaign and strategy projects, not just theory.' },
+      { q: 'Is the course online or offline?', a: 'Both options are available — online live sessions or offline classes at our Lucknow center.' },
+      { q: 'Will I get a certificate?', a: 'Yes, you\u2019ll receive a certificate of completion at the end of the course.' },
+      { q: 'Is mentorship included?', a: 'Yes, you\u2019ll have access to mentor support throughout the course.' },
+    ],
+  },
+  {
+    slug: 'artificial-intelligence',
+    active: true,
+    icon: 'brain-circuit',
+    title: 'Artificial Intelligence',
+    shortDescription: 'A practical AI course covering fundamentals, generative AI, prompt engineering and real applications.',
+    duration: '2 Months',
+    level: 'Beginner to Intermediate',
+    mode: 'Online / Offline (Lucknow)',
+    originalPrice: '\u20b97,999',
+    price: '\u20b93,999',
+    discountPercent: 50,
+    isDemoPrice: true,
+    demoVideoUrl: '',
+    hasCertificateSample: true,
+    projects: 3,
+    certificate: true,
+    mentorship: true,
+    topics: [
+      'AI Fundamentals', 'Generative AI', 'Prompt Engineering', 'AI Tools',
+      'Machine Learning Fundamentals', 'AI Applications', 'Automation', 'Practical AI Projects',
+    ],
+    whatYouLearn: [
+      'Understand how modern AI systems and models work at a practical level',
+      'Write effective prompts for real business and creative tasks',
+      'Use current AI tools to automate everyday work',
+      'Apply AI to marketing, content and productivity workflows',
+    ],
+    whoShouldJoin: ['Students curious about AI careers', 'Professionals who want to use AI tools effectively', 'Entrepreneurs looking to automate parts of their business'],
+    faqs: [
+      { q: 'Do I need a coding background?', a: 'No — this course is practical and tool-focused, not a deep ML engineering course.' },
+      { q: 'Will I build anything?', a: 'Yes, you\u2019ll complete practical AI-assisted projects during the course.' },
+      { q: 'Is the course online or offline?', a: 'Both options are available — online live sessions or offline classes at our Lucknow center.' },
+      { q: 'Will I get a certificate?', a: 'Yes, you\u2019ll receive a certificate of completion at the end of the course.' },
+      { q: 'Is mentorship included?', a: 'Yes, you\u2019ll have access to mentor support throughout the course.' },
+    ],
+  },
+  {
+    slug: 'website-development',
+    active: true,
+    icon: 'code-2',
+    title: 'Website Development',
+    shortDescription: 'Go from HTML basics to building and deploying real, responsive websites with React.',
+    duration: '4 Months',
+    level: 'Beginner to Advanced',
+    mode: 'Online / Offline (Lucknow)',
+    originalPrice: '\u20b911,999',
+    price: '\u20b95,999',
+    discountPercent: 50,
+    isDemoPrice: true,
+    demoVideoUrl: '',
+    hasCertificateSample: true,
+    projects: 5,
+    certificate: true,
+    mentorship: true,
+    topics: [
+      'HTML', 'CSS', 'JavaScript', 'Responsive Design', 'Git & GitHub',
+      'Frontend Development', 'React', 'Backend Fundamentals', 'Database', 'Deployment', 'Real-world Projects',
+    ],
+    whatYouLearn: [
+      'Build responsive websites from scratch with HTML, CSS and JavaScript',
+      'Develop modern frontend interfaces using React',
+      'Understand backend and database fundamentals',
+      'Use Git/GitHub in a real development workflow',
+      'Deploy a live website',
+    ],
+    whoShouldJoin: ['Students starting a web development career', 'Professionals switching into tech', 'Business owners who want to understand their own website'],
+    faqs: [
+      { q: 'Do I need any prior knowledge?', a: 'No — the course starts from the fundamentals of HTML and CSS.' },
+      { q: 'Will I have a portfolio by the end?', a: 'Yes, you\u2019ll complete multiple real projects you can showcase.' },
+      { q: 'Is the course online or offline?', a: 'Both options are available — online live sessions or offline classes at our Lucknow center.' },
+      { q: 'Will I get a certificate?', a: 'Yes, you\u2019ll receive a certificate of completion at the end of the course.' },
+      { q: 'Is mentorship included?', a: 'Yes, you\u2019ll have access to mentor support throughout the course.' },
+    ],
+  },
+  // Additional courses — data-ready, not yet launched (active: false so they don't display).
+  { slug: 'python-programming', active: false, title: 'Python Programming' },
+  { slug: 'data-science', active: false, title: 'Data Science' },
+  { slug: 'machine-learning', active: false, title: 'Machine Learning' },
+  { slug: 'cybersecurity', active: false, title: 'Cybersecurity' },
+  { slug: 'cloud-computing', active: false, title: 'Cloud Computing' },
+  { slug: 'seo-course', active: false, title: 'SEO' },
+  { slug: 'social-media-marketing-course', active: false, title: 'Social Media Marketing' },
+  { slug: 'graphic-design-course', active: false, title: 'Graphic Design' },
+  { slug: 'full-stack-development', active: false, title: 'Full Stack Development' },
+  { slug: 'data-analytics', active: false, title: 'Data Analytics' },
+  { slug: 'programming-fundamentals', active: false, title: 'Programming Fundamentals' },
+];
+
+export const ACTIVE_COURSES = COURSES.filter((c) => c.active);
+
+export function getCourseBySlug(slug) {
+  return COURSES.find((c) => c.slug === slug && c.active);
+}
