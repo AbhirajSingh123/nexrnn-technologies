@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-heading: "Bebas Neue", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --color-primary: #1D6FE0;
+  --color-primary-dark: #144FA6;
+  --color-secondary: #0B1220;
+  --color-accent: #F3F6FB;
+  --color-surface: #FFFFFF;
+  --color-muted: #626B7A;
+  --color-border: #0B1220;
+
+  --hard-shadow: 6px 6px 0 #0B1220;
+  --hard-shadow-sm: 4px 4px 0 #0B1220;
+  --hard-shadow-blue: 6px 6px 0 #1D6FE0;
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    color: var(--color-secondary);
+    background-color: var(--color-accent);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .container-section { @apply max-w-7xl mx-auto px-5 sm:px-6 lg:px-8; }
+  .section-padding { @apply py-16 md:py-24; }
+  .badge-tag {
+    @apply inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-primary bg-primary/5 border border-primary/30 px-4 py-1.5;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-primary text-white font-semibold text-sm tracking-wide px-7 py-3.5 border-2 border-secondary transition-all duration-200
+    shadow-[4px_4px_0_#0B1220] hover:shadow-[2px_2px_0_#0B1220] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px];
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 bg-white text-secondary font-semibold text-sm tracking-wide px-7 py-3.5 border-2 border-secondary transition-all duration-200
+    shadow-[4px_4px_0_#0B1220] hover:shadow-[2px_2px_0_#0B1220] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px];
+  }
+  .btn-outline-light {
+    @apply inline-flex items-center justify-center gap-2 bg-white text-secondary font-semibold text-sm tracking-wide px-7 py-3.5 border-2 border-secondary transition-all duration-200
+    shadow-[4px_4px_0_#0B1220] hover:shadow-[2px_2px_0_#0B1220] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px];
+  }
+  .card-base {
+    @apply relative bg-white border-2 border-secondary shadow-[var(--hard-shadow)] transition-all duration-200;
+  }
+  .card-hover {
+    @apply hover:shadow-[8px_8px_0_#1D6FE0] hover:-translate-x-0.5 hover:-translate-y-0.5;
+  }
+  .bracket-corners::before,
+  .bracket-corners::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+  }
+  .bracket-corners::before {
+    top: -6px; left: -6px;
+    border-top: 3px solid var(--color-primary);
+    border-left: 3px solid var(--color-primary);
+  }
+  .bracket-corners::after {
+    bottom: -6px; right: -6px;
+    border-bottom: 3px solid var(--color-primary);
+    border-right: 3px solid var(--color-primary);
+  }
+}
+
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #0B1220; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #1D6FE0; }
+
+.no-scroll { overflow: hidden; }
+
+.review-video-swiper .swiper-pagination-bullet-active {
+  background: var(--color-primary) !important;
+}
+.review-video-swiper .swiper-button-next,
+.review-video-swiper .swiper-button-prev {
+  color: var(--color-primary) !important;
+}
+
+.bg-grid-light {
+  background-image: linear-gradient(#0000000a 1px, transparent 1px), linear-gradient(90deg, #0000000a 1px, transparent 1px);
+  background-size: 40px 40px;
+}
