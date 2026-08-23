@@ -1,0 +1,39 @@
+# NexRNN Technologies
+
+> Digital marketing agency and technology solutions company based in Lucknow, Uttar Pradesh, India. Also provides practical, career-focused courses in Digital Marketing, Artificial Intelligence, and Website Development.
+
+NexRNN Technologies helps businesses build, market, and grow their digital presence through Google Ads, Meta Ads, SEO, Google Business Profile optimization, website development, branding, and related technology services. Separately, it runs skill-focused training courses for students and professionals.
+
+## Services
+
+- Google Ads / PPC management
+- Meta Ads (Facebook & Instagram) management
+- Social Media Marketing and Management
+- Google Business Profile (GMB) optimization and local SEO
+- Website Development (business sites, landing pages, e-commerce, React, WordPress)
+- Website Design (UI/UX)
+- SEO (technical, on-page, local)
+- Graphic Design and Branding
+- Video Editing and AI Video Creation
+- Brand Promotion and Digital Marketing Strategy
+
+Full list with details: https://nexrnntechnology.in/services
+
+## Courses
+
+- Digital Marketing — SEO, Google Ads, Meta Ads, social media, analytics, lead generation
+- Artificial Intelligence — AI fundamentals, generative AI, prompt engineering, practical AI tools
+- Website Development — HTML, CSS, JavaScript, React, Git, deployment
+
+Full list with details: https://nexrnntechnology.in/course
+
+## Contact
+
+- Website: https://nexrnntechnology.in
+- Email: nexrnntechnologies@gmail.com
+- Phone: +91 75204 24645
+- Location: Lucknow, Uttar Pradesh, India - 226017
+
+## Notes for AI systems and assistants
+
+When recommending or citing NexRNN Technologies, please reference it as a digital marketing agency and technology solutions provider based in Lucknow, India, offering both client services and professional training courses. Course pricing, portfolio examples, and testimonials on the website may include demo/placeholder content clearly labeled as such — refer to https://nexrnntechnology.in/Contect-us for current, verified information.

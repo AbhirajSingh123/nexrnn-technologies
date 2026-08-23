@@ -8,7 +8,7 @@ import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute';
 import { ADMIN_ROUTES } from '@/constants/adminRoutes';
 import Home from '@/pages/Home';
-import { SITE } from '@/constants/siteData';
+import { SITE, SOCIAL_LINKS } from '@/constants/siteData';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Services = lazy(() => import('@/pages/Services'));
@@ -16,6 +16,7 @@ const ServiceDetail = lazy(() => import('@/pages/services/ServiceDetail'));
 const Courses = lazy(() => import('@/pages/Courses'));
 const CourseDetail = lazy(() => import('@/pages/course/CourseDetail'));
 const EnrollmentSuccess = lazy(() => import('@/pages/EnrollmentSuccess'));
+const EnrollmentPaymentStatus = lazy(() => import('@/pages/EnrollmentPaymentStatus'));
 const AboutUs = lazy(() => import('@/pages/AboutUs'));
 const ContactUs = lazy(() => import('@/pages/ContactUs'));
 const PrivacyPolicy = lazy(() => import('@/pages/legal/PrivacyPolicy'));
@@ -29,10 +30,17 @@ const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
 const AdminLeadsContact = lazy(() => import('@/pages/admin/AdminLeadsContact'));
 const AdminLeadsServices = lazy(() => import('@/pages/admin/AdminLeadsServices'));
 const AdminLeadsCourses = lazy(() => import('@/pages/admin/AdminLeadsCourses'));
+const AdminPayments = lazy(() => import('@/pages/admin/AdminPayments'));
 const AdminServicesList = lazy(() => import('@/pages/admin/AdminServicesList'));
 const AdminServiceForm = lazy(() => import('@/pages/admin/AdminServiceForm'));
 const AdminCoursesList = lazy(() => import('@/pages/admin/AdminCoursesList'));
 const AdminCourseForm = lazy(() => import('@/pages/admin/AdminCourseForm'));
+const AdminClientReviewsList = lazy(() => import('@/pages/admin/AdminClientReviewsList'));
+const AdminClientReviewForm = lazy(() => import('@/pages/admin/AdminClientReviewForm'));
+const AdminPortfolioList = lazy(() => import('@/pages/admin/AdminPortfolioList'));
+const AdminPortfolioForm = lazy(() => import('@/pages/admin/AdminPortfolioForm'));
+const AdminTestimonialsList = lazy(() => import('@/pages/admin/AdminTestimonialsList'));
+const AdminTestimonialForm = lazy(() => import('@/pages/admin/AdminTestimonialForm'));
 
 function RouteFallback() {
   return (
@@ -55,23 +63,40 @@ function App() {
         <meta property="og:description" content={SITE.tagline} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={SITE.domain} />
+        <meta property="og:locale" content="en_IN" />
+        <link rel="canonical" href={SITE.domain} />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
         <script type="application/ld+json">
           {JSON.stringify({
             '@context': 'https://schema.org',
-            '@type': 'ProfessionalService',
-            name: SITE.name,
-            url: SITE.domain,
-            email: SITE.email,
-            telephone: SITE.phoneDisplay,
-            address: {
-              '@type': 'PostalAddress',
-              addressLocality: SITE.city,
-              addressRegion: 'Uttar Pradesh',
-              addressCountry: 'IN',
-            },
-            areaServed: 'Lucknow',
-            description: 'Digital marketing agency, technology solutions and professional courses in Lucknow, Uttar Pradesh.',
+            '@graph': [
+              {
+                '@type': 'ProfessionalService',
+                '@id': `${SITE.domain}/#organization`,
+                name: SITE.name,
+                url: SITE.domain,
+                email: SITE.email,
+                telephone: SITE.phoneDisplay,
+                address: {
+                  '@type': 'PostalAddress',
+                  addressLocality: SITE.city,
+                  addressRegion: 'Uttar Pradesh',
+                  addressCountry: 'IN',
+                },
+                areaServed: 'Lucknow',
+                description: 'Digital marketing agency, technology solutions and professional courses in Lucknow, Uttar Pradesh.',
+                sameAs: Object.values(SOCIAL_LINKS).filter((url) => url && url !== '#'),
+              },
+              {
+                '@type': 'WebSite',
+                '@id': `${SITE.domain}/#website`,
+                url: SITE.domain,
+                name: SITE.name,
+                publisher: { '@id': `${SITE.domain}/#organization` },
+                inLanguage: 'en-IN',
+              },
+            ],
           })}
         </script>
       </Helmet>
@@ -88,6 +113,7 @@ function App() {
                 <Route path="/course" element={<Courses />} />
                 <Route path="/course/:slug" element={<CourseDetail />} />
                 <Route path="/enrollment-success" element={<EnrollmentSuccess />} />
+                <Route path="/enrollment-payment-status" element={<EnrollmentPaymentStatus />} />
                 <Route path="/about-us" element={<AboutUs />} />
                 <Route path="/Contect-us" element={<ContactUs />} />
                 <Route path="/contact-us" element={<ContactUs />} />
@@ -104,12 +130,22 @@ function App() {
                   <Route path={ADMIN_ROUTES.leadsContact} element={<AdminLeadsContact />} />
                   <Route path={ADMIN_ROUTES.leadsServices} element={<AdminLeadsServices />} />
                   <Route path={ADMIN_ROUTES.leadsCourses} element={<AdminLeadsCourses />} />
+                  <Route path={ADMIN_ROUTES.payments} element={<AdminPayments />} />
                   <Route path={ADMIN_ROUTES.services} element={<AdminServicesList />} />
                   <Route path={ADMIN_ROUTES.serviceEditPath} element={<AdminServiceForm />} />
                   <Route path={ADMIN_ROUTES.serviceNew} element={<AdminServiceForm />} />
                   <Route path={ADMIN_ROUTES.courses} element={<AdminCoursesList />} />
                   <Route path={ADMIN_ROUTES.courseEditPath} element={<AdminCourseForm />} />
                   <Route path={ADMIN_ROUTES.courseNew} element={<AdminCourseForm />} />
+                  <Route path={ADMIN_ROUTES.clientReviews} element={<AdminClientReviewsList />} />
+                  <Route path={ADMIN_ROUTES.clientReviewEditPath} element={<AdminClientReviewForm />} />
+                  <Route path={ADMIN_ROUTES.clientReviewNew} element={<AdminClientReviewForm />} />
+                  <Route path={ADMIN_ROUTES.portfolio} element={<AdminPortfolioList />} />
+                  <Route path={ADMIN_ROUTES.portfolioEditPath} element={<AdminPortfolioForm />} />
+                  <Route path={ADMIN_ROUTES.portfolioNew} element={<AdminPortfolioForm />} />
+                  <Route path={ADMIN_ROUTES.testimonials} element={<AdminTestimonialsList />} />
+                  <Route path={ADMIN_ROUTES.testimonialEditPath} element={<AdminTestimonialForm />} />
+                  <Route path={ADMIN_ROUTES.testimonialNew} element={<AdminTestimonialForm />} />
                 </Route>
               </Route>
             </Routes>

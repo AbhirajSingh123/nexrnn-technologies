@@ -80,6 +80,33 @@ export default function CourseDetail() {
       <Helmet>
         <title>{course.title} Course in Lucknow | {SITE.name}</title>
         <meta name="description" content={course.shortDescription} />
+        <link rel="canonical" href={`${SITE.domain}/course/${course.slug}`} />
+        {course.faqs?.length > 0 && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: course.faqs.map((f) => ({
+                '@type': 'Question',
+                name: f.q,
+                acceptedAnswer: { '@type': 'Answer', text: f.a },
+              })),
+            })}
+          </script>
+        )}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Course',
+            name: course.title,
+            description: course.shortDescription,
+            provider: {
+              '@type': 'Organization',
+              name: SITE.name,
+              sameAs: SITE.domain,
+            },
+          })}
+        </script>
       </Helmet>
 
       <section className="bg-accent bg-grid-light pt-32 pb-16">

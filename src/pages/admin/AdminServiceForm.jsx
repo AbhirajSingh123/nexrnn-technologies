@@ -16,7 +16,7 @@ const emptyForm = {
 
 export default function AdminServiceForm() {
   const { id } = useParams();
-  const isNew = id === 'new';
+  const isNew = !id || id === 'new';
   const navigate = useNavigate();
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(!isNew);

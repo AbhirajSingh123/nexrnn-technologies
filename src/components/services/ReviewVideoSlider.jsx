@@ -1,9 +1,10 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { PlayCircle } from 'lucide-react';
-import { REVIEW_VIDEOS } from '@/data/reviewVideos';
+import { useClientReviews } from '@/hooks/useContent';
 import Reveal from '@/components/shared/Reveal';
 import SectionHeading from '@/components/shared/SectionHeading';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
@@ -50,6 +51,8 @@ function ReviewVideoSlot({ video }) {
 }
 
 export default function ReviewVideoSlider() {
+  const { items: reviews, loading } = useClientReviews();
+
   return (
     <section className="section-padding bg-accent">
       <div className="container-section">
@@ -58,29 +61,33 @@ export default function ReviewVideoSlider() {
           title="What Our Clients Say"
           description="Video reviews from clients we've worked with — demo slots shown below until real client videos are added."
         />
-        <Reveal>
-          <Swiper
-            modules={[Autoplay, Pagination, Navigation]}
-            spaceBetween={20}
-            slidesPerView={1.2}
-            breakpoints={{
-              480: { slidesPerView: 1.6 },
-              640: { slidesPerView: 2.2 },
-              1024: { slidesPerView: 3.2 },
-              1280: { slidesPerView: 4 },
-            }}
-            autoplay={{ delay: 4500, disableOnInteraction: false }}
-            pagination={{ clickable: true }}
-            navigation
-            className="pb-12 review-video-swiper"
-          >
-            {REVIEW_VIDEOS.map((video) => (
-              <SwiperSlide key={video.id}>
-                <ReviewVideoSlot video={video} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </Reveal>
+        {loading ? (
+          <LoadingSpinner />
+        ) : (
+          <Reveal>
+            <Swiper
+              modules={[Autoplay, Pagination, Navigation]}
+              spaceBetween={20}
+              slidesPerView={1.2}
+              breakpoints={{
+                480: { slidesPerView: 1.6 },
+                640: { slidesPerView: 2.2 },
+                1024: { slidesPerView: 3.2 },
+                1280: { slidesPerView: 4 },
+              }}
+              autoplay={{ delay: 4500, disableOnInteraction: false }}
+              pagination={{ clickable: true }}
+              navigation
+              className="pb-12 review-video-swiper"
+            >
+              {reviews.map((video) => (
+                <SwiperSlide key={video.id}>
+                  <ReviewVideoSlot video={video} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </Reveal>
+        )}
       </div>
     </section>
   );

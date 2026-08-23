@@ -6,6 +6,13 @@ import AdminTable from '@/components/admin/AdminTable';
 import AdminFilterBar from '@/components/admin/AdminFilterBar';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
+const STATUS_STYLES = {
+  pending: 'bg-accent text-secondary border-secondary/30',
+  on_call: 'bg-blue-50 text-blue-700 border-blue-300',
+  done: 'bg-green-50 text-green-700 border-green-300',
+  undone: 'bg-red-50 text-primary border-primary/30',
+};
+
 export default function AdminLeadsServices() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,6 +20,7 @@ export default function AdminLeadsServices() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [serviceFilter, setServiceFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -36,6 +44,15 @@ export default function AdminLeadsServices() {
     }
   };
 
+  const handleStatusChange = async (row, status) => {
+    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, status } : r)));
+    const { error } = await supabase.from('leads_service').update({ status }).eq('id', row.id);
+    if (error) {
+      toast.error('Failed to update status.');
+      load();
+    }
+  };
+
   const serviceOptions = useMemo(
     () => [...new Set(rows.map((r) => r.service_title))].sort(),
     [rows]
@@ -44,6 +61,7 @@ export default function AdminLeadsServices() {
   const filteredRows = useMemo(() => {
     return rows.filter((r) => {
       if (serviceFilter !== 'all' && r.service_title !== serviceFilter) return false;
+      if (statusFilter !== 'all' && (r.status ?? 'pending') !== statusFilter) return false;
       if (dateFrom && new Date(r.created_at) < new Date(dateFrom)) return false;
       if (dateTo && new Date(r.created_at) > new Date(`${dateTo}T23:59:59`)) return false;
       if (search.trim()) {
@@ -53,7 +71,7 @@ export default function AdminLeadsServices() {
       }
       return true;
     });
-  }, [rows, search, dateFrom, dateTo, serviceFilter]);
+  }, [rows, search, dateFrom, dateTo, serviceFilter, statusFilter]);
 
   const columns = [
     { key: 'created_at', label: 'Date', render: (r) => formatDateTimeWithDay(r.created_at) },
@@ -64,6 +82,22 @@ export default function AdminLeadsServices() {
     { key: 'email', label: 'Email' },
     { key: 'service_title', label: 'Service' },
     { key: 'message', label: 'Message' },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (r) => (
+        <select
+          value={r.status ?? 'pending'}
+          onChange={(e) => handleStatusChange(r, e.target.value)}
+          className={`text-xs font-bold uppercase tracking-wide px-2.5 py-1.5 border-2 outline-none ${STATUS_STYLES[r.status ?? 'pending']}`}
+        >
+          <option value="pending">Pending</option>
+          <option value="on_call">On Call</option>
+          <option value="done">Done</option>
+          <option value="undone">Undone</option>
+        </select>
+      ),
+    },
   ];
 
   return (
@@ -79,19 +113,35 @@ export default function AdminLeadsServices() {
         dateTo={dateTo}
         onDateToChange={setDateTo}
         extra={
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wide text-muted mb-1">Service</label>
-            <select
-              value={serviceFilter}
-              onChange={(e) => setServiceFilter(e.target.value)}
-              className="border-2 border-secondary/20 focus:border-primary px-3 py-2 text-sm outline-none transition-colors bg-white max-w-[220px]"
-            >
-              <option value="all">All Services</option>
-              {serviceOptions.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
+          <>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wide text-muted mb-1">Service</label>
+              <select
+                value={serviceFilter}
+                onChange={(e) => setServiceFilter(e.target.value)}
+                className="border-2 border-secondary/20 focus:border-primary px-3 py-2 text-sm outline-none transition-colors bg-white max-w-[220px]"
+              >
+                <option value="all">All Services</option>
+                {serviceOptions.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wide text-muted mb-1">Status</label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="border-2 border-secondary/20 focus:border-primary px-3 py-2 text-sm outline-none transition-colors bg-white"
+              >
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="on_call">On Call</option>
+                <option value="done">Done</option>
+                <option value="undone">Undone</option>
+              </select>
+            </div>
+          </>
         }
       />
 

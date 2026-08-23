@@ -18,6 +18,7 @@ export default function Courses() {
           name="description"
           content="Practical, career-focused courses in Digital Marketing, Artificial Intelligence and Website Development from NexRNN Technology, Lucknow."
         />
+        <link rel="canonical" href={`${SITE.domain}/course`} />
       </Helmet>
 
       <section className="bg-accent bg-grid-light pt-32 pb-16">

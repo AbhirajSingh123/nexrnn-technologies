@@ -34,6 +34,22 @@ export default function ServiceDetail() {
       <Helmet>
         <title>{service.title} Services in Lucknow | {SITE.name}</title>
         <meta name="description" content={service.shortDescription} />
+        <link rel="canonical" href={`${SITE.domain}/services/${service.slug}`} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Service',
+            serviceType: service.title,
+            name: service.title,
+            description: service.shortDescription,
+            areaServed: 'Lucknow',
+            provider: {
+              '@type': 'Organization',
+              name: SITE.name,
+              sameAs: SITE.domain,
+            },
+          })}
+        </script>
       </Helmet>
 
       <section className="bg-accent bg-grid-light pt-32 pb-16">

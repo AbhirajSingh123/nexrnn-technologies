@@ -19,6 +19,7 @@ export default function Services() {
           name="description"
           content="Google Ads, Meta Ads, SEO, social media marketing, Google Business Profile, website development and more — digital marketing and technology services from NexRNN Technology, Lucknow."
         />
+        <link rel="canonical" href={`${SITE.domain}/services`} />
       </Helmet>
 
       <section className="bg-accent bg-grid-light pt-32 pb-16">

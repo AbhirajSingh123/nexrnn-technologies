@@ -114,3 +114,124 @@ Same as before — see `vercel.json` / `public/_redirects` for SPA routing. **Re
 your `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables in your
 hosting provider's dashboard** (e.g. Vercel → Project Settings → Environment Variables) —
 `.env` files are never deployed.
+
+---
+
+## Round 3 additions (SEO, Client Reviews, Portfolio, Testimonials, expanded lead/enrollment tracking)
+
+### New Supabase migration to run
+
+Run **`supabase/migration_3.sql`** once in the SQL Editor (after `migration_2.sql`). It adds:
+- `client_reviews`, `portfolio`, `testimonials` tables (each with public read + admin CRUD policies)
+- a `portfolio-assets` storage bucket for uploaded project images
+- an `on_call` status option for Contact and Service leads
+- new columns on `leads_course`: `batch_id`, `enrollment_status`, `call_status`, `email_status`, `payment_status`, `admin_notes`, `updated_at`
+
+### Admin panel additions
+
+- **What Our Clients Say** (`/nexrnn/master-nexrnn/admin/client-reviews`) — full CRUD for the video review slider on the Services page (YouTube link, client name, service name)
+- **Manage Portfolio** (`.../admin/portfolio`) — full CRUD with direct image upload to Supabase Storage, category (Website/Ads/Branding/Other)
+- **Manage Testimonials** (`.../admin/testimonials`) — full CRUD with a star-rating picker (review, rating, client name, company name)
+- **Contact Leads / Service Leads** — status is now Pending / On Call / Done / Undone
+- **Course Enrollments** — click **Manage** on any row to open a panel where you set: Batch ID (free text, e.g. `BATCH-2026-001`), Enrollment Status (Pending / On Call / Enrolled / Payment Received / Declined), Payment Status (Unpaid / Paid — tracked separately from Enrollment Status), Call Status (Done / Undone), Email Status (Sent / Not Sent), and Admin Notes. None of these fields are ever shown on the public enrollment form — admin-only, as requested.
+
+All three new content types (client reviews, portfolio, testimonials) work the same way as Services/Courses did: the public site fetches live from Supabase, and falls back to the original static demo data if Supabase isn't configured or a table is empty.
+
+### SEO
+
+- **On-page**: canonical tags added on every page (fixes duplicate-content risk between `/` and `/Home`, and `/Contect-us` / `/contact-us`), `Course` and `Service` schema.org markup on detail pages, `FAQPage` schema on course detail pages (pulled from each course's existing FAQ data), `Organization` + `WebSite` schema with `sameAs` social links on the root page, `robots` meta tag.
+- **GEO (Generative Engine Optimization)**: added `public/llms.txt` — a plain-text summary of the business, services, and courses following the emerging llms.txt convention that AI systems (ChatGPT, Perplexity, etc.) increasingly check when summarizing or recommending a site.
+- **AEO (Answer Engine Optimization)**: the FAQPage schema above is the main lever here — it's what lets Google (and increasingly AI answer engines) surface your course FAQs directly as rich results/answers.
+- **Off-page SEO**: this genuinely can't be "added" through code — it's backlinks, directory listings (Google Business Profile, Justdial, etc.), guest content, and social presence, all built over time outside the codebase. The technical foundation above (clean URLs, schema, canonical tags) makes off-page efforts more effective once you start them, but there's no on-site feature to toggle for it.
+
+### One naming clarification made without asking
+
+"Payment Status" (Section 7) was listed separately from "Enrollment Status" (Section 6, which already includes a "Payment Received" option). I implemented them as **two independent fields** — Enrollment Status tracks where the student is in the funnel, Payment Status is a simple Unpaid/Paid toggle that can change independently (e.g., a student can be "On Call" but already Paid). If you intended these to be the same field, let me know and I'll collapse them back into one.
+
+---
+
+## Round 4: Cashfree Payment Gateway Integration
+
+### Why this needs Supabase Edge Functions
+
+Cashfree's secret API key must **never** be shipped to the browser — anyone could open DevTools and steal it. So order creation, payment verification, and the webhook all run as **Supabase Edge Functions** (small serverless functions, same free Supabase project, no separate hosting needed).
+
+### Step 1 — Get Cashfree credentials
+
+1. Sign up / log in at [merchant.cashfree.com](https://merchant.cashfree.com).
+2. Go to **Developers → API Keys**. Copy the **Test Mode** (sandbox) **Client ID** and **Client Secret** first — test everything here before going live. Production keys become available after KYC is approved.
+
+### Step 2 — Install & link the Supabase CLI
+
+```bash
+npm install -g supabase
+supabase login
+supabase link --project-ref YOUR_PROJECT_REF
+```
+`YOUR_PROJECT_REF` is the part after `/project/` in your Supabase dashboard URL.
+
+### Step 3 — Set secrets (these never appear in frontend code)
+
+```bash
+supabase secrets set CASHFREE_CLIENT_ID=your_test_client_id
+supabase secrets set CASHFREE_CLIENT_SECRET=your_test_client_secret
+supabase secrets set CASHFREE_ENV=sandbox
+supabase secrets set SITE_URL=https://nexrnntechnology.in
+```
+(`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are provided automatically to every Edge Function — you don't need to set those yourself.)
+
+### Step 4 — Run the database migration
+
+Run **`supabase/migration_4.sql`** once in the SQL Editor (after migrations 2 and 3). It adds the `payments` table and a `cashfree_order_id` column on `leads_course`.
+
+### Step 5 — Deploy the three Edge Functions
+
+```bash
+supabase functions deploy create-cashfree-order
+supabase functions deploy verify-cashfree-payment
+supabase functions deploy cashfree-webhook --no-verify-jwt
+```
+The `--no-verify-jwt` flag on the webhook is required — Cashfree's servers call it directly with no Supabase login, so it can't require a Supabase auth token like the other two.
+
+### Step 6 — Set up the webhook in Cashfree
+
+1. In the Cashfree dashboard: **Developers → Webhooks → Add Webhook**.
+2. URL: `https://YOUR_PROJECT_REF.supabase.co/functions/v1/cashfree-webhook`
+3. Select the `PAYMENT_SUCCESS_WEBHOOK` and `PAYMENT_FAILED_WEBHOOK` events (or "all events").
+4. Cashfree will show you a **Webhook Secret** — copy it and set:
+   ```bash
+   supabase secrets set CASHFREE_WEBHOOK_SECRET=the_webhook_secret
+   ```
+
+### Step 7 — Set the frontend mode
+
+In your `.env` (and in your hosting provider's environment variables — e.g. Vercel):
+```
+VITE_CASHFREE_MODE=sandbox
+```
+
+### Step 8 — Test end-to-end in sandbox
+
+1. Run the site, click **Enroll Now** on a course, fill the form, click **Proceed to Payment**.
+2. You'll land on Cashfree's sandbox checkout — use their [test card/UPI details](https://www.cashfree.com/docs/payments/test-integration) to simulate a payment.
+3. After payment, you should land back on `/enrollment-payment-status`, which verifies the payment and redirects to the success page.
+4. Check **Admin → Course Enrollments → Manage** on that record — you should see the payment attempt logged, with status `paid`, and Payment Status auto-updated.
+5. Check **Admin → Payments** for the full payment log.
+
+### Step 9 — Go live
+
+Once sandbox testing passes and Cashfree KYC is approved:
+```bash
+supabase secrets set CASHFREE_CLIENT_ID=your_production_client_id
+supabase secrets set CASHFREE_CLIENT_SECRET=your_production_client_secret
+supabase secrets set CASHFREE_ENV=production
+```
+And update `VITE_CASHFREE_MODE=production` in your hosting provider's env vars, then redeploy the frontend. Also add a **second, separate webhook** in Cashfree's dashboard for Production mode pointing to the same URL, and set its production webhook secret the same way.
+
+### What changed in the enrollment flow
+
+- The old QR-code image and optional "Payment Reference Number" field are **removed** from the enrollment popup — payment is now handled entirely through Cashfree's checkout.
+- "Submit Enrollment" is now **"Proceed to Payment"** — clicking it saves the enrollment record, creates a Cashfree order, and immediately redirects to Cashfree's hosted payment page.
+- A new **`/enrollment-payment-status`** page handles the return from Cashfree: it re-verifies the payment status directly with Cashfree's server (never trusts the redirect URL alone), updates the database, and then shows the existing success page — or a clear "payment not completed" screen with your contact details if it failed.
+- Cashfree's webhook keeps payment status in sync in the background as a second, more reliable layer (in case the user closes the tab right after paying, before the redirect completes).
+- New **Admin → Payments** page lists every payment attempt (order ID, amount, method, Cashfree payment ID, status) with search/filter, and each order's payment history is also visible inside the **Manage** panel on that specific enrollment.

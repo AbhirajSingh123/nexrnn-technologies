@@ -38,6 +38,7 @@ export default function ContactUs() {
       <Helmet>
         <title>Contact Us | {SITE.name} — Lucknow</title>
         <meta name="description" content={`Get in touch with ${SITE.name} for digital marketing, website development, or course enquiries in Lucknow.`} />
+        <link rel="canonical" href={`${SITE.domain}/Contect-us`} />
       </Helmet>
 
       <section className="bg-accent bg-grid-light pt-32 pb-16">

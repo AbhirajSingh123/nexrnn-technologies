@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { ArrowLeft, Loader2, Plus, Trash2, UploadCloud } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/services/supabaseClient';
 import { ADMIN_ROUTES } from '@/constants/adminRoutes';
 import { ICONS } from '@/utils/iconMap';
@@ -14,18 +14,17 @@ const emptyForm = {
   slug: '', icon: 'sparkles', title: '', short_description: '', duration: '', level: '', mode: '',
   original_price: '', price: '', discount_percent: '', is_demo_price: true, demo_video_url: '',
   has_certificate_sample: true, projects: 0, certificate: true, mentorship: true,
-  topics: '', what_you_learn: '', who_should_join: '', qr_code_url: '', active: true, sort_order: 0,
+  topics: '', what_you_learn: '', who_should_join: '', active: true, sort_order: 0,
 };
 
 export default function AdminCourseForm() {
   const { id } = useParams();
-  const isNew = id === 'new';
+  const isNew = !id || id === 'new';
   const navigate = useNavigate();
   const [form, setForm] = useState(emptyForm);
   const [faqs, setFaqs] = useState([{ q: '', a: '' }]);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (isNew) return;
@@ -60,23 +59,6 @@ export default function AdminCourseForm() {
 
   const addFaq = () => setFaqs((prev) => [...prev, { q: '', a: '' }]);
   const removeFaq = (index) => setFaqs((prev) => prev.filter((_, i) => i !== index));
-
-  const handleQrUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    const fileName = `qr-${form.slug || 'course'}-${Date.now()}.${file.name.split('.').pop()}`;
-    const { error } = await supabase.storage.from('course-assets').upload(fileName, file, { upsert: true });
-    if (error) {
-      toast.error(error.message || 'Upload failed.');
-      setUploading(false);
-      return;
-    }
-    const { data } = supabase.storage.from('course-assets').getPublicUrl(fileName);
-    setForm((f) => ({ ...f, qr_code_url: data.publicUrl }));
-    setUploading(false);
-    toast.success('QR code uploaded.');
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -195,18 +177,6 @@ export default function AdminCourseForm() {
         <div>
           <label className={labelClass}>Demo Video URL (YouTube)</label>
           <input className={inputClass} value={form.demo_video_url} onChange={handleChange('demo_video_url')} placeholder="https://youtube.com/watch?v=..." />
-        </div>
-
-        <div>
-          <label className={labelClass}>Payment QR Code</label>
-          {form.qr_code_url && (
-            <img src={form.qr_code_url} alt="Current QR code" className="w-28 h-28 object-contain border-2 border-secondary/15 mb-3" />
-          )}
-          <label className="flex items-center gap-3 border-2 border-dashed border-secondary/25 px-4 py-3 text-sm text-muted cursor-pointer hover:border-primary transition-colors w-fit">
-            <UploadCloud size={17} className="text-primary shrink-0" />
-            {uploading ? 'Uploading…' : 'Upload QR code image'}
-            <input type="file" accept="image/*" className="hidden" onChange={handleQrUpload} disabled={uploading} />
-          </label>
         </div>
 
         <div className="grid sm:grid-cols-3 gap-5">

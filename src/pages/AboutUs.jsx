@@ -13,6 +13,7 @@ export default function AboutUs() {
       <Helmet>
         <title>About Us | {SITE.name} — Digital Marketing & Technology, Lucknow</title>
         <meta name="description" content={ABOUT.intro} />
+        <link rel="canonical" href={`${SITE.domain}/about-us`} />
       </Helmet>
 
       <section className="bg-accent bg-grid-light pt-32 pb-16">

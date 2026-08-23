@@ -8,6 +8,7 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
 const STATUS_STYLES = {
   pending: 'bg-accent text-secondary border-secondary/30',
+  on_call: 'bg-blue-50 text-blue-700 border-blue-300',
   done: 'bg-green-50 text-green-700 border-green-300',
   undone: 'bg-red-50 text-primary border-primary/30',
 };
@@ -82,6 +83,7 @@ export default function AdminLeadsContact() {
           className={`text-xs font-bold uppercase tracking-wide px-2.5 py-1.5 border-2 outline-none ${STATUS_STYLES[r.status ?? 'pending']}`}
         >
           <option value="pending">Pending</option>
+          <option value="on_call">On Call</option>
           <option value="done">Done</option>
           <option value="undone">Undone</option>
         </select>
@@ -111,6 +113,7 @@ export default function AdminLeadsContact() {
             >
               <option value="all">All</option>
               <option value="pending">Pending</option>
+              <option value="on_call">On Call</option>
               <option value="done">Done</option>
               <option value="undone">Undone</option>
             </select>

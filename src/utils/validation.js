@@ -37,6 +37,5 @@ export const courseEnrollSchema = z.object({
   phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
   email: z.string().email('Enter a valid email'),
   college: z.string().optional().or(z.literal('')),
-  paymentRefNo: z.string().optional().or(z.literal('')),
   consent: consentField,
 });
