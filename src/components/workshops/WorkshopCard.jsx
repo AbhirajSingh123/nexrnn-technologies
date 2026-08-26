@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock3, ArrowRight, Image as ImageIcon } from 'lucide-react';
+import { Calendar, Clock3, ArrowRight, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
+import { formatINR } from '@/utils/format';
 import { useWorkshopEnrollModal } from '@/contexts/WorkshopEnrollContext';
 import Reveal from '@/components/shared/Reveal';
 
@@ -37,20 +38,29 @@ export default function WorkshopCard({ workshop, index = 0 }) {
             )}
           </div>
 
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-heading text-2xl text-primary">{workshop.price}</span>
-            {workshop.originalPrice && (
-              <span className="text-sm text-muted line-through normal-case">{workshop.originalPrice}</span>
-            )}
-            {workshop.discountPercent && (
-              <span className="bg-primary text-white text-[10px] font-bold uppercase px-2 py-0.5">
-                {workshop.discountPercent}% OFF
-              </span>
-            )}
-          </div>
-          <div className="flex items-center justify-between mb-5">
-            {workshop.isDemoPrice && <span className="text-[10px] text-muted normal-case">Demo pricing</span>}
-          </div>
+          {workshop.isFree ? (
+            <div className="flex items-center gap-1.5 mb-5">
+              <CheckCircle2 size={16} className="text-green-600" />
+              <span className="font-heading text-2xl text-green-600">FREE</span>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-heading text-2xl text-primary">{formatINR(workshop.price)}</span>
+                {workshop.originalPrice && (
+                  <span className="text-sm text-muted line-through normal-case">{formatINR(workshop.originalPrice)}</span>
+                )}
+                {workshop.discountPercent && (
+                  <span className="bg-primary text-white text-[10px] font-bold uppercase px-2 py-0.5">
+                    {workshop.discountPercent}% OFF
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center justify-between mb-5">
+                {workshop.isDemoPrice && <span className="text-[10px] text-muted normal-case">Demo pricing</span>}
+              </div>
+            </>
+          )}
 
           <div className="flex items-center gap-3 mt-auto">
             <Link to={`/workshop/${workshop.slug}`} className="btn-secondary flex-1 !px-4 !py-2.5 text-xs">

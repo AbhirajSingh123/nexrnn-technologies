@@ -8,6 +8,7 @@ import { WorkshopEnrollProvider } from '@/contexts/WorkshopEnrollContext';
 import ServiceLeadModal from '@/components/services/ServiceLeadModal';
 import CourseEnrollModal from '@/components/courses/CourseEnrollModal';
 import WorkshopEnrollModal from '@/components/workshops/WorkshopEnrollModal';
+import PopupOffer from '@/components/shared/PopupOffer';
 
 export default function RootLayout() {
   const { pathname } = useLocation();
@@ -28,6 +29,7 @@ export default function RootLayout() {
           <ServiceLeadModal />
           <CourseEnrollModal />
           <WorkshopEnrollModal />
+          <PopupOffer />
         </WorkshopEnrollProvider>
       </CourseEnrollProvider>
     </ServiceLeadProvider>

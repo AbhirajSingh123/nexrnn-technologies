@@ -126,6 +126,7 @@ Deno.serve(async (req) => {
         orderId,
         leadType,
         itemTitle: lead?.[titleColumn] ?? '',
+        referenceId: lead?.reference_id ?? '',
         studentName: lead?.name ?? '',
         whatsappGroupLink,
       }),

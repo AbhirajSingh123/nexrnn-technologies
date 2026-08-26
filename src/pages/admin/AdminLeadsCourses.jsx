@@ -4,6 +4,8 @@ import { supabase } from '@/services/supabaseClient';
 import { formatDateTimeWithDay } from '@/utils/formatDateTime';
 import AdminTable from '@/components/admin/AdminTable';
 import AdminFilterBar from '@/components/admin/AdminFilterBar';
+import AdminLoadMore from '@/components/admin/AdminLoadMore';
+import { useLoadMore } from '@/hooks/useLoadMore';
 import AdminEnrollmentModal from '@/components/admin/AdminEnrollmentModal';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
@@ -75,12 +77,18 @@ export default function AdminLeadsCourses() {
     });
   }, [rows, search, dateFrom, dateTo, courseFilter, statusFilter]);
 
+  const { visibleItems, hasMore, loadMore, total, shown } = useLoadMore(
+    filteredRows,
+    `${search}|${dateFrom}|${dateTo}|${courseFilter}|${statusFilter}`
+  );
+
   const columns = [
     { key: 'created_at', label: 'Date', render: (r) => formatDateTimeWithDay(r.created_at) },
     { key: 'name', label: 'Name' },
     { key: 'phone', label: 'WhatsApp / Mobile' },
     { key: 'email', label: 'Email' },
     { key: 'course_title', label: 'Course' },
+    { key: 'reference_id', label: 'Reference ID', render: (r) => r.reference_id || '—' },
     { key: 'batch_id', label: 'Batch ID', render: (r) => r.batch_id || '—' },
     {
       key: 'enrollment_status',
@@ -149,7 +157,14 @@ export default function AdminLeadsCourses() {
         }
       />
 
-      {loading ? <LoadingSpinner /> : <AdminTable columns={columns} rows={filteredRows} onDelete={handleDelete} />}
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <>
+          <AdminTable columns={columns} rows={visibleItems} onDelete={handleDelete} />
+          <AdminLoadMore shown={shown} total={total} hasMore={hasMore} onLoadMore={loadMore} />
+        </>
+      )}
 
       <AdminEnrollmentModal
         enrollment={managingRow}

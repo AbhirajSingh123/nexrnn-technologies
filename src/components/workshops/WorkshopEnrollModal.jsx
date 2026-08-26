@@ -1,12 +1,13 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CreditCard, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CreditCard, Loader2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { courseEnrollSchema } from '@/utils/validation';
 import { submitWorkshopEnrollment } from '@/data/leadsRepo';
 import { createCashfreeOrder } from '@/data/paymentsRepo';
 import { startCashfreeCheckout } from '@/utils/cashfreeSdk';
-import { parseRupeeAmount } from '@/utils/format';
+import { parseRupeeAmount, formatINR } from '@/utils/format';
 import { useWorkshopEnrollModal } from '@/contexts/WorkshopEnrollContext';
 import Modal from '@/components/shared/Modal';
 import ConsentCheckbox from '@/components/shared/ConsentCheckbox';
@@ -18,6 +19,7 @@ const errorClass = 'mt-1.5 text-xs text-primary normal-case';
 
 export default function WorkshopEnrollModal() {
   const { workshop, closeWorkshopEnroll } = useWorkshopEnrollModal();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -28,6 +30,15 @@ export default function WorkshopEnrollModal() {
   const onSubmit = async (data) => {
     try {
       const lead = await submitWorkshopEnrollment({ ...data, workshop });
+
+      if (workshop.isFree) {
+        reset();
+        closeWorkshopEnroll();
+        navigate('/enrollment-success', {
+          state: { name: data.name, itemTitle: workshop.title, referenceId: lead.referenceId, isFree: true },
+        });
+        return;
+      }
 
       const amount = parseRupeeAmount(workshop.price);
       const { paymentSessionId } = await createCashfreeOrder({
@@ -59,7 +70,13 @@ export default function WorkshopEnrollModal() {
           </div>
           <div className="text-right">
             <p className="text-[10px] font-bold uppercase tracking-wide text-muted mb-0.5">Fee</p>
-            <p className="font-heading text-2xl text-primary">{workshop.price}</p>
+            {workshop.isFree ? (
+              <p className="font-heading text-2xl text-green-600 flex items-center gap-1.5 justify-end">
+                <CheckCircle2 size={18} /> FREE
+              </p>
+            ) : (
+              <p className="font-heading text-2xl text-primary">{formatINR(workshop.price)}</p>
+            )}
           </div>
         </div>
       )}
@@ -94,7 +111,11 @@ export default function WorkshopEnrollModal() {
         <button type="submit" disabled={isSubmitting} className="btn-primary w-full disabled:opacity-60">
           {isSubmitting ? (
             <>
-              <Loader2 size={16} className="animate-spin" /> Preparing payment…
+              <Loader2 size={16} className="animate-spin" /> {workshop?.isFree ? 'Submitting…' : 'Preparing payment…'}
+            </>
+          ) : workshop?.isFree ? (
+            <>
+              Complete Free Registration <CheckCircle2 size={15} />
             </>
           ) : (
             <>

@@ -284,3 +284,47 @@ Run **`supabase/migration_5.sql`** once (after migrations 2, 3, and 4). It adds:
 - `leads_workshop` table (registrations, same status fields as `leads_course`)
 - generalizes `payments` to support both `lead_type: 'course'` and `lead_type: 'workshop'`
 - a new `workshop-assets` storage bucket for banner uploads
+
+---
+
+## Round 6: Free/Paid pricing, unique reference IDs, workshop mentors, admin layout, pagination, popup offers
+
+### New Supabase migration to run
+
+Run **`supabase/migration_6.sql`** once (after migrations 2–5). It adds:
+- `is_free` on `courses` and `workshops`
+- `mentor_name` / `mentor_intro` on `workshops`
+- `price` / `original_price` / `discount_percent` on `services` (previously had no pricing at all)
+- `reference_id` (unique) on `leads_course` and `leads_workshop`
+- `'free'` as a valid `payment_status` value alongside `unpaid`/`paid`
+- `popup_enabled` / `popup_image_url` / `popup_link` on `site_settings`
+- a new `site-assets` storage bucket (for the popup image)
+
+**⚠️ No Edge Function redeploy needed this round** — the Free/Paid logic is handled entirely on the frontend (free enrollments skip calling the payment functions altogether).
+
+### 1–2. Pricing, ₹ sign, Free/Paid
+
+- Courses, Workshops, and now **Services too** show pricing on their cards and detail pages.
+- `formatINR()` (`src/utils/format.js`) always renders a consistent `₹` + comma-grouped number no matter what's stored — it strips any stray symbols/commas before formatting, so the ₹ sign can never go missing or get duplicated.
+- Each course/workshop's admin edit form now has a **Free / Paid** toggle. Free items hide the pricing fields entirely and show a green "FREE" badge everywhere on the site instead. A ₹0 (or free) item **never calls the payment gateway** — the enrollment completes immediately and redirects straight to the success page.
+- Services have a **Price** field too now (optional) — if left blank, the site shows "Contact for Pricing" instead of ₹0.
+
+### 3. Unique Reference ID per enrollment
+
+Every course/workshop enrollment (free or paid) now gets a unique reference ID (e.g. `NRN-CRS-M2K3P9-X7Q1`), generated the moment the form is submitted. It's shown prominently on the success page, and appears as its own column in **Course Enrollments** / **Workshop Registrations**, plus inside each enrollment's **Manage** panel.
+
+### 4. Admin panel layout
+
+- The sidebar is now fixed and scrolls independently from the main content area (both now use their own internal scrollbars instead of the whole page scrolling together) — this also fixes the sidebar nav getting cut off now that there are many more sections.
+- **Pagination**: every admin list (leads, payments, services, courses, workshops, client reviews, portfolio, testimonials) now shows a maximum of 10 records at a time with a **Load More** button underneath ("Showing X of Y").
+
+### 5. Workshop Mentor section
+
+Each workshop's admin form now has a **Mentor Section** (Mentor Name + Short Introduction). If a mentor name is set, a "Your Mentor" section automatically appears on that workshop's public page. Leave the name blank to hide it.
+
+### 6. Popup Offers
+
+**Admin → Site Settings → Popup Offers**: toggle on/off, upload a popup image, and optionally set a link (the whole image becomes clickable and opens that link in a new tab). Behavior on the live site:
+- Appears 5 seconds after a visitor lands on any page
+- Auto-closes after 10 seconds if the visitor doesn't close it manually
+- Closeable anytime via the × button or by clicking outside it

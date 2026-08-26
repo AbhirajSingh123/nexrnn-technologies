@@ -42,9 +42,9 @@ export default function AdminLayout() {
   useIdleTimeout(() => handleLogout(true), true);
 
   return (
-    <div className="min-h-screen flex bg-accent">
-      <aside className="w-64 bg-secondary text-white flex flex-col shrink-0">
-        <div className="flex items-center gap-2.5 px-6 py-6 border-b border-white/10">
+    <div className="h-screen flex bg-accent overflow-hidden">
+      <aside className="w-64 h-screen bg-secondary text-white flex flex-col shrink-0">
+        <div className="flex items-center gap-2.5 px-6 py-6 border-b border-white/10 shrink-0">
           <span className="w-8 h-8 bg-primary border-2 border-white flex items-center justify-center text-xs font-heading shrink-0">
             N
           </span>
@@ -73,7 +73,7 @@ export default function AdminLayout() {
           })}
         </nav>
 
-        <div className="px-6 py-4 border-t border-white/10">
+        <div className="px-6 py-4 border-t border-white/10 shrink-0">
           <p className="text-xs text-white/50 normal-case mb-1">Signed in as</p>
           <p className="text-sm font-semibold mb-3 truncate">{profile?.full_name ?? 'Admin'}</p>
           <span className="inline-block text-[10px] font-bold uppercase tracking-wide bg-white/10 px-2 py-1 mb-4">
@@ -88,7 +88,7 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main className="flex-1 p-8 overflow-x-hidden">
+      <main className="flex-1 h-screen overflow-y-auto overflow-x-hidden p-8">
         <Outlet />
       </main>
     </div>

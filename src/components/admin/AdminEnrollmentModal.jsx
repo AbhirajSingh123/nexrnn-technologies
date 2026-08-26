@@ -87,6 +87,7 @@ export default function AdminEnrollmentModal({ enrollment, table, titleField, pa
   return (
     <Modal isOpen={Boolean(enrollment)} onClose={onClose} title="Manage Enrollment">
       <div className="grid sm:grid-cols-2 gap-4 mb-6 pb-6 border-b-2 border-secondary/10">
+        <InfoRow label="Reference ID" value={enrollment.reference_id} />
         <InfoRow label="Student Name" value={enrollment.name} />
         <InfoRow label={itemLabel} value={enrollment[titleField]} />
         <InfoRow label="Email" value={enrollment.email} />
@@ -152,6 +153,7 @@ export default function AdminEnrollmentModal({ enrollment, table, titleField, pa
             <select className={inputClass} value={form.payment_status} onChange={handleChange('payment_status')}>
               <option value="unpaid">Unpaid</option>
               <option value="paid">Paid</option>
+              <option value="free">Free</option>
             </select>
           </div>
           <div>

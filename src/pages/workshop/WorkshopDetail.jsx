@@ -3,10 +3,11 @@ import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Calendar, Clock3, Award, CheckCircle2, ChevronDown, ArrowRight, ArrowLeft, PlayCircle, Image as ImageIcon,
+  Calendar, Clock3, Award, CheckCircle2, ChevronDown, ArrowRight, ArrowLeft, PlayCircle, Image as ImageIcon, User,
 } from 'lucide-react';
 import { useWorkshop } from '@/hooks/useCatalog';
 import { useWorkshopEnrollModal } from '@/contexts/WorkshopEnrollContext';
+import { formatINR } from '@/utils/format';
 import { SITE } from '@/constants/siteData';
 import Reveal from '@/components/shared/Reveal';
 import DemoVideo from '@/components/shared/DemoVideo';
@@ -123,18 +124,24 @@ export default function WorkshopDetail() {
 
             <Reveal className="card-base bg-white p-7">
               <p className="text-xs font-bold uppercase tracking-wide text-muted mb-1">Workshop Fee</p>
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span className="font-heading text-4xl text-primary">{workshop.price}</span>
-                {workshop.originalPrice && (
-                  <span className="text-base text-muted line-through normal-case">{workshop.originalPrice}</span>
-                )}
-              </div>
-              {workshop.discountPercent && (
-                <span className="inline-block bg-primary text-white text-[10px] font-bold uppercase px-2.5 py-1 mb-2">
-                  {workshop.discountPercent}% OFF
-                </span>
+              {workshop.isFree ? (
+                <p className="font-heading text-4xl text-green-600 mb-4">FREE</p>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="font-heading text-4xl text-primary">{formatINR(workshop.price)}</span>
+                    {workshop.originalPrice && (
+                      <span className="text-base text-muted line-through normal-case">{formatINR(workshop.originalPrice)}</span>
+                    )}
+                  </div>
+                  {workshop.discountPercent && (
+                    <span className="inline-block bg-primary text-white text-[10px] font-bold uppercase px-2.5 py-1 mb-2">
+                      {workshop.discountPercent}% OFF
+                    </span>
+                  )}
+                  {workshop.isDemoPrice && <p className="text-[11px] text-muted normal-case mb-5">Demo pricing — confirm with our team</p>}
+                </>
               )}
-              {workshop.isDemoPrice && <p className="text-[11px] text-muted normal-case mb-5">Demo pricing — confirm with our team</p>}
               <button onClick={() => openWorkshopEnroll(workshop)} className="btn-primary w-full">
                 Register Now <ArrowRight size={16} />
               </button>
@@ -162,7 +169,26 @@ export default function WorkshopDetail() {
         </div>
       </section>
 
-      <section className="section-padding bg-white">
+      {workshop.mentorName && (
+        <section className="section-padding bg-white">
+          <div className="container-section max-w-3xl">
+            <h2 className="text-2xl text-secondary mb-5 flex items-center gap-2">
+              <User size={22} className="text-primary" /> Your Mentor
+            </h2>
+            <div className="card-base p-7 flex items-start gap-5">
+              <div className="w-14 h-14 bg-primary/10 flex items-center justify-center shrink-0">
+                <User size={24} className="text-primary" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-secondary normal-case mb-2">{workshop.mentorName}</p>
+                <p className="text-sm text-muted leading-relaxed normal-case">{workshop.mentorIntro}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="section-padding bg-accent">
         <div className="container-section max-w-3xl">
           <h2 className="text-2xl text-secondary mb-5">About This Workshop</h2>
           <p className="text-sm text-secondary/80 leading-relaxed normal-case whitespace-pre-line mb-12">{workshop.details}</p>

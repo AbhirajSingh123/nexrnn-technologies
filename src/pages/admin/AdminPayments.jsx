@@ -4,6 +4,8 @@ import { supabase } from '@/services/supabaseClient';
 import { formatDateTimeWithDay } from '@/utils/formatDateTime';
 import AdminTable from '@/components/admin/AdminTable';
 import AdminFilterBar from '@/components/admin/AdminFilterBar';
+import AdminLoadMore from '@/components/admin/AdminLoadMore';
+import { useLoadMore } from '@/hooks/useLoadMore';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
 const STATUS_STYLES = {
@@ -63,6 +65,11 @@ export default function AdminPayments() {
     });
   }, [rows, search, dateFrom, dateTo, statusFilter]);
 
+  const { visibleItems, hasMore, loadMore, total, shown } = useLoadMore(
+    filteredRows,
+    `${search}|${dateFrom}|${dateTo}|${statusFilter}`
+  );
+
   const columns = [
     { key: 'created_at', label: 'Date', render: (r) => formatDateTimeWithDay(r.created_at) },
     { key: 'student', label: 'Student', render: (r) => getStudent(r)?.name ?? '—' },
@@ -115,7 +122,14 @@ export default function AdminPayments() {
         }
       />
 
-      {loading ? <LoadingSpinner /> : <AdminTable columns={columns} rows={filteredRows} />}
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <>
+          <AdminTable columns={columns} rows={visibleItems} />
+          <AdminLoadMore shown={shown} total={total} hasMore={hasMore} onLoadMore={loadMore} />
+        </>
+      )}
     </div>
   );
 }

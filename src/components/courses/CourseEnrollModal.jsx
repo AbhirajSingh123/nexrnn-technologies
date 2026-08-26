@@ -1,12 +1,13 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CreditCard, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CreditCard, Loader2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { courseEnrollSchema } from '@/utils/validation';
 import { submitCourseEnrollment } from '@/data/leadsRepo';
 import { createCashfreeOrder } from '@/data/paymentsRepo';
 import { startCashfreeCheckout } from '@/utils/cashfreeSdk';
-import { parseRupeeAmount } from '@/utils/format';
+import { parseRupeeAmount, formatINR } from '@/utils/format';
 import { useCourseEnrollModal } from '@/contexts/CourseEnrollContext';
 import Modal from '@/components/shared/Modal';
 import ConsentCheckbox from '@/components/shared/ConsentCheckbox';
@@ -18,6 +19,7 @@ const errorClass = 'mt-1.5 text-xs text-primary normal-case';
 
 export default function CourseEnrollModal() {
   const { course, closeCourseEnroll } = useCourseEnrollModal();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -27,11 +29,21 @@ export default function CourseEnrollModal() {
 
   const onSubmit = async (data) => {
     try {
-      // 1. Save the enrollment record first.
+      // 1. Save the enrollment record first (gets a unique reference ID).
       const lead = await submitCourseEnrollment({ ...data, course });
 
-      // 2. Ask our backend (Edge Function) to create a Cashfree order — the
-      //    Cashfree secret key is only ever used server-side, never here.
+      // 2. Free courses skip the payment gateway entirely — straight to success.
+      if (course.isFree) {
+        reset();
+        closeCourseEnroll();
+        navigate('/enrollment-success', {
+          state: { name: data.name, itemTitle: course.title, referenceId: lead.referenceId, isFree: true },
+        });
+        return;
+      }
+
+      // 3. Paid courses: ask our backend (Edge Function) to create a Cashfree
+      //    order — the Cashfree secret key is only ever used server-side.
       const amount = parseRupeeAmount(course.price);
       const { paymentSessionId } = await createCashfreeOrder({
         leadId: lead.id,
@@ -46,7 +58,7 @@ export default function CourseEnrollModal() {
       reset();
       closeCourseEnroll();
 
-      // 3. Redirect to Cashfree's hosted checkout page.
+      // 4. Redirect to Cashfree's hosted checkout page.
       await startCashfreeCheckout(paymentSessionId);
     } catch (err) {
       toast.error(err.message || 'Something went wrong. Please try again.');
@@ -63,7 +75,13 @@ export default function CourseEnrollModal() {
           </div>
           <div className="text-right">
             <p className="text-[10px] font-bold uppercase tracking-wide text-muted mb-0.5">Fee</p>
-            <p className="font-heading text-2xl text-primary">{course.price}</p>
+            {course.isFree ? (
+              <p className="font-heading text-2xl text-green-600 flex items-center gap-1.5 justify-end">
+                <CheckCircle2 size={18} /> FREE
+              </p>
+            ) : (
+              <p className="font-heading text-2xl text-primary">{formatINR(course.price)}</p>
+            )}
           </div>
         </div>
       )}
@@ -98,7 +116,11 @@ export default function CourseEnrollModal() {
         <button type="submit" disabled={isSubmitting} className="btn-primary w-full disabled:opacity-60">
           {isSubmitting ? (
             <>
-              <Loader2 size={16} className="animate-spin" /> Preparing payment…
+              <Loader2 size={16} className="animate-spin" /> {course?.isFree ? 'Submitting…' : 'Preparing payment…'}
+            </>
+          ) : course?.isFree ? (
+            <>
+              Complete Free Enrollment <CheckCircle2 size={15} />
             </>
           ) : (
             <>

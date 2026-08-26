@@ -9,6 +9,9 @@ function mapRow(row) {
     shortDescription: row.short_description,
     benefits: row.benefits ?? [],
     features: row.features ?? [],
+    price: row.price,
+    originalPrice: row.original_price,
+    discountPercent: row.discount_percent,
     cta: row.cta,
     active: row.active,
   };

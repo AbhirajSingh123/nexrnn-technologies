@@ -11,8 +11,8 @@ const labelClass = 'block text-xs font-bold text-secondary uppercase tracking-wi
 
 const emptyForm = {
   slug: '', banner_url: '', title: '', short_description: '', workshop_datetime: '', registration_deadline: '',
-  details: '', original_price: '', price: '', discount_percent: '', is_demo_price: true, demo_video_url: '',
-  has_certificate_sample: true, whatsapp_group_link: '', active: true, sort_order: 0,
+  details: '', is_free: false, original_price: '', price: '', discount_percent: '', is_demo_price: true, demo_video_url: '',
+  has_certificate_sample: true, whatsapp_group_link: '', mentor_name: '', mentor_intro: '', active: true, sort_order: 0,
 };
 
 function toLocalInputValue(iso) {
@@ -93,6 +93,7 @@ export default function AdminWorkshopForm() {
       workshop_datetime: form.workshop_datetime ? new Date(form.workshop_datetime).toISOString() : null,
       registration_deadline: form.registration_deadline ? new Date(form.registration_deadline).toISOString() : null,
       details: form.details.trim(),
+      is_free: form.is_free,
       original_price: form.original_price.trim(),
       price: form.price.trim(),
       discount_percent: form.discount_percent === '' ? null : Number(form.discount_percent),
@@ -101,6 +102,8 @@ export default function AdminWorkshopForm() {
       has_certificate_sample: form.has_certificate_sample,
       faqs: faqs.filter((f) => f.q.trim() && f.a.trim()),
       whatsapp_group_link: form.whatsapp_group_link.trim(),
+      mentor_name: form.mentor_name.trim(),
+      mentor_intro: form.mentor_intro.trim(),
       active: form.active,
       sort_order: Number(form.sort_order) || 0,
     };
@@ -173,20 +176,47 @@ export default function AdminWorkshopForm() {
           <textarea rows={5} className={`${inputClass} resize-none`} value={form.details} onChange={handleChange('details')} />
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-5">
-          <div>
-            <label className={labelClass}>Original Price</label>
-            <input className={inputClass} value={form.original_price} onChange={handleChange('original_price')} placeholder="₹1,999" />
+        <div className="card-base bg-accent p-5">
+          <label className={labelClass}>Pricing Type</label>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setForm((f) => ({ ...f, is_free: false }))}
+              className={`flex-1 py-3 text-sm font-bold border-2 transition-colors ${!form.is_free ? 'bg-primary text-white border-secondary' : 'bg-white text-secondary border-secondary/20'}`}
+            >
+              Paid Workshop
+            </button>
+            <button
+              type="button"
+              onClick={() => setForm((f) => ({ ...f, is_free: true }))}
+              className={`flex-1 py-3 text-sm font-bold border-2 transition-colors ${form.is_free ? 'bg-green-600 text-white border-secondary' : 'bg-white text-secondary border-secondary/20'}`}
+            >
+              Free Workshop
+            </button>
           </div>
-          <div>
-            <label className={labelClass}>Offer Price</label>
-            <input className={inputClass} value={form.price} onChange={handleChange('price')} placeholder="₹999" />
-          </div>
-          <div>
-            <label className={labelClass}>Discount %</label>
-            <input type="number" className={inputClass} value={form.discount_percent} onChange={handleChange('discount_percent')} placeholder="50" />
-          </div>
+          {form.is_free && (
+            <p className="text-[11px] text-muted normal-case mt-3">
+              Free workshops skip the payment gateway entirely — students register directly.
+            </p>
+          )}
         </div>
+
+        {!form.is_free && (
+          <div className="grid sm:grid-cols-3 gap-5">
+            <div>
+              <label className={labelClass}>Original Price (numbers only)</label>
+              <input className={inputClass} value={form.original_price} onChange={handleChange('original_price')} placeholder="1999" />
+            </div>
+            <div>
+              <label className={labelClass}>Offer Price (numbers only)</label>
+              <input className={inputClass} value={form.price} onChange={handleChange('price')} placeholder="999" />
+            </div>
+            <div>
+              <label className={labelClass}>Discount %</label>
+              <input type="number" className={inputClass} value={form.discount_percent} onChange={handleChange('discount_percent')} placeholder="50" />
+            </div>
+          </div>
+        )}
 
         <label className="flex items-center gap-2.5">
           <input type="checkbox" className="w-4 h-4 accent-primary" checked={form.is_demo_price} onChange={handleChange('is_demo_price')} />
@@ -207,6 +237,19 @@ export default function AdminWorkshopForm() {
           <label className={labelClass}>WhatsApp Group Link</label>
           <input className={inputClass} value={form.whatsapp_group_link} onChange={handleChange('whatsapp_group_link')} placeholder="https://chat.whatsapp.com/..." />
           <p className="mt-1.5 text-[11px] text-muted normal-case">Shown to the student on the payment success page after they enroll and pay.</p>
+        </div>
+
+        <div className="card-base bg-accent p-5 space-y-4">
+          <p className="text-sm font-bold text-secondary normal-case">Mentor Section</p>
+          <div>
+            <label className={labelClass}>Mentor Name</label>
+            <input className={inputClass} value={form.mentor_name} onChange={handleChange('mentor_name')} placeholder="e.g. Priya Sharma" />
+          </div>
+          <div>
+            <label className={labelClass}>Short Introduction</label>
+            <textarea rows={3} className={`${inputClass} resize-none`} value={form.mentor_intro} onChange={handleChange('mentor_intro')} placeholder="A short bio about the mentor..." />
+          </div>
+          <p className="text-[11px] text-muted normal-case">Leave the mentor name blank to hide this section on the workshop page.</p>
         </div>
 
         <div>

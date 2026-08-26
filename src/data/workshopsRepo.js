@@ -18,6 +18,9 @@ function mapRow(row) {
     hasCertificateSample: row.has_certificate_sample,
     faqs: row.faqs ?? [],
     whatsappGroupLink: row.whatsapp_group_link,
+    isFree: row.is_free,
+    mentorName: row.mentor_name,
+    mentorIntro: row.mentor_intro,
     active: row.active,
   };
 }

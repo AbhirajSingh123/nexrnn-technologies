@@ -11,7 +11,8 @@ const inputClass = 'w-full border-2 border-secondary/20 focus:border-primary px-
 const labelClass = 'block text-xs font-bold text-secondary uppercase tracking-wide mb-2';
 
 const emptyForm = {
-  slug: '', icon: 'sparkles', title: '', short_description: '', benefits: '', features: '', cta: '', active: true, sort_order: 0,
+  slug: '', icon: 'sparkles', title: '', short_description: '', benefits: '', features: '',
+  price: '', original_price: '', discount_percent: '', cta: '', active: true, sort_order: 0,
 };
 
 export default function AdminServiceForm() {
@@ -57,6 +58,9 @@ export default function AdminServiceForm() {
       short_description: form.short_description.trim(),
       benefits: form.benefits.split('\n').map((s) => s.trim()).filter(Boolean),
       features: form.features.split('\n').map((s) => s.trim()).filter(Boolean),
+      price: form.price.trim(),
+      original_price: form.original_price.trim(),
+      discount_percent: form.discount_percent === '' ? null : Number(form.discount_percent),
       cta: form.cta.trim(),
       active: form.active,
       sort_order: Number(form.sort_order) || 0,
@@ -120,6 +124,22 @@ export default function AdminServiceForm() {
           <label className={labelClass}>What We Provide (one per line)</label>
           <textarea rows={4} className={`${inputClass} resize-none`} value={form.features} onChange={handleChange('features')} />
         </div>
+
+        <div className="grid sm:grid-cols-3 gap-5">
+          <div>
+            <label className={labelClass}>Price (numbers only, optional)</label>
+            <input className={inputClass} value={form.price} onChange={handleChange('price')} placeholder="4999" />
+          </div>
+          <div>
+            <label className={labelClass}>Original Price (optional)</label>
+            <input className={inputClass} value={form.original_price} onChange={handleChange('original_price')} placeholder="9999" />
+          </div>
+          <div>
+            <label className={labelClass}>Discount %</label>
+            <input type="number" className={inputClass} value={form.discount_percent} onChange={handleChange('discount_percent')} placeholder="50" />
+          </div>
+        </div>
+        <p className="text-[11px] text-muted normal-case -mt-3">Leave Price blank to show "Contact for Pricing" instead.</p>
 
         <div>
           <label className={labelClass}>CTA Text</label>

@@ -11,7 +11,7 @@ function renderTemplate(template, { name, title }) {
 
 export default function EnrollmentSuccess() {
   const location = useLocation();
-  const { name, itemTitle, whatsappGroupLink } = location.state ?? {};
+  const { name, itemTitle, whatsappGroupLink, referenceId } = location.state ?? {};
   const { settings, loading } = useSiteSettings();
 
   // If someone lands here directly (no submission just happened), send them back.
@@ -34,6 +34,14 @@ export default function EnrollmentSuccess() {
           </div>
 
           <h1 className="text-2xl sm:text-3xl text-secondary mb-6">{settings.paymentSuccessHeading}</h1>
+
+          {referenceId && (
+            <div className="card-base bg-accent border-primary/30 px-6 py-4 mb-8 inline-block">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted mb-1">Your Reference ID</p>
+              <p className="font-heading text-xl text-primary tracking-wide">{referenceId}</p>
+              <p className="text-[11px] text-muted normal-case mt-1">Please save this for any future queries.</p>
+            </div>
+          )}
 
           <div className="text-left text-sm text-secondary/85 leading-relaxed normal-case space-y-3 mb-8">
             {bodyLines.map((line, i) => (

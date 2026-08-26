@@ -4,6 +4,7 @@ import { ArrowRight, ArrowLeft, CheckCircle2, Sparkles, ClipboardList } from 'lu
 import { useService, useServices } from '@/hooks/useCatalog';
 import { useServiceLeadModal } from '@/contexts/ServiceLeadContext';
 import { getIcon } from '@/utils/iconMap';
+import { formatINR } from '@/utils/format';
 import { SITE } from '@/constants/siteData';
 import Reveal from '@/components/shared/Reveal';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
@@ -68,6 +69,20 @@ export default function ServiceDetail() {
             </div>
 
             <Reveal className="card-base bg-secondary text-white p-7">
+              <p className="text-xs font-bold uppercase tracking-wide text-white/50 mb-1">Price</p>
+              <div className="flex items-center gap-2 mb-5 flex-wrap">
+                <span className="font-heading text-3xl text-white">
+                  {service.price ? formatINR(service.price) : 'Contact for Pricing'}
+                </span>
+                {service.originalPrice && (
+                  <span className="text-sm text-white/50 line-through normal-case">{formatINR(service.originalPrice)}</span>
+                )}
+                {service.discountPercent && (
+                  <span className="bg-primary text-white text-[10px] font-bold uppercase px-2 py-0.5">
+                    {service.discountPercent}% OFF
+                  </span>
+                )}
+              </div>
               <h3 className="text-lg normal-case mb-4">Ready to Get Started?</h3>
               <p className="text-sm text-white/70 normal-case leading-relaxed mb-6">
                 Tell us about your business and we&rsquo;ll put together the right plan for {service.title.toLowerCase()}.

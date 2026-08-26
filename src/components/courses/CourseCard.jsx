@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Clock, BarChart3, FolderCheck, Award, ArrowRight } from 'lucide-react';
+import { Clock, BarChart3, FolderCheck, Award, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { getIcon } from '@/utils/iconMap';
+import { formatINR } from '@/utils/format';
 import { useCourseEnrollModal } from '@/contexts/CourseEnrollContext';
 import Reveal from '@/components/shared/Reveal';
 
@@ -36,20 +37,29 @@ export default function CourseCard({ course, index = 0 }) {
             </span>
           </div>
 
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-heading text-2xl text-primary">{course.price}</span>
-            {course.originalPrice && (
-              <span className="text-sm text-muted line-through normal-case">{course.originalPrice}</span>
-            )}
-            {course.discountPercent && (
-              <span className="bg-primary text-white text-[10px] font-bold uppercase px-2 py-0.5">
-                {course.discountPercent}% OFF
-              </span>
-            )}
-          </div>
-          <div className="flex items-center justify-between mb-5">
-            {course.isDemoPrice && <span className="text-[10px] text-muted normal-case">Demo pricing</span>}
-          </div>
+          {course.isFree ? (
+            <div className="flex items-center gap-1.5 mb-5">
+              <CheckCircle2 size={16} className="text-green-600" />
+              <span className="font-heading text-2xl text-green-600">FREE</span>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-heading text-2xl text-primary">{formatINR(course.price)}</span>
+                {course.originalPrice && (
+                  <span className="text-sm text-muted line-through normal-case">{formatINR(course.originalPrice)}</span>
+                )}
+                {course.discountPercent && (
+                  <span className="bg-primary text-white text-[10px] font-bold uppercase px-2 py-0.5">
+                    {course.discountPercent}% OFF
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center justify-between mb-5">
+                {course.isDemoPrice && <span className="text-[10px] text-muted normal-case">Demo pricing</span>}
+              </div>
+            </>
+          )}
 
           <div className="flex items-center gap-3 mt-auto">
             <Link to={`/course/${course.slug}`} className="btn-secondary flex-1 !px-4 !py-2.5 text-xs">

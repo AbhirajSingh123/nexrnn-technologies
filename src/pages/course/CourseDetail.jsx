@@ -9,6 +9,7 @@ import {
 import { useCourse } from '@/hooks/useCatalog';
 import { useCourseEnrollModal } from '@/contexts/CourseEnrollContext';
 import { getIcon } from '@/utils/iconMap';
+import { formatINR } from '@/utils/format';
 import { SITE } from '@/constants/siteData';
 import Reveal from '@/components/shared/Reveal';
 import DemoVideo from '@/components/shared/DemoVideo';
@@ -133,18 +134,24 @@ export default function CourseDetail() {
 
             <Reveal className="card-base bg-white p-7">
               <p className="text-xs font-bold uppercase tracking-wide text-muted mb-1">Course Fee</p>
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span className="font-heading text-4xl text-primary">{course.price}</span>
-                {course.originalPrice && (
-                  <span className="text-base text-muted line-through normal-case">{course.originalPrice}</span>
-                )}
-              </div>
-              {course.discountPercent && (
-                <span className="inline-block bg-primary text-white text-[10px] font-bold uppercase px-2.5 py-1 mb-2">
-                  {course.discountPercent}% OFF
-                </span>
+              {course.isFree ? (
+                <p className="font-heading text-4xl text-green-600 mb-2">FREE</p>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="font-heading text-4xl text-primary">{formatINR(course.price)}</span>
+                    {course.originalPrice && (
+                      <span className="text-base text-muted line-through normal-case">{formatINR(course.originalPrice)}</span>
+                    )}
+                  </div>
+                  {course.discountPercent && (
+                    <span className="inline-block bg-primary text-white text-[10px] font-bold uppercase px-2.5 py-1 mb-2">
+                      {course.discountPercent}% OFF
+                    </span>
+                  )}
+                  {course.isDemoPrice && <p className="text-[11px] text-muted normal-case mb-5">Demo pricing — confirm with our team</p>}
+                </>
               )}
-              {course.isDemoPrice && <p className="text-[11px] text-muted normal-case mb-5">Demo pricing — confirm with our team</p>}
               <div className="flex items-center gap-2 mb-2.5">
                 <Award size={16} className="text-primary shrink-0" />
                 <span className="text-sm text-secondary normal-case">Certificate on completion</span>

@@ -4,6 +4,8 @@ import { supabase } from '@/services/supabaseClient';
 import { formatDateTimeWithDay } from '@/utils/formatDateTime';
 import AdminTable from '@/components/admin/AdminTable';
 import AdminFilterBar from '@/components/admin/AdminFilterBar';
+import AdminLoadMore from '@/components/admin/AdminLoadMore';
+import { useLoadMore } from '@/hooks/useLoadMore';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
 const STATUS_STYLES = {
@@ -72,6 +74,11 @@ export default function AdminLeadsServices() {
       return true;
     });
   }, [rows, search, dateFrom, dateTo, serviceFilter, statusFilter]);
+
+  const { visibleItems, hasMore, loadMore, total, shown } = useLoadMore(
+    filteredRows,
+    `${search}|${dateFrom}|${dateTo}|${serviceFilter}|${statusFilter}`
+  );
 
   const columns = [
     { key: 'created_at', label: 'Date', render: (r) => formatDateTimeWithDay(r.created_at) },
@@ -145,7 +152,14 @@ export default function AdminLeadsServices() {
         }
       />
 
-      {loading ? <LoadingSpinner /> : <AdminTable columns={columns} rows={filteredRows} onDelete={handleDelete} />}
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <>
+          <AdminTable columns={columns} rows={visibleItems} onDelete={handleDelete} />
+          <AdminLoadMore shown={shown} total={total} hasMore={hasMore} onLoadMore={loadMore} />
+        </>
+      )}
     </div>
   );
 }

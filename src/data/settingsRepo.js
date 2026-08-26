@@ -7,6 +7,9 @@ const DEFAULT_SETTINGS = {
   paymentSuccessHeading: 'Enrollment Submitted!',
   paymentSuccessBody:
     'Dear {name},\n\nYour enrollment request for {title} has been submitted successfully.\n\nThank you for choosing NexRNN Technologies. Our team will review and verify the details you provided. Once your enrollment is verified, we will contact you with the next steps, including information about your live classes and course materials.\n\nIf you have any questions, please contact us at nexrnntechnology@gmail.com.\n\nCongratulations, and welcome to NexRNN Technologies!\nYou will receive a confirmation and welcome email after successful verification of your enrollment details.\n\n\u2014 Team NexRNN Technologies',
+  popupEnabled: false,
+  popupImageUrl: '',
+  popupLink: '',
 };
 
 function mapRow(row) {
@@ -16,6 +19,9 @@ function mapRow(row) {
     showWorkshops: row.show_workshops,
     paymentSuccessHeading: row.payment_success_heading,
     paymentSuccessBody: row.payment_success_body,
+    popupEnabled: row.popup_enabled,
+    popupImageUrl: row.popup_image_url,
+    popupLink: row.popup_link,
   };
 }
 
@@ -35,6 +41,9 @@ export async function updateSiteSettings(settings) {
       show_workshops: settings.showWorkshops,
       payment_success_heading: settings.paymentSuccessHeading,
       payment_success_body: settings.paymentSuccessBody,
+      popup_enabled: settings.popupEnabled,
+      popup_image_url: settings.popupImageUrl,
+      popup_link: settings.popupLink,
     })
     .eq('id', 1);
   if (error) throw error;

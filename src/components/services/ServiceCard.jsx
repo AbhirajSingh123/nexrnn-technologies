@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { getIcon } from '@/utils/iconMap';
+import { formatINR } from '@/utils/format';
 import { useServiceLeadModal } from '@/contexts/ServiceLeadContext';
 import Reveal from '@/components/shared/Reveal';
 
@@ -27,6 +28,20 @@ export default function ServiceCard({ service, index = 0, compact = false }) {
             ))}
           </ul>
         )}
+
+        <div className="flex items-center gap-2 mb-4">
+          <span className="font-heading text-xl text-primary">
+            {service.price ? formatINR(service.price) : 'Contact for Pricing'}
+          </span>
+          {service.originalPrice && (
+            <span className="text-sm text-muted line-through normal-case">{formatINR(service.originalPrice)}</span>
+          )}
+          {service.discountPercent && (
+            <span className="bg-primary text-white text-[10px] font-bold uppercase px-2 py-0.5">
+              {service.discountPercent}% OFF
+            </span>
+          )}
+        </div>
 
         <div className="flex items-center gap-3 mt-auto">
           <Link to={`/services/${service.slug}`} className="btn-secondary flex-1 !px-4 !py-2.5 text-xs">

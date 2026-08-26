@@ -12,7 +12,7 @@ const labelClass = 'block text-xs font-bold text-secondary uppercase tracking-wi
 
 const emptyForm = {
   slug: '', icon: 'sparkles', title: '', short_description: '', duration: '', level: '', mode: '',
-  original_price: '', price: '', discount_percent: '', is_demo_price: true, demo_video_url: '',
+  is_free: false, original_price: '', price: '', discount_percent: '', is_demo_price: true, demo_video_url: '',
   has_certificate_sample: true, projects: 0, certificate: true, mentorship: true,
   topics: '', what_you_learn: '', who_should_join: '', whatsapp_group_link: '', active: true, sort_order: 0,
 };
@@ -72,6 +72,7 @@ export default function AdminCourseForm() {
       duration: form.duration.trim(),
       level: form.level.trim(),
       mode: form.mode.trim(),
+      is_free: form.is_free,
       original_price: form.original_price.trim(),
       price: form.price.trim(),
       discount_percent: form.discount_percent === '' ? null : Number(form.discount_percent),
@@ -155,20 +156,47 @@ export default function AdminCourseForm() {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-5">
-          <div>
-            <label className={labelClass}>Original Price</label>
-            <input className={inputClass} value={form.original_price} onChange={handleChange('original_price')} placeholder="₹9,999" />
+        <div className="card-base bg-accent p-5">
+          <label className={labelClass}>Pricing Type</label>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setForm((f) => ({ ...f, is_free: false }))}
+              className={`flex-1 py-3 text-sm font-bold border-2 transition-colors ${!form.is_free ? 'bg-primary text-white border-secondary' : 'bg-white text-secondary border-secondary/20'}`}
+            >
+              Paid Course
+            </button>
+            <button
+              type="button"
+              onClick={() => setForm((f) => ({ ...f, is_free: true }))}
+              className={`flex-1 py-3 text-sm font-bold border-2 transition-colors ${form.is_free ? 'bg-green-600 text-white border-secondary' : 'bg-white text-secondary border-secondary/20'}`}
+            >
+              Free Course
+            </button>
           </div>
-          <div>
-            <label className={labelClass}>Final Price</label>
-            <input className={inputClass} value={form.price} onChange={handleChange('price')} placeholder="₹4,999" />
-          </div>
-          <div>
-            <label className={labelClass}>Discount %</label>
-            <input type="number" className={inputClass} value={form.discount_percent} onChange={handleChange('discount_percent')} placeholder="50" />
-          </div>
+          {form.is_free && (
+            <p className="text-[11px] text-muted normal-case mt-3">
+              Free courses skip the payment gateway entirely — students enroll directly.
+            </p>
+          )}
         </div>
+
+        {!form.is_free && (
+          <div className="grid sm:grid-cols-3 gap-5">
+            <div>
+              <label className={labelClass}>Original Price (numbers only)</label>
+              <input className={inputClass} value={form.original_price} onChange={handleChange('original_price')} placeholder="9999" />
+            </div>
+            <div>
+              <label className={labelClass}>Final Price (numbers only)</label>
+              <input className={inputClass} value={form.price} onChange={handleChange('price')} placeholder="4999" />
+            </div>
+            <div>
+              <label className={labelClass}>Discount %</label>
+              <input type="number" className={inputClass} value={form.discount_percent} onChange={handleChange('discount_percent')} placeholder="50" />
+            </div>
+          </div>
+        )}
 
         <label className="flex items-center gap-2.5">
           <input type="checkbox" className="w-4 h-4 accent-primary" checked={form.is_demo_price} onChange={handleChange('is_demo_price')} />

@@ -5,6 +5,8 @@ import { Plus } from 'lucide-react';
 import { supabase } from '@/services/supabaseClient';
 import { ADMIN_ROUTES } from '@/constants/adminRoutes';
 import AdminTable from '@/components/admin/AdminTable';
+import AdminLoadMore from '@/components/admin/AdminLoadMore';
+import { useLoadMore } from '@/hooks/useLoadMore';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
 export default function AdminCoursesList() {
@@ -49,6 +51,8 @@ export default function AdminCoursesList() {
     },
   ];
 
+  const { visibleItems, hasMore, loadMore, total, shown } = useLoadMore(rows, rows.length);
+
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
@@ -58,7 +62,14 @@ export default function AdminCoursesList() {
         </Link>
       </div>
       <p className="text-sm text-muted normal-case mb-6">Full CRUD — changes here reflect live on the website.</p>
-      {loading ? <LoadingSpinner /> : <AdminTable columns={columns} rows={rows} onDelete={handleDelete} />}
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <>
+          <AdminTable columns={columns} rows={visibleItems} onDelete={handleDelete} />
+          <AdminLoadMore shown={shown} total={total} hasMore={hasMore} onLoadMore={loadMore} />
+        </>
+      )}
     </div>
   );
 }

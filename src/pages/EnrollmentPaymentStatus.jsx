@@ -61,6 +61,7 @@ export default function EnrollmentPaymentStatus() {
           itemTitle: result.itemTitle,
           leadType: result.leadType,
           whatsappGroupLink: result.whatsappGroupLink,
+          referenceId: result.referenceId,
         }}
       />
     );
