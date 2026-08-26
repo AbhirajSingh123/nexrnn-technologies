@@ -24,6 +24,7 @@ function mapRow(row) {
     whoShouldJoin: row.who_should_join ?? [],
     faqs: row.faqs ?? [],
     qrCodeUrl: row.qr_code_url,
+    whatsappGroupLink: row.whatsapp_group_link,
     active: row.active,
   };
 }

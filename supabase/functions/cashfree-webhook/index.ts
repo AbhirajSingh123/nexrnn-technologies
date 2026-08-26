@@ -58,6 +58,12 @@ Deno.serve(async (req) => {
 
     const status = paymentStatus === 'SUCCESS' ? 'paid' : paymentStatus === 'FAILED' ? 'failed' : 'pending';
 
+    const { data: paymentRow } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('cashfree_order_id', orderId)
+      .maybeSingle();
+
     await supabase
       .from('payments')
       .update({
@@ -68,8 +74,11 @@ Deno.serve(async (req) => {
       })
       .eq('cashfree_order_id', orderId);
 
+    const leadType = paymentRow?.lead_type === 'workshop' ? 'workshop' : 'course';
+    const leadTable = leadType === 'workshop' ? 'leads_workshop' : 'leads_course';
+
     const { data: lead } = await supabase
-      .from('leads_course')
+      .from(leadTable)
       .select('*')
       .eq('cashfree_order_id', orderId)
       .maybeSingle();
@@ -81,7 +90,7 @@ Deno.serve(async (req) => {
       if (status === 'paid' && ['pending', 'on_call'].includes(lead.enrollment_status)) {
         updates.enrollment_status = 'payment_received';
       }
-      await supabase.from('leads_course').update(updates).eq('id', lead.id);
+      await supabase.from(leadTable).update(updates).eq('id', lead.id);
     }
 
     return new Response(JSON.stringify({ received: true }), { headers: corsHeaders });

@@ -235,3 +235,52 @@ And update `VITE_CASHFREE_MODE=production` in your hosting provider's env vars, 
 - A new **`/enrollment-payment-status`** page handles the return from Cashfree: it re-verifies the payment status directly with Cashfree's server (never trusts the redirect URL alone), updates the database, and then shows the existing success page — or a clear "payment not completed" screen with your contact details if it failed.
 - Cashfree's webhook keeps payment status in sync in the background as a second, more reliable layer (in case the user closes the tab right after paying, before the redirect completes).
 - New **Admin → Payments** page lists every payment attempt (order ID, amount, method, Cashfree payment ID, status) with search/filter, and each order's payment history is also visible inside the **Manage** panel on that specific enrollment.
+
+---
+
+## Round 5: Bug fix, Workshops, Payment Success page, Site Display Settings, Report-a-Bug
+
+### 1. Bug fixed — "Course not found" after payment
+
+Root cause: the `SITE_URL` secret in Supabase almost certainly has an extra `/course` (or similar) segment in it, so Cashfree's `return_url` became `https://your-domain/course/enrollment-payment-status?...`, which matched the `/course/:slug` route instead of the dedicated status page.
+
+**Please check** your `SITE_URL` secret (Supabase → Edge Functions → Secrets) and make sure it's just the bare domain with no trailing path, e.g.:
+```
+SITE_URL=https://nexrnntechnology.in
+```
+(or your Vercel preview domain if that's what you're testing on, again with no trailing path).
+
+As a safety net, this update also adds a few extra routes (`/course/enrollment-payment-status`, `/workshop/enrollment-payment-status`, etc.) that resolve to the same page regardless — so even if this happens again, the site itself won't break.
+
+**⚠️ You must redeploy all 3 Edge Functions again** (paste the new code from `supabase/functions/*/index.ts` into the dashboard editor as before) — they were generalized in this round to support both course and workshop payments through the same functions.
+
+### 2. Payment Success Page — now admin-editable
+
+Run `supabase/migration_5.sql` — adds a `site_settings` table with an editable heading + message body for the payment-success page. Edit it at **Admin → Site Settings**. Use `{name}` and `{title}` as placeholders in the message — they get replaced with the student's name and the course/workshop title automatically.
+
+Each course/workshop now also has a **WhatsApp Group Link** field (in its admin edit form) — if set, a "Join WhatsApp Group" button appears on the payment success page after that specific course/workshop is paid for.
+
+### 3. Workshops — a full new content type, parallel to Courses
+
+- Public pages: `/workshop` (listing) and `/workshop/:slug` (detail — banner, date/time, registration deadline, details, FAQs, certificate sample, workshop video, pricing)
+- Registration popup (same pattern as course enrollment) → Cashfree checkout → same payment-success flow
+- Admin: **Manage Workshops** (full CRUD, banner image upload) and **Workshop Registrations** (search/filter, Manage panel with Batch ID + all 4 statuses + admin notes — identical to how Course Enrollments works)
+- Workshop payments show up in the same **Payments** admin page as courses, with a Type column distinguishing them
+
+### 4. Site Display Control
+
+At **Admin → Site Settings**, toggle whether **Services**, **Courses**, and **Workshops** each show on the public site — this hides the nav link, the homepage preview section, and shows a friendly "temporarily unavailable" message if someone visits the page directly while it's off. Individual item-level `active` toggles (e.g. hiding just one course) still work exactly as before — this is a separate, whole-section switch.
+
+### 5. Report a Bug button
+
+Added to both the 404 page and the general error screen (shown if something crashes) — it links to `/Contect-us?subject=bug-report`, which now pre-fills the Contact Us form's service dropdown and message field so bug reports arrive as a normal, identifiable Contact Lead. A new "Report a Bug / Website Issue" option was also added to the service dropdown for anyone who selects it manually.
+
+### New Supabase migration to run
+
+Run **`supabase/migration_5.sql`** once (after migrations 2, 3, and 4). It adds:
+- `site_settings` table (display toggles + payment success template)
+- `whatsapp_group_link` column on `courses`
+- `workshops` table (full CRUD content type)
+- `leads_workshop` table (registrations, same status fields as `leads_course`)
+- generalizes `payments` to support both `lead_type: 'course'` and `lead_type: 'workshop'`
+- a new `workshop-assets` storage bucket for banner uploads

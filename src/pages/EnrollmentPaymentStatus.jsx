@@ -56,7 +56,12 @@ export default function EnrollmentPaymentStatus() {
       <Navigate
         to="/enrollment-success"
         replace
-        state={{ name: result.studentName, courseTitle: result.courseTitle }}
+        state={{
+          name: result.studentName,
+          itemTitle: result.itemTitle,
+          leadType: result.leadType,
+          whatsappGroupLink: result.whatsappGroupLink,
+        }}
       />
     );
   }

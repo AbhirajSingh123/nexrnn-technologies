@@ -7,7 +7,9 @@ export const ADMIN_ROUTES = {
   leadsContact: `${ADMIN_BASE}/leads/contact`,
   leadsServices: `${ADMIN_BASE}/leads/services`,
   leadsCourses: `${ADMIN_BASE}/leads/courses`,
+  leadsWorkshops: `${ADMIN_BASE}/leads/workshops`,
   payments: `${ADMIN_BASE}/payments`,
+  siteSettings: `${ADMIN_BASE}/settings`,
   services: `${ADMIN_BASE}/services`,
   serviceNew: `${ADMIN_BASE}/services/new`,
   serviceEdit: (id) => `${ADMIN_BASE}/services/${id}/edit`,
@@ -28,4 +30,8 @@ export const ADMIN_ROUTES = {
   testimonialNew: `${ADMIN_BASE}/testimonials/new`,
   testimonialEdit: (id) => `${ADMIN_BASE}/testimonials/${id}/edit`,
   testimonialEditPath: `${ADMIN_BASE}/testimonials/:id/edit`,
+  workshops: `${ADMIN_BASE}/workshops`,
+  workshopNew: `${ADMIN_BASE}/workshops/new`,
+  workshopEdit: (id) => `${ADMIN_BASE}/workshops/${id}/edit`,
+  workshopEditPath: `${ADMIN_BASE}/workshops/:id/edit`,
 };

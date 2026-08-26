@@ -51,3 +51,27 @@ export async function submitCourseEnrollment({ name, phone, email, college, cons
   if (error) throw error;
   return record;
 }
+
+export async function submitWorkshopEnrollment({ name, phone, email, college, consent, workshop }) {
+  if (!isSupabaseConfigured) {
+    throw new Error('Backend is not configured yet. Please contact us directly by phone or email for now.');
+  }
+  // Same reasoning as submitCourseEnrollment above: generate the ID
+  // client-side and do a plain insert (no .select()) since leads_workshop is
+  // admin-read-only.
+  const id = crypto.randomUUID();
+  const record = {
+    id,
+    name,
+    phone,
+    email,
+    college: college || '',
+    consent,
+    workshop_slug: workshop.slug,
+    workshop_title: workshop.title,
+    price: workshop.price || '',
+  };
+  const { error } = await supabase.from('leads_workshop').insert(record);
+  if (error) throw error;
+  return record;
+}

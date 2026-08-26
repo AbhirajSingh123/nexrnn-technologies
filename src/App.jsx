@@ -15,6 +15,8 @@ const Services = lazy(() => import('@/pages/Services'));
 const ServiceDetail = lazy(() => import('@/pages/services/ServiceDetail'));
 const Courses = lazy(() => import('@/pages/Courses'));
 const CourseDetail = lazy(() => import('@/pages/course/CourseDetail'));
+const Workshops = lazy(() => import('@/pages/Workshops'));
+const WorkshopDetail = lazy(() => import('@/pages/workshop/WorkshopDetail'));
 const EnrollmentSuccess = lazy(() => import('@/pages/EnrollmentSuccess'));
 const EnrollmentPaymentStatus = lazy(() => import('@/pages/EnrollmentPaymentStatus'));
 const AboutUs = lazy(() => import('@/pages/AboutUs'));
@@ -30,17 +32,21 @@ const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
 const AdminLeadsContact = lazy(() => import('@/pages/admin/AdminLeadsContact'));
 const AdminLeadsServices = lazy(() => import('@/pages/admin/AdminLeadsServices'));
 const AdminLeadsCourses = lazy(() => import('@/pages/admin/AdminLeadsCourses'));
+const AdminLeadsWorkshops = lazy(() => import('@/pages/admin/AdminLeadsWorkshops'));
 const AdminPayments = lazy(() => import('@/pages/admin/AdminPayments'));
 const AdminServicesList = lazy(() => import('@/pages/admin/AdminServicesList'));
 const AdminServiceForm = lazy(() => import('@/pages/admin/AdminServiceForm'));
 const AdminCoursesList = lazy(() => import('@/pages/admin/AdminCoursesList'));
 const AdminCourseForm = lazy(() => import('@/pages/admin/AdminCourseForm'));
+const AdminWorkshopsList = lazy(() => import('@/pages/admin/AdminWorkshopsList'));
+const AdminWorkshopForm = lazy(() => import('@/pages/admin/AdminWorkshopForm'));
 const AdminClientReviewsList = lazy(() => import('@/pages/admin/AdminClientReviewsList'));
 const AdminClientReviewForm = lazy(() => import('@/pages/admin/AdminClientReviewForm'));
 const AdminPortfolioList = lazy(() => import('@/pages/admin/AdminPortfolioList'));
 const AdminPortfolioForm = lazy(() => import('@/pages/admin/AdminPortfolioForm'));
 const AdminTestimonialsList = lazy(() => import('@/pages/admin/AdminTestimonialsList'));
 const AdminTestimonialForm = lazy(() => import('@/pages/admin/AdminTestimonialForm'));
+const AdminSiteSettings = lazy(() => import('@/pages/admin/AdminSiteSettings'));
 
 function RouteFallback() {
   return (
@@ -112,8 +118,21 @@ function App() {
                 <Route path="/services/:slug" element={<ServiceDetail />} />
                 <Route path="/course" element={<Courses />} />
                 <Route path="/course/:slug" element={<CourseDetail />} />
+                <Route path="/workshop" element={<Workshops />} />
+                <Route path="/workshop/:slug" element={<WorkshopDetail />} />
                 <Route path="/enrollment-success" element={<EnrollmentSuccess />} />
                 <Route path="/enrollment-payment-status" element={<EnrollmentPaymentStatus />} />
+                {/*
+                  Safety-net aliases: if a payment gateway return_url ever ends up
+                  misconfigured with an extra path segment (e.g. SITE_URL secret
+                  accidentally set to ".../course"), these still resolve instead
+                  of hitting the /course/:slug or /workshop/:slug catch-all and
+                  showing a confusing "not found" page.
+                */}
+                <Route path="/course/enrollment-payment-status" element={<EnrollmentPaymentStatus />} />
+                <Route path="/course/enrollment-success" element={<EnrollmentSuccess />} />
+                <Route path="/workshop/enrollment-payment-status" element={<EnrollmentPaymentStatus />} />
+                <Route path="/workshop/enrollment-success" element={<EnrollmentSuccess />} />
                 <Route path="/about-us" element={<AboutUs />} />
                 <Route path="/Contect-us" element={<ContactUs />} />
                 <Route path="/contact-us" element={<ContactUs />} />
@@ -130,6 +149,7 @@ function App() {
                   <Route path={ADMIN_ROUTES.leadsContact} element={<AdminLeadsContact />} />
                   <Route path={ADMIN_ROUTES.leadsServices} element={<AdminLeadsServices />} />
                   <Route path={ADMIN_ROUTES.leadsCourses} element={<AdminLeadsCourses />} />
+                  <Route path={ADMIN_ROUTES.leadsWorkshops} element={<AdminLeadsWorkshops />} />
                   <Route path={ADMIN_ROUTES.payments} element={<AdminPayments />} />
                   <Route path={ADMIN_ROUTES.services} element={<AdminServicesList />} />
                   <Route path={ADMIN_ROUTES.serviceEditPath} element={<AdminServiceForm />} />
@@ -137,6 +157,9 @@ function App() {
                   <Route path={ADMIN_ROUTES.courses} element={<AdminCoursesList />} />
                   <Route path={ADMIN_ROUTES.courseEditPath} element={<AdminCourseForm />} />
                   <Route path={ADMIN_ROUTES.courseNew} element={<AdminCourseForm />} />
+                  <Route path={ADMIN_ROUTES.workshops} element={<AdminWorkshopsList />} />
+                  <Route path={ADMIN_ROUTES.workshopEditPath} element={<AdminWorkshopForm />} />
+                  <Route path={ADMIN_ROUTES.workshopNew} element={<AdminWorkshopForm />} />
                   <Route path={ADMIN_ROUTES.clientReviews} element={<AdminClientReviewsList />} />
                   <Route path={ADMIN_ROUTES.clientReviewEditPath} element={<AdminClientReviewForm />} />
                   <Route path={ADMIN_ROUTES.clientReviewNew} element={<AdminClientReviewForm />} />
@@ -146,6 +169,7 @@ function App() {
                   <Route path={ADMIN_ROUTES.testimonials} element={<AdminTestimonialsList />} />
                   <Route path={ADMIN_ROUTES.testimonialEditPath} element={<AdminTestimonialForm />} />
                   <Route path={ADMIN_ROUTES.testimonialNew} element={<AdminTestimonialForm />} />
+                  <Route path={ADMIN_ROUTES.siteSettings} element={<AdminSiteSettings />} />
                 </Route>
               </Route>
             </Routes>

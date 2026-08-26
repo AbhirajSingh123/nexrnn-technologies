@@ -3,12 +3,16 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { NAV_LINKS, SITE } from '@/constants/siteData';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import useLockBodyScroll from '@/hooks/useLockBodyScroll';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
+  const { settings } = useSiteSettings();
+
+  const visibleLinks = NAV_LINKS.filter((link) => !link.settingsKey || settings[link.settingsKey]);
 
   useLockBodyScroll(mobileOpen);
 
@@ -38,7 +42,7 @@ export default function Navbar() {
         </Link>
 
         <ul className="hidden lg:flex items-center gap-8">
-          {NAV_LINKS.map((link) => (
+          {visibleLinks.map((link) => (
             <li key={link.href}>
               <NavLink
                 to={link.href}
@@ -91,7 +95,7 @@ export default function Navbar() {
             className="lg:hidden bg-white border-t-2 border-secondary overflow-hidden"
           >
             <ul className="container-section py-6 flex flex-col gap-1">
-              {NAV_LINKS.map((link) => (
+              {visibleLinks.map((link) => (
                 <li key={link.href}>
                   <NavLink
                     to={link.href}

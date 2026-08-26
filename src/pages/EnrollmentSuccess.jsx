@@ -1,14 +1,25 @@
 import { useLocation, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { CheckCircle2, Mail } from 'lucide-react';
+import { CheckCircle2, Mail, MessageCircle } from 'lucide-react';
 import { SITE } from '@/constants/siteData';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+
+function renderTemplate(template, { name, title }) {
+  return template.replace(/{name}/g, name || 'Student').replace(/{title}/g, title || 'the program');
+}
 
 export default function EnrollmentSuccess() {
   const location = useLocation();
-  const { name, courseTitle } = location.state ?? {};
+  const { name, itemTitle, whatsappGroupLink } = location.state ?? {};
+  const { settings, loading } = useSiteSettings();
 
   // If someone lands here directly (no submission just happened), send them back.
-  if (!name || !courseTitle) return <Navigate to="/course" replace />;
+  if (!name || !itemTitle) return <Navigate to="/course" replace />;
+
+  if (loading) return <LoadingSpinner className="min-h-screen" />;
+
+  const bodyLines = renderTemplate(settings.paymentSuccessBody, { name, title: itemTitle }).split('\n');
 
   return (
     <>
@@ -22,34 +33,33 @@ export default function EnrollmentSuccess() {
             <CheckCircle2 size={32} className="text-primary" />
           </div>
 
-          <h1 className="text-2xl sm:text-3xl text-secondary mb-6">Enrollment Submitted!</h1>
+          <h1 className="text-2xl sm:text-3xl text-secondary mb-6">{settings.paymentSuccessHeading}</h1>
 
-          <div className="text-left text-sm text-secondary/85 leading-relaxed normal-case space-y-4">
-            <p>Dear {name},</p>
-            <p>
-              Your enrollment request for <strong className="text-primary">{courseTitle}</strong> has been submitted
-              successfully.
-            </p>
-            <p>
-              Thank you for choosing NexRNN Technologies. Our team will review and verify the details you provided.
-              Once your enrollment is verified, we will contact you with the next steps, including information about
-              your live classes and course materials.
-            </p>
-            <p>
-              If you have any questions, please contact us at{' '}
-              <a href="mailto:nexrnntechnology@gmail.com" className="text-primary font-semibold hover:underline inline-flex items-center gap-1">
-                <Mail size={13} /> nexrnntechnology@gmail.com
-              </a>
-              .
-            </p>
-            <p className="font-semibold text-secondary">Congratulations, and welcome to NexRNN Technologies!</p>
-            <p>You will receive a confirmation and welcome email after successful verification of your enrollment details.</p>
-            <p>— Team NexRNN Technologies</p>
+          <div className="text-left text-sm text-secondary/85 leading-relaxed normal-case space-y-3 mb-8">
+            {bodyLines.map((line, i) => (
+              <p key={i}>{line || '\u00a0'}</p>
+            ))}
           </div>
 
-          <Link to="/" className="btn-primary mt-8 min-w-[200px]">
-            Back to Home
-          </Link>
+          {whatsappGroupLink && (
+            <a
+              href={whatsappGroupLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary w-full mb-4 bg-[#25D366] hover:bg-secondary"
+            >
+              <MessageCircle size={16} /> Join WhatsApp Group
+            </a>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href={`mailto:${SITE.email}`} className="btn-secondary">
+              <Mail size={15} /> Email Us
+            </a>
+            <Link to="/" className="btn-primary">
+              Back to Home
+            </Link>
+          </div>
         </div>
       </section>
     </>

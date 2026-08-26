@@ -4,8 +4,10 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { ServiceLeadProvider } from '@/contexts/ServiceLeadContext';
 import { CourseEnrollProvider } from '@/contexts/CourseEnrollContext';
+import { WorkshopEnrollProvider } from '@/contexts/WorkshopEnrollContext';
 import ServiceLeadModal from '@/components/services/ServiceLeadModal';
 import CourseEnrollModal from '@/components/courses/CourseEnrollModal';
+import WorkshopEnrollModal from '@/components/workshops/WorkshopEnrollModal';
 
 export default function RootLayout() {
   const { pathname } = useLocation();
@@ -17,13 +19,16 @@ export default function RootLayout() {
   return (
     <ServiceLeadProvider>
       <CourseEnrollProvider>
-        <Navbar />
-        <main>
-          <Outlet />
-        </main>
-        <Footer />
-        <ServiceLeadModal />
-        <CourseEnrollModal />
+        <WorkshopEnrollProvider>
+          <Navbar />
+          <main>
+            <Outlet />
+          </main>
+          <Footer />
+          <ServiceLeadModal />
+          <CourseEnrollModal />
+          <WorkshopEnrollModal />
+        </WorkshopEnrollProvider>
       </CourseEnrollProvider>
     </ServiceLeadProvider>
   );

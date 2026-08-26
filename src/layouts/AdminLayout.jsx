@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   LayoutDashboard, Inbox, Briefcase, GraduationCap, Layers, BookOpen, LogOut, CreditCard,
-  Video, Image as ImageIcon, Star,
+  Video, Image as ImageIcon, Star, PartyPopper, Settings,
 } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import useIdleTimeout from '@/hooks/useIdleTimeout';
@@ -15,12 +15,15 @@ const NAV_ITEMS = [
   { to: ADMIN_ROUTES.leadsContact, label: 'Contact Leads', icon: Inbox },
   { to: ADMIN_ROUTES.leadsServices, label: 'Service Leads', icon: Briefcase },
   { to: ADMIN_ROUTES.leadsCourses, label: 'Course Enrollments', icon: GraduationCap },
+  { to: ADMIN_ROUTES.leadsWorkshops, label: 'Workshop Registrations', icon: PartyPopper },
   { to: ADMIN_ROUTES.payments, label: 'Payments', icon: CreditCard },
   { to: ADMIN_ROUTES.services, label: 'Manage Services', icon: Layers },
   { to: ADMIN_ROUTES.courses, label: 'Manage Courses', icon: BookOpen },
+  { to: ADMIN_ROUTES.workshops, label: 'Manage Workshops', icon: PartyPopper },
   { to: ADMIN_ROUTES.clientReviews, label: 'Client Reviews', icon: Video },
   { to: ADMIN_ROUTES.portfolio, label: 'Manage Portfolio', icon: ImageIcon },
   { to: ADMIN_ROUTES.testimonials, label: 'Manage Testimonials', icon: Star },
+  { to: ADMIN_ROUTES.siteSettings, label: 'Site Settings', icon: Settings },
 ];
 
 export default function AdminLayout() {

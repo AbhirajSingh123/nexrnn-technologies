@@ -15,12 +15,13 @@ async function extractFunctionErrorMessage(error, fallback) {
   return error?.message || fallback;
 }
 
-export async function createCashfreeOrder({ leadCourseId, amount, customerName, customerEmail, customerPhone, courseTitle }) {
+// leadType: 'course' | 'workshop'
+export async function createCashfreeOrder({ leadId, leadType, amount, customerName, customerEmail, customerPhone, itemTitle }) {
   if (!isSupabaseConfigured) {
     throw new Error('Payment backend is not configured yet. Please contact us directly to enroll.');
   }
   const { data, error } = await supabase.functions.invoke('create-cashfree-order', {
-    body: { leadCourseId, amount, customerName, customerEmail, customerPhone, courseTitle },
+    body: { leadId, leadType, amount, customerName, customerEmail, customerPhone, itemTitle },
   });
   if (error) throw new Error(await extractFunctionErrorMessage(error, 'Failed to start payment. Please try again.'));
   if (data?.error) throw new Error(data.error);
@@ -42,5 +43,5 @@ export async function verifyCashfreePayment(orderId) {
   });
   if (error) throw new Error(await extractFunctionErrorMessage(error, 'Failed to verify payment.'));
   if (data?.error) throw new Error(data.error);
-  return data; // { status: 'paid' | 'pending' | 'failed', orderId, courseTitle, studentName }
+  return data; // { status, orderId, leadType, itemTitle, studentName, whatsappGroupLink }
 }

@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Loader2, Send, Mail, Phone, MapPin } from 'lucide-react';
 import { FaInstagram, FaLinkedinIn, FaFacebookF, FaYoutube } from 'react-icons/fa';
@@ -16,12 +17,21 @@ const labelClass = 'block text-xs font-bold text-secondary uppercase tracking-wi
 const errorClass = 'mt-1.5 text-xs text-primary normal-case';
 
 export default function ContactUs() {
+  const [searchParams] = useSearchParams();
+  const isBugReport = searchParams.get('subject') === 'bug-report';
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm({ resolver: zodResolver(contactFormSchema), mode: 'onBlur' });
+  } = useForm({
+    resolver: zodResolver(contactFormSchema),
+    mode: 'onBlur',
+    defaultValues: isBugReport
+      ? { service: 'Report a Bug / Website Issue', message: "I'd like to report a bug on the website: " }
+      : undefined,
+  });
 
   const onSubmit = async (data) => {
     try {
@@ -75,7 +85,7 @@ export default function ContactUs() {
               </div>
               <div>
                 <label htmlFor="service" className={labelClass}>Service</label>
-                <select id="service" className={inputClass} {...register('service')} defaultValue="">
+                <select id="service" className={inputClass} {...register('service')} defaultValue={isBugReport ? 'Report a Bug / Website Issue' : ''}>
                   <option value="" disabled>Select a service</option>
                   {CONSULTATION_SERVICE_OPTIONS.map((s) => (
                     <option key={s} value={s}>{s}</option>

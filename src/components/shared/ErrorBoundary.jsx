@@ -31,9 +31,14 @@ export default class ErrorBoundary extends Component {
             <p className="text-xs text-primary normal-case font-mono mb-6 break-words">
               {String(this.state.error?.message ?? this.state.error)}
             </p>
-            <button onClick={this.handleReload} className="btn-primary">
-              Reload Page
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button onClick={this.handleReload} className="btn-primary">
+                Reload Page
+              </button>
+              <a href="/Contect-us?subject=bug-report" className="btn-secondary">
+                Report a Bug
+              </a>
+            </div>
           </div>
         </div>
       );

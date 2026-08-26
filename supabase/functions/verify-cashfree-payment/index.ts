@@ -78,16 +78,30 @@ Deno.serve(async (req) => {
       status = 'failed';
     }
 
+    const { data: paymentRow } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('cashfree_order_id', orderId)
+      .maybeSingle();
+
     await supabase
       .from('payments')
       .update({ status, cf_payment_id: cfPaymentId, payment_method: paymentMethod, raw_response: order })
       .eq('cashfree_order_id', orderId);
 
+    const leadType = paymentRow?.lead_type === 'workshop' ? 'workshop' : 'course';
+    const leadTable = leadType === 'workshop' ? 'leads_workshop' : 'leads_course';
+    const itemTable = leadType === 'workshop' ? 'workshops' : 'courses';
+    const slugColumn = leadType === 'workshop' ? 'workshop_slug' : 'course_slug';
+    const titleColumn = leadType === 'workshop' ? 'workshop_title' : 'course_title';
+
     const { data: lead } = await supabase
-      .from('leads_course')
+      .from(leadTable)
       .select('*')
       .eq('cashfree_order_id', orderId)
       .maybeSingle();
+
+    let whatsappGroupLink = '';
 
     if (lead) {
       const updates: Record<string, unknown> = {
@@ -96,15 +110,24 @@ Deno.serve(async (req) => {
       if (status === 'paid' && ['pending', 'on_call'].includes(lead.enrollment_status)) {
         updates.enrollment_status = 'payment_received';
       }
-      await supabase.from('leads_course').update(updates).eq('id', lead.id);
+      await supabase.from(leadTable).update(updates).eq('id', lead.id);
+
+      const { data: item } = await supabase
+        .from(itemTable)
+        .select('whatsapp_group_link')
+        .eq('slug', lead[slugColumn])
+        .maybeSingle();
+      whatsappGroupLink = item?.whatsapp_group_link ?? '';
     }
 
     return new Response(
       JSON.stringify({
         status,
         orderId,
-        courseTitle: lead?.course_title ?? '',
+        leadType,
+        itemTitle: lead?.[titleColumn] ?? '',
         studentName: lead?.name ?? '',
+        whatsappGroupLink,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

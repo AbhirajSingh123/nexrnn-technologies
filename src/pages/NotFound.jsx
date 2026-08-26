@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Home } from 'lucide-react';
+import { Home, Bug } from 'lucide-react';
 
 export default function NotFound() {
   return (
@@ -10,9 +10,14 @@ export default function NotFound() {
         <p className="text-muted text-sm normal-case leading-relaxed mb-8">
           The page you&rsquo;re looking for may have been moved or doesn&rsquo;t exist. Let&rsquo;s get you back on track.
         </p>
-        <Link to="/" className="btn-primary min-w-[200px]">
-          <Home size={16} /> Back to Home
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link to="/" className="btn-primary min-w-[200px]">
+            <Home size={16} /> Back to Home
+          </Link>
+          <Link to="/Contect-us?subject=bug-report" className="btn-secondary min-w-[200px]">
+            <Bug size={16} /> Report a Bug
+          </Link>
+        </div>
       </div>
     </section>
   );

@@ -1,6 +1,7 @@
 // Called from the browser via supabase.functions.invoke('create-cashfree-order', ...)
 // Creates a Cashfree order server-side (secret key never touches the client),
-// logs a `payments` row, and links it to the leads_course record.
+// logs a `payments` row, and links it to the leads_course OR leads_workshop
+// record depending on `leadType`.
 //
 // This file is self-contained (no imports from a shared folder) so it can be
 // pasted directly into the Supabase Dashboard's "Create new edge function" editor.
@@ -32,9 +33,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { leadCourseId, amount, customerName, customerEmail, customerPhone, courseTitle } = await req.json();
+    const { leadId, leadType, amount, customerName, customerEmail, customerPhone, itemTitle } = await req.json();
 
-    if (!leadCourseId || !amount || Number(amount) <= 0 || !customerEmail || !customerPhone) {
+    if (!leadId || !leadType || !['course', 'workshop'].includes(leadType) || !amount || Number(amount) <= 0 || !customerEmail || !customerPhone) {
       return new Response(JSON.stringify({ error: 'Missing or invalid required fields.' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -58,7 +59,7 @@ Deno.serve(async (req) => {
         order_amount: Number(amount),
         order_currency: 'INR',
         customer_details: {
-          customer_id: `cust_${String(leadCourseId).replace(/-/g, '')}`,
+          customer_id: `cust_${String(leadId).replace(/-/g, '')}`,
           customer_name: customerName || 'Student',
           customer_email: customerEmail,
           customer_phone: customerPhone,
@@ -67,7 +68,7 @@ Deno.serve(async (req) => {
           return_url: `${siteUrl}/enrollment-payment-status?order_id={order_id}`,
           notify_url: `${functionsBase}/cashfree-webhook`,
         },
-        order_note: courseTitle || '',
+        order_note: itemTitle || '',
       }),
     });
 
@@ -80,16 +81,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    await supabase.from('payments').insert({
-      lead_course_id: leadCourseId,
+    const paymentRecord: Record<string, unknown> = {
       cashfree_order_id: orderId,
       amount: Number(amount),
       currency: 'INR',
       status: 'created',
       raw_response: cfData,
-    });
+      lead_type: leadType,
+    };
+    if (leadType === 'course') {
+      paymentRecord.lead_course_id = leadId;
+    } else {
+      paymentRecord.lead_workshop_id = leadId;
+    }
 
-    await supabase.from('leads_course').update({ cashfree_order_id: orderId }).eq('id', leadCourseId);
+    await supabase.from('payments').insert(paymentRecord);
+
+    const leadTable = leadType === 'course' ? 'leads_course' : 'leads_workshop';
+    await supabase.from(leadTable).update({ cashfree_order_id: orderId }).eq('id', leadId);
 
     return new Response(
       JSON.stringify({ orderId, paymentSessionId: cfData.payment_session_id }),

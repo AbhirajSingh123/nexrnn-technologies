@@ -2,6 +2,7 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useServices } from '@/hooks/useCatalog';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { SITE } from '@/constants/siteData';
 import ServiceCard from '@/components/services/ServiceCard';
 import ReviewVideoSlider from '@/components/services/ReviewVideoSlider';
@@ -10,6 +11,21 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
 export default function Services() {
   const { services, loading } = useServices();
+  const { settings, loading: settingsLoading } = useSiteSettings();
+
+  if (!settingsLoading && !settings.showServices) {
+    return (
+      <section className="min-h-[60vh] flex items-center justify-center bg-accent bg-grid-light px-4 py-24">
+        <div className="card-base bg-white max-w-lg w-full p-8 sm:p-10 text-center">
+          <h1 className="text-2xl text-secondary mb-3">Services Temporarily Unavailable</h1>
+          <p className="text-sm text-muted normal-case leading-relaxed mb-6">
+            Please check back soon, or get in touch directly.
+          </p>
+          <Link to="/Contect-us" className="btn-primary">Contact Us</Link>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <>

@@ -24,8 +24,9 @@ export const SOCIAL_LINKS = {
 
 export const NAV_LINKS = [
   { label: 'Home', href: '/' },
-  { label: 'Services', href: '/services' },
-  { label: 'Courses', href: '/course' },
+  { label: 'Services', href: '/services', settingsKey: 'showServices' },
+  { label: 'Courses', href: '/course', settingsKey: 'showCourses' },
+  { label: 'Workshops', href: '/workshop', settingsKey: 'showWorkshops' },
   { label: 'About Us', href: '/about-us' },
   { label: 'Contact Us', href: '/Contect-us' },
 ];
@@ -94,5 +95,7 @@ export const CONSULTATION_SERVICE_OPTIONS = [
   'Graphic Design & Branding',
   'Video Editing / AI Video',
   'Course Enquiry',
+  'Workshop Enquiry',
+  'Report a Bug / Website Issue',
   'Other',
 ];

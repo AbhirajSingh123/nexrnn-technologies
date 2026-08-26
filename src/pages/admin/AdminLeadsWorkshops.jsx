@@ -23,20 +23,20 @@ const ENROLLMENT_STATUS_STYLES = {
   declined: 'bg-red-50 text-primary border-primary/30',
 };
 
-export default function AdminLeadsCourses() {
+export default function AdminLeadsWorkshops() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [courseFilter, setCourseFilter] = useState('all');
+  const [workshopFilter, setWorkshopFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [managingRow, setManagingRow] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('leads_course').select('*').order('created_at', { ascending: false });
-    if (error) toast.error('Failed to load enrollments.');
+    const { data, error } = await supabase.from('leads_workshop').select('*').order('created_at', { ascending: false });
+    if (error) toast.error('Failed to load registrations.');
     setRows(data ?? []);
     setLoading(false);
   }, []);
@@ -46,41 +46,41 @@ export default function AdminLeadsCourses() {
   }, [load]);
 
   const handleDelete = async (row) => {
-    if (!window.confirm('Delete this enrollment?')) return;
-    const { error } = await supabase.from('leads_course').delete().eq('id', row.id);
+    if (!window.confirm('Delete this registration?')) return;
+    const { error } = await supabase.from('leads_workshop').delete().eq('id', row.id);
     if (error) toast.error('Delete failed.');
     else {
-      toast.success('Enrollment deleted.');
+      toast.success('Registration deleted.');
       load();
     }
   };
 
-  const courseOptions = useMemo(
-    () => [...new Set(rows.map((r) => r.course_title))].sort(),
+  const workshopOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.workshop_title))].sort(),
     [rows]
   );
 
   const filteredRows = useMemo(() => {
     return rows.filter((r) => {
-      if (courseFilter !== 'all' && r.course_title !== courseFilter) return false;
+      if (workshopFilter !== 'all' && r.workshop_title !== workshopFilter) return false;
       if (statusFilter !== 'all' && (r.enrollment_status ?? 'pending') !== statusFilter) return false;
       if (dateFrom && new Date(r.created_at) < new Date(dateFrom)) return false;
       if (dateTo && new Date(r.created_at) > new Date(`${dateTo}T23:59:59`)) return false;
       if (search.trim()) {
         const q = search.trim().toLowerCase();
-        const haystack = [r.name, r.email, r.phone, r.course_title, r.college, r.payment_ref_no, r.batch_id].join(' ').toLowerCase();
+        const haystack = [r.name, r.email, r.phone, r.workshop_title, r.college, r.batch_id].join(' ').toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
     });
-  }, [rows, search, dateFrom, dateTo, courseFilter, statusFilter]);
+  }, [rows, search, dateFrom, dateTo, workshopFilter, statusFilter]);
 
   const columns = [
     { key: 'created_at', label: 'Date', render: (r) => formatDateTimeWithDay(r.created_at) },
     { key: 'name', label: 'Name' },
     { key: 'phone', label: 'WhatsApp / Mobile' },
     { key: 'email', label: 'Email' },
-    { key: 'course_title', label: 'Course' },
+    { key: 'workshop_title', label: 'Workshop' },
     { key: 'batch_id', label: 'Batch ID', render: (r) => r.batch_id || '—' },
     {
       key: 'enrollment_status',
@@ -104,9 +104,9 @@ export default function AdminLeadsCourses() {
 
   return (
     <div>
-      <h1 className="font-heading text-3xl text-secondary mb-1">Course Enrollments</h1>
+      <h1 className="font-heading text-3xl text-secondary mb-1">Workshop Registrations</h1>
       <p className="text-sm text-muted normal-case mb-6">
-        Submissions from the course enrollment popup. Click "Manage" to set the Batch ID, statuses, and admin notes.
+        Submissions from the workshop registration popup. Click "Manage" to set the Batch ID, statuses, and admin notes.
       </p>
 
       <AdminFilterBar
@@ -120,15 +120,15 @@ export default function AdminLeadsCourses() {
         extra={
           <>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wide text-muted mb-1">Course</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wide text-muted mb-1">Workshop</label>
               <select
-                value={courseFilter}
-                onChange={(e) => setCourseFilter(e.target.value)}
+                value={workshopFilter}
+                onChange={(e) => setWorkshopFilter(e.target.value)}
                 className="border-2 border-secondary/20 focus:border-primary px-3 py-2 text-sm outline-none transition-colors bg-white max-w-[220px]"
               >
-                <option value="all">All Courses</option>
-                {courseOptions.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                <option value="all">All Workshops</option>
+                {workshopOptions.map((w) => (
+                  <option key={w} value={w}>{w}</option>
                 ))}
               </select>
             </div>
@@ -153,10 +153,10 @@ export default function AdminLeadsCourses() {
 
       <AdminEnrollmentModal
         enrollment={managingRow}
-        table="leads_course"
-        titleField="course_title"
-        paymentFkColumn="lead_course_id"
-        itemLabel="Course"
+        table="leads_workshop"
+        titleField="workshop_title"
+        paymentFkColumn="lead_workshop_id"
+        itemLabel="Workshop"
         onClose={() => setManagingRow(null)}
         onSaved={() => {
           setManagingRow(null);
