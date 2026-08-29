@@ -7,6 +7,7 @@ import { courseEnrollSchema } from '@/utils/validation';
 import { submitCourseEnrollment } from '@/data/leadsRepo';
 import { createCashfreeOrder } from '@/data/paymentsRepo';
 import { startCashfreeCheckout } from '@/utils/cashfreeSdk';
+import { trackLead, trackBeginCheckout } from '@/utils/analytics';
 import { parseRupeeAmount, formatINR } from '@/utils/format';
 import { useCourseEnrollModal } from '@/contexts/CourseEnrollContext';
 import Modal from '@/components/shared/Modal';
@@ -31,6 +32,9 @@ export default function CourseEnrollModal() {
     try {
       // 1. Save the enrollment record first (gets a unique reference ID).
       const lead = await submitCourseEnrollment({ ...data, course });
+
+      // Lead/form tracking (GA4 + admin dashboard)
+      trackLead('course', course.title);
 
       // 2. Free courses skip the payment gateway entirely — straight to success.
       if (course.isFree) {
@@ -59,6 +63,8 @@ export default function CourseEnrollModal() {
       closeCourseEnroll();
 
       // 4. Redirect to Cashfree's hosted checkout page.
+      // Checkout tracking - GA4 funnel: view -> begin_checkout -> purchase
+      trackBeginCheckout(course.title, amount, 'course');
       await startCashfreeCheckout(paymentSessionId);
     } catch (err) {
       toast.error(err.message || 'Something went wrong. Please try again.');

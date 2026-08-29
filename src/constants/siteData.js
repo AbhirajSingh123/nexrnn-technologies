@@ -27,6 +27,7 @@ export const NAV_LINKS = [
   { label: 'Services', href: '/services', settingsKey: 'showServices' },
   { label: 'Courses', href: '/course', settingsKey: 'showCourses' },
   { label: 'Workshops', href: '/workshop', settingsKey: 'showWorkshops' },
+  { label: 'Blog', href: '/blog' },
   { label: 'About Us', href: '/about-us' },
   { label: 'Contact Us', href: '/Contect-us' },
 ];

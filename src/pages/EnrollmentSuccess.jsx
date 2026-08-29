@@ -1,8 +1,10 @@
+import { useEffect, useRef } from 'react';
 import { useLocation, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { CheckCircle2, Mail, MessageCircle } from 'lucide-react';
 import { SITE } from '@/constants/siteData';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { trackEnrollmentSuccess } from '@/utils/analytics';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
 function renderTemplate(template, { name, title }) {
@@ -13,6 +15,15 @@ export default function EnrollmentSuccess() {
   const location = useLocation();
   const { name, itemTitle, whatsappGroupLink, referenceId } = location.state ?? {};
   const { settings, loading } = useSiteSettings();
+  const trackedRef = useRef(false);
+
+  // Enrollment success tracking (ek hi baar fire ho)
+  useEffect(() => {
+    if (!trackedRef.current && itemTitle) {
+      trackedRef.current = true;
+      trackEnrollmentSuccess(itemTitle);
+    }
+  }, [itemTitle]);
 
   // If someone lands here directly (no submission just happened), send them back.
   if (!name || !itemTitle) return <Navigate to="/course" replace />;

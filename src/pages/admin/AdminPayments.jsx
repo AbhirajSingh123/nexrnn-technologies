@@ -7,6 +7,7 @@ import AdminFilterBar from '@/components/admin/AdminFilterBar';
 import AdminLoadMore from '@/components/admin/AdminLoadMore';
 import { useLoadMore } from '@/hooks/useLoadMore';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ExportButtons from '@/components/admin/ExportButtons';
 
 const STATUS_STYLES = {
   created: 'bg-accent text-secondary border-secondary/30',
@@ -121,6 +122,14 @@ export default function AdminPayments() {
           </div>
         }
       />
+
+      {/* Download data: PDF / Excel / CSV */}
+
+      <div className="mb-4">
+
+        <ExportButtons rows={rows} columns={columns} filename="payments" title="Payments" />
+
+      </div>
 
       {loading ? (
         <LoadingSpinner />

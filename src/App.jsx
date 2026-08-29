@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { ToastContainer } from 'react-toastify';
+import AnalyticsLoader from '@/components/analytics/AnalyticsLoader';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import RootLayout from '@/layouts/RootLayout';
 import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
@@ -17,6 +18,8 @@ const Courses = lazy(() => import('@/pages/Courses'));
 const CourseDetail = lazy(() => import('@/pages/course/CourseDetail'));
 const Workshops = lazy(() => import('@/pages/Workshops'));
 const WorkshopDetail = lazy(() => import('@/pages/workshop/WorkshopDetail'));
+const Blog = lazy(() => import('@/pages/Blog'));
+const BlogDetail = lazy(() => import('@/pages/blog/BlogDetail'));
 const EnrollmentSuccess = lazy(() => import('@/pages/EnrollmentSuccess'));
 const EnrollmentPaymentStatus = lazy(() => import('@/pages/EnrollmentPaymentStatus'));
 const AboutUs = lazy(() => import('@/pages/AboutUs'));
@@ -29,6 +32,7 @@ const NotFound = lazy(() => import('@/pages/NotFound'));
 const AdminLogin = lazy(() => import('@/pages/admin/AdminLogin'));
 const AdminLayout = lazy(() => import('@/layouts/AdminLayout'));
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const AdminAnalytics = lazy(() => import('@/pages/admin/AdminAnalytics'));
 const AdminLeadsContact = lazy(() => import('@/pages/admin/AdminLeadsContact'));
 const AdminLeadsServices = lazy(() => import('@/pages/admin/AdminLeadsServices'));
 const AdminLeadsCourses = lazy(() => import('@/pages/admin/AdminLeadsCourses'));
@@ -40,6 +44,8 @@ const AdminCoursesList = lazy(() => import('@/pages/admin/AdminCoursesList'));
 const AdminCourseForm = lazy(() => import('@/pages/admin/AdminCourseForm'));
 const AdminWorkshopsList = lazy(() => import('@/pages/admin/AdminWorkshopsList'));
 const AdminWorkshopForm = lazy(() => import('@/pages/admin/AdminWorkshopForm'));
+const AdminBlogPostsList = lazy(() => import('@/pages/admin/AdminBlogPostsList'));
+const AdminBlogPostForm = lazy(() => import('@/pages/admin/AdminBlogPostForm'));
 const AdminClientReviewsList = lazy(() => import('@/pages/admin/AdminClientReviewsList'));
 const AdminClientReviewForm = lazy(() => import('@/pages/admin/AdminClientReviewForm'));
 const AdminPortfolioList = lazy(() => import('@/pages/admin/AdminPortfolioList'));
@@ -59,6 +65,8 @@ function RouteFallback() {
 function App() {
   return (
     <HelmetProvider>
+      {/* GA4 + GTM + Clarity + page views + global click tracking */}
+      <AnalyticsLoader />
       <Helmet>
         <title>{`${SITE.name} — ${SITE.tagline}`}</title>
         <meta
@@ -120,6 +128,8 @@ function App() {
                 <Route path="/course/:slug" element={<CourseDetail />} />
                 <Route path="/workshop" element={<Workshops />} />
                 <Route path="/workshop/:slug" element={<WorkshopDetail />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogDetail />} />
                 <Route path="/enrollment-success" element={<EnrollmentSuccess />} />
                 <Route path="/enrollment-payment-status" element={<EnrollmentPaymentStatus />} />
                 {/*
@@ -146,6 +156,7 @@ function App() {
               <Route element={<AdminProtectedRoute />}>
                 <Route element={<AdminLayout />}>
                   <Route path={ADMIN_ROUTES.dashboard} element={<AdminDashboard />} />
+                  <Route path={ADMIN_ROUTES.analytics} element={<AdminAnalytics />} />
                   <Route path={ADMIN_ROUTES.leadsContact} element={<AdminLeadsContact />} />
                   <Route path={ADMIN_ROUTES.leadsServices} element={<AdminLeadsServices />} />
                   <Route path={ADMIN_ROUTES.leadsCourses} element={<AdminLeadsCourses />} />
@@ -160,6 +171,9 @@ function App() {
                   <Route path={ADMIN_ROUTES.workshops} element={<AdminWorkshopsList />} />
                   <Route path={ADMIN_ROUTES.workshopEditPath} element={<AdminWorkshopForm />} />
                   <Route path={ADMIN_ROUTES.workshopNew} element={<AdminWorkshopForm />} />
+                  <Route path={ADMIN_ROUTES.blogPosts} element={<AdminBlogPostsList />} />
+                  <Route path={ADMIN_ROUTES.blogPostEditPath} element={<AdminBlogPostForm />} />
+                  <Route path={ADMIN_ROUTES.blogPostNew} element={<AdminBlogPostForm />} />
                   <Route path={ADMIN_ROUTES.clientReviews} element={<AdminClientReviewsList />} />
                   <Route path={ADMIN_ROUTES.clientReviewEditPath} element={<AdminClientReviewForm />} />
                   <Route path={ADMIN_ROUTES.clientReviewNew} element={<AdminClientReviewForm />} />
