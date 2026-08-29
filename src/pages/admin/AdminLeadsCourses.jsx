@@ -8,6 +8,7 @@ import AdminLoadMore from '@/components/admin/AdminLoadMore';
 import { useLoadMore } from '@/hooks/useLoadMore';
 import AdminEnrollmentModal from '@/components/admin/AdminEnrollmentModal';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ExportButtons from '@/components/admin/ExportButtons';
 
 const ENROLLMENT_STATUS_LABELS = {
   pending: 'Pending',
@@ -156,6 +157,14 @@ export default function AdminLeadsCourses() {
           </>
         }
       />
+
+      {/* Download data: PDF / Excel / CSV */}
+
+      <div className="mb-4">
+
+        <ExportButtons rows={rows} columns={columns} filename="course-enrollments" title="Course Enrollments" />
+
+      </div>
 
       {loading ? (
         <LoadingSpinner />

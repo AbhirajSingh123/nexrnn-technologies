@@ -8,6 +8,7 @@ import AdminTable from '@/components/admin/AdminTable';
 import AdminLoadMore from '@/components/admin/AdminLoadMore';
 import { useLoadMore } from '@/hooks/useLoadMore';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ExportButtons from '@/components/admin/ExportButtons';
 
 export default function AdminClientReviewsList() {
   const [rows, setRows] = useState([]);
@@ -62,6 +63,10 @@ export default function AdminClientReviewsList() {
         </Link>
       </div>
       <p className="text-sm text-muted normal-case mb-6">Video reviews shown in the slider on the Services page.</p>
+      {/* Download data: PDF / Excel / CSV */}
+      <div className="mb-4">
+        <ExportButtons rows={rows} columns={columns} filename="client-reviews" title="Client Reviews" />
+      </div>
       {loading ? (
         <LoadingSpinner />
       ) : (

@@ -17,6 +17,8 @@ const Courses = lazy(() => import('@/pages/Courses'));
 const CourseDetail = lazy(() => import('@/pages/course/CourseDetail'));
 const Workshops = lazy(() => import('@/pages/Workshops'));
 const WorkshopDetail = lazy(() => import('@/pages/workshop/WorkshopDetail'));
+const Blog = lazy(() => import('@/pages/Blog'));
+const BlogDetail = lazy(() => import('@/pages/blog/BlogDetail'));
 const EnrollmentSuccess = lazy(() => import('@/pages/EnrollmentSuccess'));
 const EnrollmentPaymentStatus = lazy(() => import('@/pages/EnrollmentPaymentStatus'));
 const AboutUs = lazy(() => import('@/pages/AboutUs'));
@@ -40,6 +42,8 @@ const AdminCoursesList = lazy(() => import('@/pages/admin/AdminCoursesList'));
 const AdminCourseForm = lazy(() => import('@/pages/admin/AdminCourseForm'));
 const AdminWorkshopsList = lazy(() => import('@/pages/admin/AdminWorkshopsList'));
 const AdminWorkshopForm = lazy(() => import('@/pages/admin/AdminWorkshopForm'));
+const AdminBlogPostsList = lazy(() => import('@/pages/admin/AdminBlogPostsList'));
+const AdminBlogPostForm = lazy(() => import('@/pages/admin/AdminBlogPostForm'));
 const AdminClientReviewsList = lazy(() => import('@/pages/admin/AdminClientReviewsList'));
 const AdminClientReviewForm = lazy(() => import('@/pages/admin/AdminClientReviewForm'));
 const AdminPortfolioList = lazy(() => import('@/pages/admin/AdminPortfolioList'));
@@ -120,6 +124,8 @@ function App() {
                 <Route path="/course/:slug" element={<CourseDetail />} />
                 <Route path="/workshop" element={<Workshops />} />
                 <Route path="/workshop/:slug" element={<WorkshopDetail />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogDetail />} />
                 <Route path="/enrollment-success" element={<EnrollmentSuccess />} />
                 <Route path="/enrollment-payment-status" element={<EnrollmentPaymentStatus />} />
                 {/*
@@ -160,6 +166,9 @@ function App() {
                   <Route path={ADMIN_ROUTES.workshops} element={<AdminWorkshopsList />} />
                   <Route path={ADMIN_ROUTES.workshopEditPath} element={<AdminWorkshopForm />} />
                   <Route path={ADMIN_ROUTES.workshopNew} element={<AdminWorkshopForm />} />
+                  <Route path={ADMIN_ROUTES.blogPosts} element={<AdminBlogPostsList />} />
+                  <Route path={ADMIN_ROUTES.blogPostEditPath} element={<AdminBlogPostForm />} />
+                  <Route path={ADMIN_ROUTES.blogPostNew} element={<AdminBlogPostForm />} />
                   <Route path={ADMIN_ROUTES.clientReviews} element={<AdminClientReviewsList />} />
                   <Route path={ADMIN_ROUTES.clientReviewEditPath} element={<AdminClientReviewForm />} />
                   <Route path={ADMIN_ROUTES.clientReviewNew} element={<AdminClientReviewForm />} />
