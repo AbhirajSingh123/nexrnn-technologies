@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { SITE, SOCIAL_LINKS, CONSULTATION_SERVICE_OPTIONS } from '@/constants/siteData';
 import { contactFormSchema } from '@/utils/validation';
 import { submitContactLead } from '@/data/leadsRepo';
+import { trackLead } from '@/utils/analytics';
 import Reveal from '@/components/shared/Reveal';
 import ConsentCheckbox from '@/components/shared/ConsentCheckbox';
 
@@ -36,6 +37,7 @@ export default function ContactUs() {
   const onSubmit = async (data) => {
     try {
       await submitContactLead(data);
+      trackLead('contact', data.service || '');
       toast.success("Thanks for reaching out! We'll get back to you shortly.");
       reset();
     } catch (err) {

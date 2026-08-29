@@ -8,6 +8,7 @@ import AdminTable from '@/components/admin/AdminTable';
 import AdminLoadMore from '@/components/admin/AdminLoadMore';
 import { useLoadMore } from '@/hooks/useLoadMore';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ExportButtons from '@/components/admin/ExportButtons';
 
 export default function AdminServicesList() {
   const [rows, setRows] = useState([]);
@@ -61,6 +62,10 @@ export default function AdminServicesList() {
         </Link>
       </div>
       <p className="text-sm text-muted normal-case mb-6">Full CRUD — changes here reflect live on the website.</p>
+      {/* Download data: PDF / Excel / CSV */}
+      <div className="mb-4">
+        <ExportButtons rows={rows} columns={columns} filename="services" title="Services" />
+      </div>
       {loading ? (
         <LoadingSpinner />
       ) : (

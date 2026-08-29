@@ -7,6 +7,7 @@ import { courseEnrollSchema } from '@/utils/validation';
 import { submitWorkshopEnrollment } from '@/data/leadsRepo';
 import { createCashfreeOrder } from '@/data/paymentsRepo';
 import { startCashfreeCheckout } from '@/utils/cashfreeSdk';
+import { trackLead, trackBeginCheckout } from '@/utils/analytics';
 import { parseRupeeAmount, formatINR } from '@/utils/format';
 import { useWorkshopEnrollModal } from '@/contexts/WorkshopEnrollContext';
 import Modal from '@/components/shared/Modal';
@@ -31,6 +32,9 @@ export default function WorkshopEnrollModal() {
     try {
       const lead = await submitWorkshopEnrollment({ ...data, workshop });
 
+      // Lead/form tracking
+      trackLead('workshop', workshop.title);
+
       if (workshop.isFree) {
         reset();
         closeWorkshopEnroll();
@@ -54,6 +58,8 @@ export default function WorkshopEnrollModal() {
       reset();
       closeWorkshopEnroll();
 
+      // Checkout tracking
+      trackBeginCheckout(workshop.title, amount, 'workshop');
       await startCashfreeCheckout(paymentSessionId);
     } catch (err) {
       toast.error(err.message || 'Something went wrong. Please try again.');

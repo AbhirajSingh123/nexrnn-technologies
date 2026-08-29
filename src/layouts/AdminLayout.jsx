@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   LayoutDashboard, Inbox, Briefcase, GraduationCap, Layers, BookOpen, LogOut, CreditCard,
-  Video, Image as ImageIcon, Star, PartyPopper, Settings,
+  Video, Image as ImageIcon, Star, PartyPopper, Settings, Newspaper, BarChart3,
 } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import useIdleTimeout from '@/hooks/useIdleTimeout';
@@ -12,6 +12,7 @@ import { ADMIN_ROUTES } from '@/constants/adminRoutes';
 
 const NAV_ITEMS = [
   { to: ADMIN_ROUTES.dashboard, label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: ADMIN_ROUTES.analytics, label: 'Traffic & Analytics', icon: BarChart3 },
   { to: ADMIN_ROUTES.leadsContact, label: 'Contact Leads', icon: Inbox },
   { to: ADMIN_ROUTES.leadsServices, label: 'Service Leads', icon: Briefcase },
   { to: ADMIN_ROUTES.leadsCourses, label: 'Course Enrollments', icon: GraduationCap },
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { to: ADMIN_ROUTES.services, label: 'Manage Services', icon: Layers },
   { to: ADMIN_ROUTES.courses, label: 'Manage Courses', icon: BookOpen },
   { to: ADMIN_ROUTES.workshops, label: 'Manage Workshops', icon: PartyPopper },
+  { to: ADMIN_ROUTES.blogPosts, label: 'Manage Blog', icon: Newspaper },
   { to: ADMIN_ROUTES.clientReviews, label: 'Client Reviews', icon: Video },
   { to: ADMIN_ROUTES.portfolio, label: 'Manage Portfolio', icon: ImageIcon },
   { to: ADMIN_ROUTES.testimonials, label: 'Manage Testimonials', icon: Star },

@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemap.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://nexrnntechnology.in/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://nexrnntechnology.in/services</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://nexrnntechnology.in/course</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://nexrnntechnology.in/workshop</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://nexrnntechnology.in/course/digital-marketing</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://nexrnntechnology.in/course/artificial-intelligence</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://nexrnntechnology.in/course/website-development</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://nexrnntechnology.in/about-us</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://nexrnntechnology.in/Contect-us</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <!-- Blog section (naye posts add karte waqt yahan URL add karo) -->
+  <url><loc>https://nexrnntechnology.in/blog</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://nexrnntechnology.in/blog/how-to-scale-local-business-with-google-ads</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://nexrnntechnology.in/blog/why-modern-businesses-need-speed-optimized-custom-websites</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://nexrnntechnology.in/blog/mastering-meta-ads-creative-fatigue-and-audience-scaling</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://nexrnntechnology.in/blog/practical-ai-tools-for-business-automation-in-2026</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://nexrnntechnology.in/blog/google-business-profile-seo-complete-guide</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
   <url><loc>https://nexrnntechnology.in/services/google-ads</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://nexrnntechnology.in/services/meta-ads</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://nexrnntechnology.in/services/social-media-marketing</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -22,6 +32,7 @@
   <url><loc>https://nexrnntechnology.in/services/ai-video-creation</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://nexrnntechnology.in/services/brand-promotion</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://nexrnntechnology.in/services/digital-marketing-strategy</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
   <url><loc>https://nexrnntechnology.in/privacy-policy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://nexrnntechnology.in/terms-and-conditions</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://nexrnntechnology.in/refund-policy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
