@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
 
+# Admin panel ko Google se chhupa do
+Disallow: /nexrnn/
+
 Sitemap: https://nexrnntechnology.in/sitemap.xml

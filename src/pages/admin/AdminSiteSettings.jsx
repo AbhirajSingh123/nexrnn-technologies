@@ -77,6 +77,14 @@ export default function AdminSiteSettings() {
               <span className="text-sm font-semibold text-secondary">Show Workshops on website</span>
               <input type="checkbox" className="w-5 h-5 accent-primary" checked={form.showWorkshops} onChange={handleToggle('showWorkshops')} />
             </label>
+            <label className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-secondary">Show Portfolio on website</span>
+              <input type="checkbox" className="w-5 h-5 accent-primary" checked={form.showPortfolio} onChange={handleToggle('showPortfolio')} />
+            </label>
+            <label className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-secondary">Show Testimonials on website</span>
+              <input type="checkbox" className="w-5 h-5 accent-primary" checked={form.showTestimonials} onChange={handleToggle('showTestimonials')} />
+            </label>
           </div>
         </div>
 

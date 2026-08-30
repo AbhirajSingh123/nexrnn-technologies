@@ -27,6 +27,7 @@ export const NAV_LINKS = [
   { label: 'Services', href: '/services', settingsKey: 'showServices' },
   { label: 'Courses', href: '/course', settingsKey: 'showCourses' },
   { label: 'Workshops', href: '/workshop', settingsKey: 'showWorkshops' },
+  { label: 'Blog', href: '/blog' },
   { label: 'About Us', href: '/about-us' },
   { label: 'Contact Us', href: '/Contect-us' },
 ];
@@ -35,7 +36,7 @@ export const HERO_STATS = [
   { label: 'Services Offered', value: 14, suffix: '+' },
   { label: 'Course Programs', value: 3, suffix: '' },
   { label: 'Focus Areas', value: 4, suffix: '' },
-  { label: 'Based In', value: 0, suffix: 'Lucknow', isText: true },
+  { label: 'Based In', value: 0, suffix: 'India', isText: true },
 ];
 
 export const HERO = {

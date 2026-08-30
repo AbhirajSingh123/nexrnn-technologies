@@ -7,6 +7,7 @@ function useList(fetchFn, deps = []) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -41,6 +42,7 @@ function useSingle(fetchFn, slug) {
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   return { item, loading };

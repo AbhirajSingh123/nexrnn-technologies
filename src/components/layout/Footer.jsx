@@ -49,6 +49,11 @@ export default function Footer() {
             <li><Link to="/services" className="text-sm text-white/70 hover:text-primary transition-colors">Services</Link></li>
             <li><Link to="/course" className="text-sm text-white/70 hover:text-primary transition-colors">Courses</Link></li>
             <li><Link to="/workshop" className="text-sm text-white/70 hover:text-primary transition-colors">Workshops</Link></li>
+            <li><Link to="/blog" className="text-sm text-white/70 hover:text-primary transition-colors">Blog</Link></li>
+            <li><Link to="/case-studies" className="text-sm text-white/70 hover:text-primary transition-colors">Case Studies</Link></li>
+            <li><Link to="/faqs" className="text-sm text-white/70 hover:text-primary transition-colors">FAQs</Link></li>
+            <li><Link to="/sitemap" className="text-sm text-white/70 hover:text-primary transition-colors">Sitemap</Link></li>
+            <li><Link to="/careers" className="text-sm text-white/70 hover:text-primary transition-colors">Careers</Link></li>
             <li><Link to="/about-us" className="text-sm text-white/70 hover:text-primary transition-colors">About Us</Link></li>
             <li><Link to="/Contect-us" className="text-sm text-white/70 hover:text-primary transition-colors">Contact Us</Link></li>
           </ul>
@@ -101,6 +106,20 @@ export default function Footer() {
           <Link to="/terms-and-conditions" className="hover:text-primary transition-colors">Terms &amp; Conditions</Link>
           <Link to="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</Link>
         </div>
+      </div>
+
+      {/* Giant outlined brand watermark - footer ka sabse neeche wala hissa */}
+      <div className="select-none overflow-hidden mt-10 pb-2" aria-hidden="true">
+        <p
+          className="font-heading text-center leading-[0.82] text-transparent whitespace-nowrap"
+          style={{
+            fontSize: 'clamp(3.5rem, 26vw, 26rem)',
+            WebkitTextStroke: '1.5px rgba(29, 111, 224, 0.55)',
+            letterSpacing: '0.02em',
+          }}
+        >
+          NexRNN
+        </p>
       </div>
     </footer>
   );

@@ -3,6 +3,7 @@ import { useSearchParams, Navigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { XCircle, Clock, Phone, Mail } from 'lucide-react';
 import { verifyCashfreePayment } from '@/data/paymentsRepo';
+import { trackPurchase } from '@/utils/analytics';
 import { SITE } from '@/constants/siteData';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
@@ -15,7 +16,17 @@ export default function EnrollmentPaymentStatus() {
   useEffect(() => {
     if (!orderId) return;
     verifyCashfreePayment(orderId)
-      .then(setResult)
+      .then((data) => {
+        setResult(data);
+        // Purchase/checkout conversion tracking (refresh par double na ho)
+        if (data?.status === 'paid') {
+          const key = `purchase_tracked_${orderId}`;
+          if (!sessionStorage.getItem(key)) {
+            sessionStorage.setItem(key, '1');
+            trackPurchase(data.itemTitle || '', data.amount || 0, data.leadType || 'course');
+          }
+        }
+      })
       .catch((err) => setError(err.message || 'Could not verify your payment.'));
   }, [orderId]);
 
@@ -59,6 +70,7 @@ export default function EnrollmentPaymentStatus() {
         state={{
           name: result.studentName,
           itemTitle: result.itemTitle,
+          batchId: result.batchId,
           leadType: result.leadType,
           whatsappGroupLink: result.whatsappGroupLink,
           referenceId: result.referenceId,

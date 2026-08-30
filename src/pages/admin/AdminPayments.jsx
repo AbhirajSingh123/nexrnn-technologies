@@ -7,6 +7,7 @@ import AdminFilterBar from '@/components/admin/AdminFilterBar';
 import AdminLoadMore from '@/components/admin/AdminLoadMore';
 import { useLoadMore } from '@/hooks/useLoadMore';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ExportButtons from '@/components/admin/ExportButtons';
 
 const STATUS_STYLES = {
   created: 'bg-accent text-secondary border-secondary/30',
@@ -18,6 +19,10 @@ const STATUS_STYLES = {
 
 function getStudent(r) {
   return r.leads_course ?? r.leads_workshop ?? null;
+}
+
+function getReferenceId(r) {
+  return r.leads_course?.reference_id ?? r.leads_workshop?.reference_id ?? '';
 }
 
 function getItemTitle(r) {
@@ -36,7 +41,7 @@ export default function AdminPayments() {
     setLoading(true);
     const { data, error } = await supabase
       .from('payments')
-      .select('*, leads_course(name, email, phone, course_title), leads_workshop(name, email, phone, workshop_title)')
+      .select('*, leads_course(name, email, phone, course_title, reference_id), leads_workshop(name, email, phone, workshop_title, reference_id)')
       .order('created_at', { ascending: false });
     if (error) toast.error('Failed to load payments.');
     setRows(data ?? []);
@@ -56,7 +61,7 @@ export default function AdminPayments() {
         const q = search.trim().toLowerCase();
         const student = getStudent(r);
         const haystack = [
-          r.cashfree_order_id, r.cf_payment_id,
+          r.cashfree_order_id, r.cf_payment_id, getReferenceId(r),
           student?.name, student?.email, student?.phone, getItemTitle(r),
         ].join(' ').toLowerCase();
         if (!haystack.includes(q)) return false;
@@ -70,14 +75,33 @@ export default function AdminPayments() {
     `${search}|${dateFrom}|${dateTo}|${statusFilter}`
   );
 
+  // Export ke liye FULL rows - student/item/reference sab resolved
+  const exportRows = filteredRows.map((r) => ({
+    date: formatDateTimeWithDay(r.created_at),
+    student: getStudent(r)?.name ?? '',
+    email: getStudent(r)?.email ?? '',
+    phone: getStudent(r)?.phone ?? '',
+    item: getItemTitle(r),
+    lead_type: r.lead_type === 'workshop' ? 'Workshop' : 'Course',
+    amount: r.amount ?? 0,
+    currency: r.currency || 'INR',
+    status: r.status || '',
+    cashfree_order_id: r.cashfree_order_id || '',
+    cf_payment_id: r.cf_payment_id || '',
+    reference_id: getReferenceId(r),
+    payment_method: r.payment_method || '',
+    created_at: r.created_at || '',
+  }));
+
   const columns = [
     { key: 'created_at', label: 'Date', render: (r) => formatDateTimeWithDay(r.created_at) },
     { key: 'student', label: 'Student', render: (r) => getStudent(r)?.name ?? '—' },
     { key: 'item', label: 'Course / Workshop', render: (r) => getItemTitle(r) },
-    { key: 'lead_type', label: 'Type', render: (r) => (r.lead_type === 'workshop' ? 'Workshop' : 'Course') },
+    { key: 'lead_type', label: 'Type', render: (r) => (r.lead_type === 'career' ? 'Career Application' : r.lead_type === 'workshop' ? 'Workshop' : 'Course') },
     { key: 'amount', label: 'Amount', render: (r) => `\u20b9${r.amount}` },
     { key: 'cashfree_order_id', label: 'Order ID' },
     { key: 'cf_payment_id', label: 'Payment ID', render: (r) => r.cf_payment_id || '—' },
+    { key: 'reference_id', label: 'Reference ID', render: (r) => getReferenceId(r) || '—' },
     { key: 'payment_method', label: 'Method', render: (r) => r.payment_method || '—' },
     {
       key: 'status',
@@ -121,6 +145,14 @@ export default function AdminPayments() {
           </div>
         }
       />
+
+      {/* Download data: PDF / Excel / CSV */}
+
+      <div className="mb-4">
+
+        <ExportButtons rows={exportRows} columns={columns} filename="payments" title="Payments" />
+
+      </div>
 
       {loading ? (
         <LoadingSpinner />
