@@ -186,6 +186,28 @@ export default function AdminDashboard() {
         ))}
       </div>
 
+      {/* Type filter pills */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        {[
+          { key: 'all', label: 'All' },
+          { key: 'contact', label: 'Contact' },
+          { key: 'service', label: 'Service' },
+          { key: 'course', label: 'Course' },
+        ].map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTypeFilter(t.key)}
+            className={`px-3 py-1.5 text-xs font-bold border-2 transition-colors ${
+              typeFilter === t.key
+                ? 'border-primary text-primary bg-primary/5'
+                : 'border-secondary/20 text-muted hover:border-secondary/40'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <h2 className="text-xl text-secondary normal-case">Recent Activity</h2>
         <div className="relative w-full sm:w-64">
