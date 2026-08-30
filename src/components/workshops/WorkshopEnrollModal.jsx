@@ -7,8 +7,10 @@ import { courseEnrollSchema } from '@/utils/validation';
 import { submitWorkshopEnrollment } from '@/data/leadsRepo';
 import { createCashfreeOrder } from '@/data/paymentsRepo';
 import { startCashfreeCheckout } from '@/utils/cashfreeSdk';
+import { trackLead, trackBeginCheckout } from '@/utils/analytics';
 import { parseRupeeAmount, formatINR } from '@/utils/format';
 import { useWorkshopEnrollModal } from '@/contexts/WorkshopEnrollContext';
+import { isRegistrationClosed } from '@/utils/workshopUtils';
 import Modal from '@/components/shared/Modal';
 import ConsentCheckbox from '@/components/shared/ConsentCheckbox';
 
@@ -20,6 +22,10 @@ const errorClass = 'mt-1.5 text-xs text-primary normal-case';
 export default function WorkshopEnrollModal() {
   const { workshop, closeWorkshopEnroll } = useWorkshopEnrollModal();
   const navigate = useNavigate();
+
+  // DEADLINE GUARD: registration deadline cross ho to submit bilkul nahi hoga
+  const regClosed = workshop ? isRegistrationClosed(workshop) : false;
+
   const {
     register,
     handleSubmit,
@@ -31,11 +37,14 @@ export default function WorkshopEnrollModal() {
     try {
       const lead = await submitWorkshopEnrollment({ ...data, workshop });
 
+      // Lead/form tracking
+      trackLead('workshop', workshop.title);
+
       if (workshop.isFree) {
         reset();
         closeWorkshopEnroll();
         navigate('/enrollment-success', {
-          state: { name: data.name, itemTitle: workshop.title, referenceId: lead.referenceId, isFree: true },
+          state: { name: data.name, itemTitle: workshop.title, referenceId: lead.referenceId, batchId: lead.batch_id, isFree: true, fee: parseRupeeAmount(workshop.price) },
         });
         return;
       }
@@ -54,11 +63,27 @@ export default function WorkshopEnrollModal() {
       reset();
       closeWorkshopEnroll();
 
+      // Checkout tracking
+      trackBeginCheckout(workshop.title, amount, 'workshop');
       await startCashfreeCheckout(paymentSessionId);
     } catch (err) {
       toast.error(err.message || 'Something went wrong. Please try again.');
     }
   };
+
+  // Deadline cross -> sirf "Completed" message dikhao, form open hi na ho
+  if (regClosed) {
+    return (
+      <Modal isOpen={Boolean(workshop)} onClose={closeWorkshopEnroll} title={workshop ? `Register: ${workshop.title}` : 'Register'}>
+        <div className="text-center py-8">
+          <p className="text-lg font-bold text-secondary mb-2">Workshop Completed</p>
+          <p className="text-sm text-muted normal-case">
+            The registration deadline for this workshop has passed. New registrations are no longer accepted.
+          </p>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal isOpen={Boolean(workshop)} onClose={closeWorkshopEnroll} title={workshop ? `Register: ${workshop.title}` : 'Register'}>

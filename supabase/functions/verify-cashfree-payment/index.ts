@@ -89,7 +89,45 @@ Deno.serve(async (req) => {
       .update({ status, cf_payment_id: cfPaymentId, payment_method: paymentMethod, raw_response: order })
       .eq('cashfree_order_id', orderId);
 
-    const leadType = paymentRow?.lead_type === 'workshop' ? 'workshop' : 'course';
+    const leadType = paymentRow?.lead_type === 'career' ? 'career' : paymentRow?.lead_type === 'workshop' ? 'workshop' : 'course';
+
+    // Career application flow: application record update + wahi info wapas bhejo
+    if (leadType === 'career') {
+      const appId = paymentRow?.application_id;
+      if (appId) {
+        await supabase
+          .from('internship_applications')
+          .update({
+            payment_status: status === 'paid' ? 'paid' : 'pending',
+            order_id: orderId,
+            cf_payment_id: cfPaymentId,
+            payment_method: paymentMethod,
+            paid_at: status === 'paid' ? new Date().toISOString() : null,
+          })
+          .eq('id', appId);
+
+        const { data: app } = await supabase
+          .from('internship_applications')
+          .select('application_id, opening_title, full_name, payment_amount')
+          .eq('id', appId)
+          .maybeSingle();
+
+        return new Response(
+          JSON.stringify({
+            status,
+            orderId,
+            leadType: 'career',
+            applicationId: app?.application_id ?? '',
+            itemTitle: app?.opening_title ?? paymentRow?.item_title ?? '',
+            applicantName: app?.full_name ?? '',
+            amount: app?.payment_amount ?? paymentRow?.amount ?? 0,
+            cfPaymentId,
+            method: paymentMethod,
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
     const leadTable = leadType === 'workshop' ? 'leads_workshop' : 'leads_course';
     const itemTable = leadType === 'workshop' ? 'workshops' : 'courses';
     const slugColumn = leadType === 'workshop' ? 'workshop_slug' : 'course_slug';
@@ -127,6 +165,7 @@ Deno.serve(async (req) => {
         leadType,
         itemTitle: lead?.[titleColumn] ?? '',
         referenceId: lead?.reference_id ?? '',
+        batchId: lead?.batch_id ?? '',
         studentName: lead?.name ?? '',
         whatsappGroupLink,
       }),

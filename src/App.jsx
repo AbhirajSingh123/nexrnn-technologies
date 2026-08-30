@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { ToastContainer } from 'react-toastify';
+import AnalyticsLoader from '@/components/analytics/AnalyticsLoader';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import RootLayout from '@/layouts/RootLayout';
 import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
@@ -17,6 +18,16 @@ const Courses = lazy(() => import('@/pages/Courses'));
 const CourseDetail = lazy(() => import('@/pages/course/CourseDetail'));
 const Workshops = lazy(() => import('@/pages/Workshops'));
 const WorkshopDetail = lazy(() => import('@/pages/workshop/WorkshopDetail'));
+const Blog = lazy(() => import('@/pages/Blog'));
+const CaseStudies = lazy(() => import('@/pages/caseStudies/CaseStudies'));
+const Careers = lazy(() => import('@/pages/careers/Careers'));
+const CareerDetail = lazy(() => import('@/pages/careers/CareerDetail'));
+const CareerApplyForm = lazy(() => import('@/pages/careers/CareerApplyForm'));
+const ApplicationPaymentStatus = lazy(() => import('@/pages/careers/ApplicationPaymentStatus'));
+const CaseStudyDetail = lazy(() => import('@/pages/caseStudies/CaseStudyDetail'));
+const Faqs = lazy(() => import('@/pages/Faqs'));
+const Sitemap = lazy(() => import('@/pages/Sitemap'));
+const BlogDetail = lazy(() => import('@/pages/blog/BlogDetail'));
 const EnrollmentSuccess = lazy(() => import('@/pages/EnrollmentSuccess'));
 const EnrollmentPaymentStatus = lazy(() => import('@/pages/EnrollmentPaymentStatus'));
 const AboutUs = lazy(() => import('@/pages/AboutUs'));
@@ -29,6 +40,8 @@ const NotFound = lazy(() => import('@/pages/NotFound'));
 const AdminLogin = lazy(() => import('@/pages/admin/AdminLogin'));
 const AdminLayout = lazy(() => import('@/layouts/AdminLayout'));
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const AdminAnalytics = lazy(() => import('@/pages/admin/AdminAnalytics'));
+const AdminBatchEnrollment = lazy(() => import('@/pages/admin/AdminBatchEnrollment'));
 const AdminLeadsContact = lazy(() => import('@/pages/admin/AdminLeadsContact'));
 const AdminLeadsServices = lazy(() => import('@/pages/admin/AdminLeadsServices'));
 const AdminLeadsCourses = lazy(() => import('@/pages/admin/AdminLeadsCourses'));
@@ -40,6 +53,13 @@ const AdminCoursesList = lazy(() => import('@/pages/admin/AdminCoursesList'));
 const AdminCourseForm = lazy(() => import('@/pages/admin/AdminCourseForm'));
 const AdminWorkshopsList = lazy(() => import('@/pages/admin/AdminWorkshopsList'));
 const AdminWorkshopForm = lazy(() => import('@/pages/admin/AdminWorkshopForm'));
+const AdminBlogPostsList = lazy(() => import('@/pages/admin/AdminBlogPostsList'));
+const AdminCaseStudiesList = lazy(() => import('@/pages/admin/AdminCaseStudiesList'));
+const AdminCareersList = lazy(() => import('@/pages/admin/AdminCareersList'));
+const AdminCareerForm = lazy(() => import('@/pages/admin/AdminCareerForm'));
+const AdminInternshipApplications = lazy(() => import('@/pages/admin/AdminInternshipApplications'));
+const AdminCaseStudyForm = lazy(() => import('@/pages/admin/AdminCaseStudyForm'));
+const AdminBlogPostForm = lazy(() => import('@/pages/admin/AdminBlogPostForm'));
 const AdminClientReviewsList = lazy(() => import('@/pages/admin/AdminClientReviewsList'));
 const AdminClientReviewForm = lazy(() => import('@/pages/admin/AdminClientReviewForm'));
 const AdminPortfolioList = lazy(() => import('@/pages/admin/AdminPortfolioList'));
@@ -59,6 +79,8 @@ function RouteFallback() {
 function App() {
   return (
     <HelmetProvider>
+      {/* GA4 + GTM + Clarity + page views + global click tracking */}
+      <AnalyticsLoader />
       <Helmet>
         <title>{`${SITE.name} — ${SITE.tagline}`}</title>
         <meta
@@ -120,6 +142,20 @@ function App() {
                 <Route path="/course/:slug" element={<CourseDetail />} />
                 <Route path="/workshop" element={<Workshops />} />
                 <Route path="/workshop/:slug" element={<WorkshopDetail />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogDetail />} />
+                <Route path="/case-studies" element={<CaseStudies />} />
+                <Route path="/case-studies/:slug" element={<CaseStudyDetail />} />
+                <Route path="/faqs" element={<Faqs />} />
+                <Route path="/careers" element={<Careers />} />
+                <Route path="/application-payment-status" element={<ApplicationPaymentStatus />} />
+                {/* Purane Cashfree redirects /course/ prefix ke saath aate the - alias rakho */}
+                <Route path="/course/application-payment-status" element={<ApplicationPaymentStatus />} />
+                <Route path="/workshop/application-payment-status" element={<ApplicationPaymentStatus />} />
+                <Route path="/internship" element={<CareerApplyForm />} />
+                <Route path="/job" element={<CareerApplyForm />} />
+                <Route path="/careers/:slug" element={<CareerDetail />} />
+                <Route path="/sitemap" element={<Sitemap />} />
                 <Route path="/enrollment-success" element={<EnrollmentSuccess />} />
                 <Route path="/enrollment-payment-status" element={<EnrollmentPaymentStatus />} />
                 {/*
@@ -146,6 +182,9 @@ function App() {
               <Route element={<AdminProtectedRoute />}>
                 <Route element={<AdminLayout />}>
                   <Route path={ADMIN_ROUTES.dashboard} element={<AdminDashboard />} />
+                  <Route path={ADMIN_ROUTES.analytics} element={<AdminAnalytics />} />
+                  <Route path={ADMIN_ROUTES.courseParticipantsPath} element={<AdminBatchEnrollment />} />
+                  <Route path={ADMIN_ROUTES.workshopParticipantsPath} element={<AdminBatchEnrollment />} />
                   <Route path={ADMIN_ROUTES.leadsContact} element={<AdminLeadsContact />} />
                   <Route path={ADMIN_ROUTES.leadsServices} element={<AdminLeadsServices />} />
                   <Route path={ADMIN_ROUTES.leadsCourses} element={<AdminLeadsCourses />} />
@@ -160,6 +199,16 @@ function App() {
                   <Route path={ADMIN_ROUTES.workshops} element={<AdminWorkshopsList />} />
                   <Route path={ADMIN_ROUTES.workshopEditPath} element={<AdminWorkshopForm />} />
                   <Route path={ADMIN_ROUTES.workshopNew} element={<AdminWorkshopForm />} />
+                  <Route path={ADMIN_ROUTES.blogPosts} element={<AdminBlogPostsList />} />
+                  <Route path={ADMIN_ROUTES.blogPostEditPath} element={<AdminBlogPostForm />} />
+                  <Route path={ADMIN_ROUTES.blogPostNew} element={<AdminBlogPostForm />} />
+                  <Route path={ADMIN_ROUTES.caseStudies} element={<AdminCaseStudiesList />} />
+                  <Route path={ADMIN_ROUTES.caseStudyEditPath} element={<AdminCaseStudyForm />} />
+                  <Route path={ADMIN_ROUTES.caseStudyNew} element={<AdminCaseStudyForm />} />
+                  <Route path={ADMIN_ROUTES.careers} element={<AdminCareersList />} />
+                  <Route path={ADMIN_ROUTES.careerEditPath} element={<AdminCareerForm />} />
+                  <Route path={ADMIN_ROUTES.careerNew} element={<AdminCareerForm />} />
+                  <Route path={ADMIN_ROUTES.internshipApplications} element={<AdminInternshipApplications />} />
                   <Route path={ADMIN_ROUTES.clientReviews} element={<AdminClientReviewsList />} />
                   <Route path={ADMIN_ROUTES.clientReviewEditPath} element={<AdminClientReviewForm />} />
                   <Route path={ADMIN_ROUTES.clientReviewNew} element={<AdminClientReviewForm />} />

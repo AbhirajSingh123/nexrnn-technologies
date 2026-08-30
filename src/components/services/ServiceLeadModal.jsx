@@ -4,6 +4,7 @@ import { Loader2, Send } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { serviceLeadSchema } from '@/utils/validation';
 import { submitServiceLead } from '@/data/leadsRepo';
+import { trackLead } from '@/utils/analytics';
 import { useServiceLeadModal } from '@/contexts/ServiceLeadContext';
 import Modal from '@/components/shared/Modal';
 import ConsentCheckbox from '@/components/shared/ConsentCheckbox';
@@ -25,6 +26,7 @@ export default function ServiceLeadModal() {
   const onSubmit = async (data) => {
     try {
       await submitServiceLead({ ...data, service });
+      trackLead('service', service?.title || '');
       toast.success("Thanks! We've received your enquiry and will reach out shortly.");
       reset();
       closeServiceLead();

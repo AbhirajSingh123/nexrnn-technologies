@@ -1,20 +1,35 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
-import { NAV_LINKS, SITE } from '@/constants/siteData';
+import { Menu, X, Search } from 'lucide-react';
+import SearchOverlay from '@/components/shared/SearchOverlay';
+import { NAV_LINKS } from '@/constants/siteData';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import useLockBodyScroll from '@/hooks/useLockBodyScroll';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const navigate = useNavigate();
   const { settings } = useSiteSettings();
 
   const visibleLinks = NAV_LINKS.filter((link) => !link.settingsKey || settings[link.settingsKey]);
 
   useLockBodyScroll(mobileOpen);
+  useLockBodyScroll(mobileOpen);
+
+  // Ctrl+K / '/' se search khulo
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey && e.key === 'k') || (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName))) {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -70,6 +85,16 @@ export default function Navbar() {
         </ul>
 
         <div className="hidden lg:block">
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="w-9 h-9 flex items-center justify-center border-2 border-secondary/20 hover:border-primary hover:text-primary text-secondary transition-colors mr-3"
+            title="Search (Ctrl+K)"
+            aria-label="Search"
+          >
+            <Search size={16} />
+          </button>
+        </div>
+        <div className="hidden lg:block">
           <button onClick={() => navigate('/Contect-us')} className="btn-primary">
             Get Started
           </button>
@@ -112,7 +137,16 @@ export default function Navbar() {
                 </li>
               ))}
             </ul>
-            <div className="container-section pb-6">
+            <div className="container-section pb-6 space-y-2">
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  setSearchOpen(true);
+                }}
+                className="btn-secondary w-full flex items-center justify-center gap-2"
+              >
+                <Search size={15} /> Search Services, Courses, Workshops
+              </button>
               <button
                 onClick={() => {
                   setMobileOpen(false);
@@ -126,6 +160,9 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Website Search */}
+      {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
     </header>
   );
 }

@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock3, ArrowRight, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
 import { formatINR } from '@/utils/format';
+import { isRegistrationClosed } from '@/utils/workshopUtils';
 import { useWorkshopEnrollModal } from '@/contexts/WorkshopEnrollContext';
 import Reveal from '@/components/shared/Reveal';
 
@@ -12,6 +13,9 @@ function formatDate(iso) {
 
 export default function WorkshopCard({ workshop, index = 0 }) {
   const { openWorkshopEnroll } = useWorkshopEnrollModal();
+
+  // Deadline cross -> workshop completed, registration band
+  const regClosed = isRegistrationClosed(workshop);
 
   return (
     <Reveal delay={(index % 3) * 0.08}>
@@ -31,10 +35,16 @@ export default function WorkshopCard({ workshop, index = 0 }) {
             <span className="flex items-center gap-1.5 text-secondary/70">
               <Calendar size={13} className="text-primary shrink-0" /> {formatDate(workshop.workshopDatetime)}
             </span>
-            {workshop.registrationDeadline && (
-              <span className="flex items-center gap-1.5 text-secondary/70">
-                <Clock3 size={13} className="text-primary shrink-0" /> Register by {formatDate(workshop.registrationDeadline)}
+            {regClosed ? (
+              <span className="flex items-center gap-1.5 font-bold text-red-600">
+                <Clock3 size={13} className="shrink-0" /> Workshop Completed
               </span>
+            ) : (
+              workshop.registrationDeadline && (
+                <span className="flex items-center gap-1.5 text-secondary/70">
+                  <Clock3 size={13} className="text-primary shrink-0" /> Register by {formatDate(workshop.registrationDeadline)}
+                </span>
+              )
             )}
           </div>
 
@@ -66,9 +76,15 @@ export default function WorkshopCard({ workshop, index = 0 }) {
             <Link to={`/workshop/${workshop.slug}`} className="btn-secondary flex-1 !px-4 !py-2.5 text-xs">
               View Workshop
             </Link>
-            <button onClick={() => openWorkshopEnroll(workshop)} className="btn-primary flex-1 !px-4 !py-2.5 text-xs">
-              Register Now <ArrowRight size={13} />
-            </button>
+            {regClosed ? (
+              <span className="btn-primary flex-1 !px-4 !py-2.5 text-xs opacity-50 cursor-not-allowed text-center select-none pointer-events-none">
+                Completed
+              </span>
+            ) : (
+              <button onClick={() => openWorkshopEnroll(workshop)} className="btn-primary flex-1 !px-4 !py-2.5 text-xs">
+                Register Now <ArrowRight size={13} />
+              </button>
+            )}
           </div>
         </div>
       </motion.div>

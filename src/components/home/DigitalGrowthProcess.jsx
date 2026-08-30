@@ -1,6 +1,5 @@
 import { PROCESS_STEPS } from '@/constants/siteData';
 import Reveal from '@/components/shared/Reveal';
-import SectionHeading from '@/components/shared/SectionHeading';
 
 export default function DigitalGrowthProcess() {
   return (

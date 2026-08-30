@@ -49,6 +49,8 @@ export async function submitCourseEnrollment({ name, phone, email, college, cons
     course_title: course.title,
     price: course.price || '',
     reference_id: referenceId,
+    // Batch ID: course ka batch automatically is enrollment par lag jata hai
+    ...(course.batchId ? { batch_id: course.batchId } : {}),
     ...(course.isFree ? { payment_status: 'free' } : {}),
   };
   const { error } = await supabase.from('leads_course').insert(record);
@@ -76,6 +78,8 @@ export async function submitWorkshopEnrollment({ name, phone, email, college, co
     workshop_title: workshop.title,
     price: workshop.price || '',
     reference_id: referenceId,
+    // Batch ID: workshop ka batch automatically is enrollment par lag jata hai
+    ...(workshop.batchId ? { batch_id: workshop.batchId } : {}),
     ...(workshop.isFree ? { payment_status: 'free' } : {}),
   };
   const { error } = await supabase.from('leads_workshop').insert(record);

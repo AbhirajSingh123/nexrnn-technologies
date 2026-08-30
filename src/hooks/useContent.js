@@ -18,7 +18,7 @@ function useAsyncList(fetchFn) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [fetchFn]);
 
   return { items, loading };
 }

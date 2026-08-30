@@ -1,4 +1,5 @@
-import { Phone, Mail } from 'lucide-react';
+import { Phone, Mail, CalendarDays } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { SITE } from '@/constants/siteData';
 import Reveal from '@/components/shared/Reveal';
 import SectionHeading from '@/components/shared/SectionHeading';
@@ -43,6 +44,21 @@ export default function CTALeadSection() {
             <LeadForm />
           </Reveal>
         </div>
+
+        {/* Explore Workshops - main page bottom band */}
+        <Reveal delay={0.15}>
+          <div className="max-w-4xl mx-auto mt-10 card-base bg-secondary text-white p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-5 border-b-4 border-primary">
+            <div className="text-center sm:text-left">
+              <h3 className="text-xl sm:text-2xl mb-1">Want hands-on learning?</h3>
+              <p className="text-sm text-white/70 normal-case">
+                Join our live workshops — practical skills with direct mentor interaction.
+              </p>
+            </div>
+            <Link to="/workshop" className="btn-primary !py-3 !px-7 inline-flex items-center gap-2 shrink-0">
+              <CalendarDays size={17} /> Explore Workshops
+            </Link>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
