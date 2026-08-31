@@ -152,14 +152,19 @@ export default function CourseDetail() {
                   {course.isDemoPrice && <p className="text-[11px] text-muted normal-case mb-5">Demo pricing — confirm with our team</p>}
                 </>
               )}
-              <div className="flex items-center gap-2 mb-2.5">
-                <Award size={16} className="text-primary shrink-0" />
-                <span className="text-sm text-secondary normal-case">Certificate on completion</span>
-              </div>
-              <div className="flex items-center gap-2 mb-6">
-                <Users2 size={16} className="text-primary shrink-0" />
-                <span className="text-sm text-secondary normal-case">Mentorship included</span>
-              </div>
+              {course.certificate && (
+                <div className="flex items-center gap-2 mb-2.5">
+                  <Award size={16} className="text-primary shrink-0" />
+                  <span className="text-sm text-secondary normal-case">Certificate on completion</span>
+                </div>
+              )}
+              {course.mentorship && (
+                <div className="flex items-center gap-2 mb-6">
+                  <Users2 size={16} className="text-primary shrink-0" />
+                  <span className="text-sm text-secondary normal-case">Mentorship included</span>
+                </div>
+              )}
+              {!course.certificate && !course.mentorship && <div className="mb-6" />}
               <button onClick={() => openCourseEnroll(course)} className="btn-primary w-full">
                 Enroll Now <ArrowRight size={16} />
               </button>

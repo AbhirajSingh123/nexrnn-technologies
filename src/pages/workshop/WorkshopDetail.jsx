@@ -3,10 +3,11 @@ import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Calendar, Clock3, Award, CheckCircle2, ChevronDown, ArrowRight, ArrowLeft, PlayCircle, Image as ImageIcon, User,
+  Calendar, Clock3, Award, ChevronDown, ArrowRight, ArrowLeft, PlayCircle, Image as ImageIcon, User,
 } from 'lucide-react';
 import { useWorkshop } from '@/hooks/useCatalog';
 import { useWorkshopEnrollModal } from '@/contexts/WorkshopEnrollContext';
+import { isRegistrationClosed } from '@/utils/workshopUtils';
 import { formatINR } from '@/utils/format';
 import { SITE } from '@/constants/siteData';
 import Reveal from '@/components/shared/Reveal';
@@ -64,6 +65,7 @@ export default function WorkshopDetail() {
   const { slug } = useParams();
   const { workshop, loading } = useWorkshop(slug);
   const { openWorkshopEnroll } = useWorkshopEnrollModal();
+  const regClosed = workshop ? isRegistrationClosed(workshop) : false;
   const [openFaq, setOpenFaq] = useState(0);
 
   if (loading) return <LoadingSpinner className="min-h-[60vh]" />;
@@ -116,9 +118,13 @@ export default function WorkshopDetail() {
               <h1 className="text-secondary text-4xl sm:text-5xl leading-[1.05] mb-5">{workshop.title}</h1>
               <p className="text-muted text-base leading-relaxed normal-case mb-7">{workshop.shortDescription}</p>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <InfoChip icon={Calendar} label="Date &amp; Time" value={formatDate(workshop.workshopDatetime)} />
-                <InfoChip icon={Clock3} label="Register By" value={formatDate(workshop.registrationDeadline)} />
+                {regClosed ? (
+                  <InfoChip icon={Clock3} label="Status" value="Workshop Completed" />
+                ) : (
+                  <InfoChip icon={Clock3} label="Register By" value={formatDate(workshop.registrationDeadline)} />
+                )}
               </div>
             </div>
 
@@ -142,9 +148,23 @@ export default function WorkshopDetail() {
                   {workshop.isDemoPrice && <p className="text-[11px] text-muted normal-case mb-5">Demo pricing — confirm with our team</p>}
                 </>
               )}
-              <button onClick={() => openWorkshopEnroll(workshop)} className="btn-primary w-full">
-                Register Now <ArrowRight size={16} />
-              </button>
+              {regClosed ? (
+                <>
+                  <button
+                    disabled
+                    className="btn-primary w-full opacity-50 cursor-not-allowed select-none"
+                  >
+                    Workshop Completed
+                  </button>
+                  <p className="text-[11px] text-muted normal-case text-center mt-2">
+                    The registration deadline has passed. New registrations are closed.
+                  </p>
+                </>
+              ) : (
+                <button onClick={() => openWorkshopEnroll(workshop)} className="btn-primary w-full">
+                  Register Now <ArrowRight size={16} />
+                </button>
+              )}
             </Reveal>
           </div>
         </div>

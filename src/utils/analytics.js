@@ -1,0 +1,113 @@
+/**
+ * ============================================================
+ * CENTRAL TRACKING HELPERS (simple syntax)
+ * ============================================================
+ *
+ * trackEvent() har event ko 3 jagah bhejta hai:
+ *   1. GTM dataLayer  (agar GTM setup hai)
+ *   2. GA4 gtag       (agar GA4 setup hai)
+ *   3. Supabase analytics_events table (Admin panel dashboard ke liye)
+ *
+ * Rules:
+ * - Kabhi error throw nahi karta (tracking fail ho to site chalti rahe)
+ * - fire-and-forget: UI wait nahi karta
+ */
+import { supabase, isSupabaseConfigured } from '@/services/supabaseClient';
+
+export function trackEvent(name, params = {}) {
+  try {
+    // 1. GTM dataLayer
+    if (typeof window !== 'undefined') {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: name, ...params });
+
+      // 2. GA4 gtag
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', name, params);
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+
+  logToSupabase(name, params);
+}
+
+/**
+ * Unique visitor id - browser mein save rehta hai (localStorage).
+ * Ek hi visitor ko baar-baar count na karna iske liye.
+ */
+function getVisitorId() {
+  try {
+    let id = localStorage.getItem('nx_vid');
+    if (!id) {
+      id = typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : 'v-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem('nx_vid', id);
+    }
+    return id;
+  } catch {
+    return '';
+  }
+}
+
+/** Admin dashboard ke liye apne Supabase mein event save karo */
+async function logToSupabase(name, params) {
+  if (!isSupabaseConfigured) return;
+  try {
+    await supabase.from('analytics_events').insert({
+      event_name: name,
+      path: params.page_path || (typeof window !== 'undefined' ? window.location.pathname : ''),
+      label: params.label || '',
+      value: typeof params.value === 'number' ? params.value : null,
+      visitor_id: getVisitorId(),
+      meta: params,
+    });
+  } catch {
+    /* tracking kabhi site na roke */
+  }
+}
+
+/* ---------------- Ready-made helpers ---------------- */
+
+// Har page change par (AnalyticsLoader khud call karta hai)
+export const trackPageView = (path, title = '') =>
+  trackEvent('page_view', { page_path: path, page_title: title, label: path });
+
+// WhatsApp / Phone clicks (AnalyticsLoader global click se pakadta hai)
+export const trackWhatsAppClick = (label = '') => trackEvent('whatsapp_click', { label });
+export const trackPhoneClick = (label = '') => trackEvent('phone_click', { label });
+
+// Form/Lead tracking - formType: 'contact' | 'service' | 'course' | 'workshop'
+export const trackLead = (formType, label = '', extra = {}) =>
+  trackEvent('generate_lead', { form_type: formType, label, ...extra });
+
+// Checkout steps (GA4 standard ecommerce events)
+export const trackBeginCheckout = (itemTitle, value, leadType = 'course') =>
+  trackEvent('begin_checkout', {
+    currency: 'INR',
+    value: Number(value) || 0,
+    label: itemTitle,
+    lead_type: leadType,
+  });
+
+// Payment success par
+export const trackPurchase = (itemTitle, value, leadType = 'course') =>
+  trackEvent('purchase', {
+    currency: 'INR',
+    value: Number(value) || 0,
+    label: itemTitle,
+    lead_type: leadType,
+  });
+
+// Free course/workshop enrollment
+export const trackEnrollmentSuccess = (itemTitle, leadType = 'course') =>
+  trackEvent('enrollment_success', { label: itemTitle, lead_type: leadType });
+
+// Blog events
+export const trackBlogRead = (postTitle, category = '') =>
+  trackEvent('blog_read', { label: postTitle, category });
+
+export const trackCtaClick = (buttonText, destination = '') =>
+  trackEvent('cta_click', { label: buttonText, destination });

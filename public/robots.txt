@@ -1,4 +1,15 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://nexrnntechnology.in/sitemap.xml
+# Admin panel ko Google se chhupa do
+Disallow: /nexrnn/
+
+# Payment return pages (internal transactional) — index ki zaroorat nahi
+Disallow: /application-payment-status
+Disallow: /course/application-payment-status
+Disallow: /workshop/application-payment-status
+Disallow: /enrollment-payment-status
+Disallow: /course/enrollment-payment-status
+Disallow: /workshop/enrollment-payment-status
+
+Sitemap: https://www.nexrnntechnologies.in/sitemap.xml

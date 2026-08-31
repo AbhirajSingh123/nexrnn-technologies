@@ -13,4 +13,8 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    // dev/preview tunneling ke liye (sirf dev server par apply hota hai)
+    allowedHosts: true,
+  },
 })

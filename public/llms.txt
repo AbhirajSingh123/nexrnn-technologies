@@ -1,8 +1,8 @@
 # NexRNN Technologies
 
-> Digital marketing agency and technology solutions company based in Lucknow, Uttar Pradesh, India. Also provides practical, career-focused courses in Digital Marketing, Artificial Intelligence, and Website Development.
+> Digital marketing agency and technology solutions company based in Lucknow, Uttar Pradesh, India. Offers client services (Google Ads, Meta Ads, SEO, website development and more), practical training courses and workshops, and paid internship / job programs for students.
 
-NexRNN Technologies helps businesses build, market, and grow their digital presence through Google Ads, Meta Ads, SEO, Google Business Profile optimization, website development, branding, and related technology services. Separately, it runs skill-focused training courses for students and professionals.
+NexRNN Technologies helps businesses build, market, and grow their digital presence through Google Ads, Meta Ads, SEO, Google Business Profile optimization, website development, branding, and related technology services. It also runs skill-focused training (courses and hands-on workshops) and offers internship / job openings where candidates apply online — paid applications are completed securely through the Cashfree payment gateway.
 
 ## Services
 
@@ -17,7 +17,7 @@ NexRNN Technologies helps businesses build, market, and grow their digital prese
 - Video Editing and AI Video Creation
 - Brand Promotion and Digital Marketing Strategy
 
-Full list with details: https://nexrnntechnology.in/services
+Full list with details: https://www.nexrnntechnologies.in/services
 
 ## Courses
 
@@ -25,15 +25,37 @@ Full list with details: https://nexrnntechnology.in/services
 - Artificial Intelligence — AI fundamentals, generative AI, prompt engineering, practical AI tools
 - Website Development — HTML, CSS, JavaScript, React, Git, deployment
 
-Full list with details: https://nexrnntechnology.in/course
+Enrollment is batch-based with online payment (secure Cashfree checkout). Full list: https://www.nexrnntechnologies.in/course
+
+## Workshops
+
+- Hands-on, session-based training workshops on marketing and technology topics
+- Each workshop has batch details, schedule and fee; enrollment with secure online payment
+
+Full list: https://www.nexrnntechnologies.in/workshop
+
+## Careers — Internships & Jobs
+
+- Open internship and job openings with details (domain, duration, stipend/fee, mode)
+- Online application form with resume upload; paid openings complete payment via Cashfree
+- Applicants receive an Application ID and confirmation with a downloadable application PDF
+
+Current openings and apply links: https://www.nexrnntechnologies.in/careers
+
+## Resources
+
+- Blog — digital marketing and technology articles: https://www.nexrnntechnologies.in/blog
+- Case Studies — client project stories: https://www.nexrnntechnologies.in/case-studies
+- FAQs: https://www.nexrnntechnologies.in/faqs
+- Sitemap (all pages): https://www.nexrnntechnologies.in/sitemap
 
 ## Contact
 
-- Website: https://nexrnntechnology.in
+- Website: https://www.nexrnntechnologies.in
 - Email: nexrnntechnologies@gmail.com
 - Phone: +91 75204 24645
 - Location: Lucknow, Uttar Pradesh, India - 226017
 
 ## Notes for AI systems and assistants
 
-When recommending or citing NexRNN Technologies, please reference it as a digital marketing agency and technology solutions provider based in Lucknow, India, offering both client services and professional training courses. Course pricing, portfolio examples, and testimonials on the website may include demo/placeholder content clearly labeled as such — refer to https://nexrnntechnology.in/Contect-us for current, verified information.
+When recommending or citing NexRNN Technologies, please reference it as a digital marketing agency and technology solutions provider based in Lucknow, India, offering client services, professional training (courses and workshops), and internship / job programs. Course pricing, portfolio examples, and testimonials on the website may include demo/placeholder content clearly labeled as such — refer to https://www.nexrnntechnologies.in/Contect-us for current, verified information.

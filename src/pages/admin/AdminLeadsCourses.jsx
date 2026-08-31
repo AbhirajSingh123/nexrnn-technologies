@@ -8,6 +8,10 @@ import AdminLoadMore from '@/components/admin/AdminLoadMore';
 import { useLoadMore } from '@/hooks/useLoadMore';
 import AdminEnrollmentModal from '@/components/admin/AdminEnrollmentModal';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ExportButtons from '@/components/admin/ExportButtons';
+import { downloadEnrollmentCertificatePDF } from '@/data/certificateRepo';
+import { buildEnrollmentMailto } from '@/utils/adminMailto';
+
 
 const ENROLLMENT_STATUS_LABELS = {
   pending: 'Pending',
@@ -28,6 +32,7 @@ const ENROLLMENT_STATUS_STYLES = {
 export default function AdminLeadsCourses() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [certBusy, setCertBusy] = useState(false);
   const [search, setSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -82,6 +87,23 @@ export default function AdminLeadsCourses() {
     `${search}|${dateFrom}|${dateTo}|${courseFilter}|${statusFilter}`
   );
 
+  const handleCertDownload = async (r) => {
+    setCertBusy(true);
+    try {
+      await downloadEnrollmentCertificatePDF({
+        name: r.name,
+        referenceId: r.reference_id,
+        batchId: r.batch_id,
+        itemTitle: r.course_title,
+        type: 'course',
+      });
+    } catch (err) {
+      toast.error(err.message || 'Certificate download failed.');
+    } finally {
+      setCertBusy(false);
+    }
+  };
+
   const columns = [
     { key: 'created_at', label: 'Date', render: (r) => formatDateTimeWithDay(r.created_at) },
     { key: 'name', label: 'Name' },
@@ -97,6 +119,33 @@ export default function AdminLeadsCourses() {
         <span className={`text-xs font-bold uppercase tracking-wide px-2.5 py-1.5 border-2 whitespace-nowrap ${ENROLLMENT_STATUS_STYLES[r.enrollment_status ?? 'pending']}`}>
           {ENROLLMENT_STATUS_LABELS[r.enrollment_status ?? 'pending']}
         </span>
+      ),
+    },
+    {
+      key: 'certificate',
+      label: 'Certificate',
+      render: (r) => (
+        <button
+          onClick={() => handleCertDownload(r)}
+          disabled={certBusy}
+          className="text-primary font-semibold hover:underline text-xs"
+          title="Download completion certificate"
+        >
+          {certBusy ? '…' : 'Download'}
+        </button>
+      ),
+    },
+    {
+      key: 'mail',
+      label: 'Mail',
+      render: (r) => (
+        <a
+          href={buildEnrollmentMailto({ name: r.name, email: r.email, batchId: r.batch_id, referenceId: r.reference_id, itemTitle: r.course_title, type: 'course' })}
+          className="text-primary font-semibold hover:underline text-xs"
+          title={`Email ${r.email}`}
+        >
+          Send
+        </a>
       ),
     },
     {
@@ -156,6 +205,14 @@ export default function AdminLeadsCourses() {
           </>
         }
       />
+
+      {/* Download data: PDF / Excel / CSV */}
+
+      <div className="mb-4">
+
+        <ExportButtons rows={rows} columns={columns} filename="course-enrollments" title="Course Enrollments" excludeKeys={['certificate', 'mail', 'manage']} />
+
+      </div>
 
       {loading ? (
         <LoadingSpinner />

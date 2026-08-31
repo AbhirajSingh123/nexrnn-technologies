@@ -4,6 +4,7 @@ import { WORKSHOPS as STATIC_WORKSHOPS } from './workshops';
 function mapRow(row) {
   return {
     slug: row.slug,
+    batchId: row.batch_id,
     bannerUrl: row.banner_url,
     title: row.title,
     shortDescription: row.short_description,

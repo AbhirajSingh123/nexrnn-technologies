@@ -4,6 +4,7 @@ import { ACTIVE_COURSES as STATIC_ACTIVE_COURSES } from './courses';
 function mapRow(row) {
   return {
     slug: row.slug,
+    batchId: row.batch_id,
     icon: row.icon,
     title: row.title,
     shortDescription: row.short_description,

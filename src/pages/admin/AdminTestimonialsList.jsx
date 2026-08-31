@@ -1,16 +1,19 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Plus, Star } from 'lucide-react';
+import { Plus, Star, Search } from 'lucide-react';
 import { supabase } from '@/services/supabaseClient';
 import { ADMIN_ROUTES } from '@/constants/adminRoutes';
 import AdminTable from '@/components/admin/AdminTable';
 import AdminLoadMore from '@/components/admin/AdminLoadMore';
 import { useLoadMore } from '@/hooks/useLoadMore';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ExportButtons from '@/components/admin/ExportButtons';
+import { useAdminSearch } from '@/hooks/useAdminSearch';
 
 export default function AdminTestimonialsList() {
   const [rows, setRows] = useState([]);
+  const { search, setSearch, filtered } = useAdminSearch(rows);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -62,7 +65,7 @@ export default function AdminTestimonialsList() {
     },
   ];
 
-  const { visibleItems, hasMore, loadMore, total, shown } = useLoadMore(rows, rows.length);
+  const { visibleItems, hasMore, loadMore, total, shown } = useLoadMore(filtered, search + "|" + filtered.length);
 
   return (
     <div>
@@ -73,6 +76,17 @@ export default function AdminTestimonialsList() {
         </Link>
       </div>
       <p className="text-sm text-muted normal-case mb-6">Full CRUD — changes here reflect live on the website.</p>
+      {/* Search filter */}
+      <div className="relative w-full sm:w-72 mb-4">
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search client, company…"
+          className="w-full border-2 border-secondary/20 focus:border-primary pl-9 pr-3 py-2 text-sm outline-none transition-colors bg-white" />
+      </div>
+
+      {/* Download data: PDF / Excel / CSV */}
+      <div className="mb-4">
+        <ExportButtons rows={filtered} columns={columns} filename="testimonials" title="Testimonials" />
+      </div>
       {loading ? (
         <LoadingSpinner />
       ) : (

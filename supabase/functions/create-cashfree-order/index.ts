@@ -33,9 +33,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { leadId, leadType, amount, customerName, customerEmail, customerPhone, itemTitle } = await req.json();
+    const { leadId, leadType, amount, customerName, customerEmail, customerPhone, itemTitle, applicationId } = await req.json();
 
-    if (!leadId || !leadType || !['course', 'workshop'].includes(leadType) || !amount || Number(amount) <= 0 || !customerEmail || !customerPhone) {
+    // Career application flow: leadType 'career' + applicationId (application pehle create hoti hai)
+
+    const isCareer = leadType === 'career' || Boolean(applicationId);
+    if (!leadId || !leadType || !['course', 'workshop', 'career'].includes(leadType) || !amount || Number(amount) <= 0 || !customerEmail || !customerPhone) {
       return new Response(JSON.stringify({ error: 'Missing or invalid required fields.' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -48,7 +51,7 @@ Deno.serve(async (req) => {
     );
 
     const orderId = `ord_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    const siteUrl = Deno.env.get('SITE_URL') ?? 'https://nexrnntechnology.in';
+    const siteUrl = Deno.env.get('SITE_URL') ?? 'https://www.nexrnntechnologies.in';
     const functionsBase = `${Deno.env.get('SUPABASE_URL')}/functions/v1`;
 
     const cfResponse = await fetch(`${getCashfreeBaseUrl()}/orders`, {
@@ -65,7 +68,9 @@ Deno.serve(async (req) => {
           customer_phone: customerPhone,
         },
         order_meta: {
-          return_url: `${siteUrl}/enrollment-payment-status?order_id={order_id}`,
+          return_url: isCareer
+            ? `${siteUrl}/application-payment-status?order_id={order_id}`
+            : `${siteUrl}/enrollment-payment-status?order_id={order_id}`,
           notify_url: `${functionsBase}/cashfree-webhook`,
         },
         order_note: itemTitle || '',
@@ -89,7 +94,10 @@ Deno.serve(async (req) => {
       raw_response: cfData,
       lead_type: leadType,
     };
-    if (leadType === 'course') {
+    if (isCareer) {
+      paymentRecord.application_id = applicationId || leadId;
+      paymentRecord.item_title = itemTitle || '';
+    } else if (leadType === 'course') {
       paymentRecord.lead_course_id = leadId;
     } else {
       paymentRecord.lead_workshop_id = leadId;
@@ -97,8 +105,10 @@ Deno.serve(async (req) => {
 
     await supabase.from('payments').insert(paymentRecord);
 
-    const leadTable = leadType === 'course' ? 'leads_course' : 'leads_workshop';
-    await supabase.from(leadTable).update({ cashfree_order_id: orderId }).eq('id', leadId);
+    if (!isCareer) {
+      const leadTable = leadType === 'course' ? 'leads_course' : 'leads_workshop';
+      await supabase.from(leadTable).update({ cashfree_order_id: orderId }).eq('id', leadId);
+    }
 
     return new Response(
       JSON.stringify({ orderId, paymentSessionId: cfData.payment_session_id }),

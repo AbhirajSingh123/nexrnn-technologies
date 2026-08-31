@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { ArrowLeft, Loader2, Plus, Trash2, UploadCloud } from 'lucide-react';
 import { supabase } from '@/services/supabaseClient';
 import { ADMIN_ROUTES } from '@/constants/adminRoutes';
+import { getWorkshopStatus } from '@/utils/workshopUtils';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
 const inputClass = 'w-full border-2 border-secondary/20 focus:border-primary px-4 py-2.5 text-sm outline-none transition-colors bg-white';
@@ -131,6 +132,22 @@ export default function AdminWorkshopForm() {
       </Link>
       <h1 className="font-heading text-3xl text-secondary mb-6">{isNew ? 'New Workshop' : 'Edit Workshop'}</h1>
 
+      {/* Auto Workshop Status (registration deadline se calculate hota hai) */}
+      {form.registration_deadline && (
+        <div className="card-base bg-accent p-4 mb-5 flex items-center gap-3">
+          <span className="text-xs font-bold uppercase tracking-wide text-secondary">Workshop Status:</span>
+          {getWorkshopStatus({ registrationDeadline: form.registration_deadline ? new Date(form.registration_deadline).toISOString() : null }) === 'completed' ? (
+            <span className="text-[11px] font-bold uppercase text-red-700 bg-red-100 border border-red-300 px-2 py-0.5">
+              Completed (registration closed)
+            </span>
+          ) : (
+            <span className="text-[11px] font-bold uppercase text-green-700 bg-green-100 border border-green-300 px-2 py-0.5">
+              Registration Open
+            </span>
+          )}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="card-base bg-white p-7 max-w-2xl space-y-5">
         <div className="grid sm:grid-cols-2 gap-5">
           <div>
@@ -166,8 +183,12 @@ export default function AdminWorkshopForm() {
             <input type="datetime-local" className={inputClass} value={form.workshop_datetime} onChange={handleChange('workshop_datetime')} />
           </div>
           <div>
-            <label className={labelClass}>Registration Deadline</label>
+            <label className={labelClass}>Registration Last Date &amp; Time</label>
             <input type="datetime-local" className={inputClass} value={form.registration_deadline} onChange={handleChange('registration_deadline')} />
+            <p className="text-[11px] text-muted mt-1.5">
+              Once the deadline passes, the workshop is automatically marked as{' '}
+              <b>Completed</b> on the website and new registrations are disabled.
+            </p>
           </div>
         </div>
 

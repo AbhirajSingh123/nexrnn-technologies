@@ -66,6 +66,9 @@ export default function Hero() {
             <Link to="/course" className="btn-outline-light min-w-[210px]">
               {HERO.ctaTertiary}
             </Link>
+            <Link to="/workshop" className="btn-outline-light min-w-[210px]">
+              Explore Workshops <ArrowRight size={16} />
+            </Link>
           </motion.div>
         </div>
       </div>
