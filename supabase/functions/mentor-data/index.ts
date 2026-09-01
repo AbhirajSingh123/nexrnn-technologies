@@ -240,8 +240,9 @@ Deno.serve(async (req) => {
         todayEarnings: Math.round(todayEarn),
         monthEarnings: Math.round(monthEarn),
         totalStudents: courseLeads.length + workshopLeads.length,
-        assignedCourses: courseIds.length,
-        assignedWorkshops: workshopIds.length,
+        // Type-guarded counts (workshop-only mentor ko course count 0 hi dikhega)
+        assignedCourses: assignedCourseRows.length,
+        assignedWorkshops: assignedWorkshopRows.length,
       });
     }
 
@@ -362,6 +363,9 @@ Deno.serve(async (req) => {
     // ================= ITEM CREATE (mentor naya program banaye) =================
     if (action === 'item_create') {
       const isWorkshop = body.kind === 'workshop';
+      // Mentor type guard: workshop-only sirf workshop, course-only sirf course bana sakta hai
+      if (isWorkshop && !allowWorkshops) return json({ error: 'Your mentor type does not allow creating workshops.' }, 403);
+      if (!isWorkshop && !allowCourses) return json({ error: 'Your mentor type does not allow creating courses.' }, 403);
       const f = body.fields || {};
       const title = String(f.title || '').trim();
       if (!title) return json({ error: 'Title is required.' }, 400);
@@ -496,14 +500,13 @@ Deno.serve(async (req) => {
 
     // ================= PROFILE =================
     if (action === 'profile') {
-      const { data: ca2 } = await supabase
-        .from('mentor_course_assignments')
-        .select('course_id, courses(title, batch_id)')
-        .eq('mentor_uuid', mentorUuid);
-      const { data: wa2 } = await supabase
-        .from('mentor_workshop_assignments')
-        .select('workshop_id, workshops(title, batch_id)')
-        .eq('mentor_uuid', mentorUuid);
+      // Type-guarded: galat kind ki assignment list me na jaye
+      const { data: ca2 } = allowCourses
+        ? await supabase.from('mentor_course_assignments').select('course_id, courses(title, batch_id)').eq('mentor_uuid', mentorUuid)
+        : { data: [] };
+      const { data: wa2 } = allowWorkshops
+        ? await supabase.from('mentor_workshop_assignments').select('workshop_id, workshops(title, batch_id)').eq('mentor_uuid', mentorUuid)
+        : { data: [] };
       return json({
         mentor: {
           mentorId: mentor.mentor_id,

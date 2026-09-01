@@ -441,6 +441,11 @@ This README is updated **every time a task/feature is completed** — newest wor
 - ✅ **Sitemap cleaned for launch**: `/internship` and `/job` removed from sitemap.xml and the on-site
   sitemap page; `<lastmod>` added; admin/mentor panels stay hidden (`Disallow: /nexrnn/` in robots.txt
   + `noindex, nofollow` on both layouts)
+- ✅ **Mentor type enforcement hardened (round 2)**: the edge function now BLOCKS `item_create`
+  for the wrong kind (workshop-only mentors cannot create courses — server-side 403), dashboard/profile
+  counts and assigned lists use type-guarded data, Manage pages redirect on direct-URL access, the Add
+  button hides for the wrong kind, and the layout refreshes the session profile on load so the nav
+  updates without re-login
 - ✅ **Mentor type enforcement everywhere**: workshop-only mentors don't see Course Registrations /
   Manage Courses (and vice versa); non-applicable commission is hidden, forced to 0, their Assign
   Programs modal blocks the other kind, per-item mentor dropdowns only list matching mentors, and the

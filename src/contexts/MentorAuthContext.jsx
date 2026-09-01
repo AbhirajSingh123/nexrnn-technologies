@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import {
   getMentorToken, getSavedMentorProfile, mentorLogout as clearSession, loginMentor,
+  refreshMentorProfile,
   MENTOR_SESSION_CLEARED,
 } from '@/data/mentorAuth';
 import { MENTOR_ROUTES } from '@/constants/mentorRoutes';
@@ -31,8 +32,14 @@ export function MentorAuthProvider({ children }) {
     setMentor(null);
   }, []);
 
+  // Server se fresh profile laao (type/gender admin badle to session bhi update ho)
+  const refreshProfile = useCallback(async () => {
+    const merged = await refreshMentorProfile();
+    if (merged) setMentor(merged);
+  }, []);
+
   return (
-    <MentorAuthContext.Provider value={{ mentor, loading, login, logout }}>
+    <MentorAuthContext.Provider value={{ mentor, loading, login, logout, refreshProfile }}>
       {children}
     </MentorAuthContext.Provider>
   );

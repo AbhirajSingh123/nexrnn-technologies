@@ -9,7 +9,8 @@ import { Loader2, Plus, Pencil, X, Info } from 'lucide-react';
 import useMentorData, { inr } from '@/hooks/useMentorData';
 import { mentorData } from '@/data/mentorAuth';
 import { MENTOR_ROUTES } from '@/constants/mentorRoutes';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useMentorAuth } from '@/contexts/MentorAuthContext';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import AdminFilterBar from '@/components/admin/AdminFilterBar';
 import AdminTable from '@/components/admin/AdminTable';
@@ -24,6 +25,10 @@ export default function MentorItems({ kind = 'course' }) {
   const isWorkshop = kind === 'workshop';
   const title = isWorkshop ? 'Manage Workshops' : 'Manage Courses';
   const navigate = useNavigate();
+  const { mentor } = useMentorAuth();
+  // Type guard: workshop-only mentor /courses khol bhi le to seedha dashboard par bhejo
+  const mentorKind = mentor?.mentorType || 'both';
+  const kindAllowed = mentorKind === 'both' || mentorKind === kind;
   const { data, error, loading } = useMentorData('items', { kind });
 
   const [search, setSearch] = useState('');
@@ -37,6 +42,13 @@ export default function MentorItems({ kind = 'course' }) {
   }), [rows, search]);
 
   const { visibleItems, hasMore, loadMore, total, shown } = useLoadMore(filtered, search);
+
+  // Direct URL access band: is kind ka access hi nahi to dashboard par bhejo
+  if (!kindAllowed) {
+    return (
+      <Navigate to={MENTOR_ROUTES.dashboard} replace />
+    );
+  }
 
   const columns = [
     { key: 'title', label: isWorkshop ? 'Workshop' : 'Course', render: (r) => <span className="font-semibold text-secondary">{r.title || '—'}</span> },
@@ -72,9 +84,11 @@ export default function MentorItems({ kind = 'course' }) {
       <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <div className="flex items-center justify-between gap-4 mb-1">
         <h1 className="font-heading text-3xl text-secondary">{title}</h1>
-        <button onClick={openAdd} className="btn-primary inline-flex items-center gap-2 shrink-0">
-          <Plus size={15} /> Add {isWorkshop ? 'Workshop' : 'Course'}
-        </button>
+        {kindAllowed && (
+          <button onClick={openAdd} className="btn-primary inline-flex items-center gap-2 shrink-0">
+            <Plus size={15} /> Add {isWorkshop ? 'Workshop' : 'Course'}
+          </button>
+        )}
       </div>
       <p className="text-sm text-muted normal-case mb-6">
         Programs assigned to you — students, registrations and commission all come from here. Public Page = how this program appears to visitors on the website.

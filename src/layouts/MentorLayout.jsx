@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'react-toastify';
@@ -24,10 +24,15 @@ const NAV_ITEMS = [
 ];
 
 export default function MentorLayout() {
-  const { mentor, logout } = useMentorAuth();
+  const { mentor, logout, refreshProfile } = useMentorAuth();
+  // Stale session bhi sahi ho jaye: mount par server se fresh profile (mentorType ke saath)
+  useEffect(() => {
+    refreshProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // Mentor type ke hisaab se nav: workshop-only mentor ko course options nahi dikhte (aur vice versa)
   const mentorKind = mentor?.mentorType || 'both';
-  const navItems = NAV_ITEMS.filter((it) => !it.kind || it.kind === 'both' || mentorKind === 'both' || it.kind === mentorKind);
+  const navItems = NAV_ITEMS.filter((it) => !it.kind || mentorKind === 'both' || it.kind === mentorKind);
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

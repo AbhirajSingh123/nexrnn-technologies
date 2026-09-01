@@ -4,7 +4,9 @@
  */
 import { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Navigate } from 'react-router-dom';
 import useMentorData, { inr } from '@/hooks/useMentorData';
+import { useMentorAuth } from '@/contexts/MentorAuthContext';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import AdminFilterBar from '@/components/admin/AdminFilterBar';
 import AdminTable from '@/components/admin/AdminTable';
@@ -21,7 +23,13 @@ const PAY_STYLES = {
 export default function MentorRegistrations({ kind = 'course' }) {
   const isWorkshop = kind === 'workshop';
   const title = isWorkshop ? 'Workshop Registrations' : 'Course Registrations';
+  const { mentor } = useMentorAuth();
   const { data, error, loading } = useMentorData('registrations', { kind });
+
+  // Type guard: workshop-only mentor course registrations nahi khol sakta (direct URL bhi)
+  // (early return hooks ke baad - rules of hooks)
+  const mentorKind = mentor?.mentorType || 'both';
+  const kindBlocked = mentorKind !== 'both' && mentorKind !== kind;
 
   const [search, setSearch] = useState('');
   const [payFilter, setPayFilter] = useState('all');
@@ -41,6 +49,10 @@ export default function MentorRegistrations({ kind = 'course' }) {
   }), [rows, search, payFilter, dateFrom, dateTo]);
 
   const { visibleItems, hasMore, loadMore, total, shown } = useLoadMore(filtered, `${search}|${payFilter}|${dateFrom}|${dateTo}`);
+
+  if (kindBlocked) {
+    return <Navigate to="/nexrnn/master-nexrnn/mentor" replace />;
+  }
 
   const columns = [
     { key: 'name', label: 'Student', render: (r) => <span className="font-semibold text-secondary">{r.name}</span> },

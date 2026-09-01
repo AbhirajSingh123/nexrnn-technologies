@@ -80,6 +80,36 @@ export async function loginMentor(mentorId, phone) {
   return data;
 }
 
+/** Profile ko sessionStorage me save karo (login + refresh dono use karte hain) */
+export function saveMentorProfile(profile) {
+  try {
+    sessionStorage.setItem(PROFILE_KEY, JSON.stringify(profile || {}));
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Stale session fix: server se fresh profile laao aur session update karo.
+ * (Admin ne mentor ka type/gender badla ho to bina re-login bhi sahi dikhe.)
+ */
+export async function refreshMentorProfile() {
+  const token = getMentorToken();
+  if (!token || !isSupabaseConfigured) return null;
+  try {
+    const data = await mentorData('profile');
+    if (data?.mentor) {
+      const current = getSavedMentorProfile() || {};
+      const merged = { ...current, ...data.mentor, mentorId: data.mentor.mentorId || current.mentorId };
+      saveMentorProfile(merged);
+      return merged;
+    }
+  } catch {
+    /* ignore - offline/edge down par session waisi hi rahe */
+  }
+  return null;
+}
+
 /**
  * Mentor-data API call (token ke saath).
  * 401 aaye to session saaf karke error - ProtectedRoute login par bhej dega.
