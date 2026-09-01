@@ -31,8 +31,6 @@ export default function Sitemap() {
     { to: '/case-studies', label: 'Case Studies' },
     { to: '/faqs', label: 'FAQs' },
     { to: '/careers', label: 'Careers — Internships & Jobs' },
-    { to: '/internship', label: 'Apply for Internship' },
-    { to: '/job', label: 'Apply for Job' },
   ];
 
   const legalPages = [

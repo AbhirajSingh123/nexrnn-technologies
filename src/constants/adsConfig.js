@@ -22,7 +22,6 @@
 // Example: 'ca-pub-1234567890123456'
 export const ADSENSE_CLIENT = 'ca-pub-6802186598254911';
 
-
 // Step 3: Ad unit ke Slot IDs yahan paste karo
 // Example: '1234567890'
 export const BLOG_AD_SLOTS = {

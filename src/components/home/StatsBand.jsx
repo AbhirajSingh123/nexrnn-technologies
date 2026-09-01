@@ -1,5 +1,6 @@
 import { useInView } from 'react-intersection-observer';
 import { HERO_STATS } from '@/constants/siteData';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import useCountUp from '@/hooks/useCountUp';
 
 function StatBox({ value, suffix, label, isText }) {
@@ -17,12 +18,32 @@ function StatBox({ value, suffix, label, isText }) {
 }
 
 export default function StatsBand() {
+  const { settings } = useSiteSettings();
+
+  // Site Settings se hide kiya ho to band render hi na ho
+  if (settings.statsBandEnabled === false) return null;
+
+  // Admin ne custom stats set kiye hain to wo, warna defaults
+  const stats = Array.isArray(settings.statsList) && settings.statsList.length === 4
+    ? settings.statsList
+    : HERO_STATS;
+
   return (
     <div className="bg-primary bg-grid-light">
       <div className="container-section grid grid-cols-2 sm:grid-cols-4">
-        {HERO_STATS.map((stat) => (
-          <StatBox key={stat.label} value={stat.value} suffix={stat.suffix} label={stat.label} isText={stat.isText} />
-        ))}
+        {stats.map((stat) => {
+          const num = Number(stat.value) || 0;
+          const textOnly = stat.isText || (!num && stat.suffix);
+          return (
+            <StatBox
+              key={stat.label || stat.suffix}
+              value={num}
+              suffix={stat.suffix || ''}
+              label={stat.label}
+              isText={textOnly}
+            />
+          );
+        })}
       </div>
     </div>
   );

@@ -218,7 +218,7 @@ export default function AdminCaseStudyForm() {
                 value={form.content}
                 onChange={handleChange}
                 className={`${inputClass} resize-y normal-case font-mono text-xs leading-relaxed`}
-                placeholder={'## The Background\nClient background yahan likhein...\n\n## The Challenge\n...\n\n## What We Did\n- pehla step\n- doosra step\n\n## The Results\nLeads **3x** ho gaye 90 din mein.\n\n> Key takeaway ek line mein.'}
+                placeholder={'## The Background\nWrite the client background here...\n\n## The Challenge\n...\n\n## What We Did\n- first step\n- second step\n\n## The Results\nLeads grew **3x** in 90 days.\n\n> Key takeaway in one line.'}
               />
               <p className="mt-1.5 text-[11px] text-muted normal-case">
                 Supports <code className="bg-accent px-1">## Heading 2</code>,{' '}
@@ -226,7 +226,7 @@ export default function AdminCaseStudyForm() {
                 <code className="bg-accent px-1">**bold**</code>,{' '}
                 <code className="bg-accent px-1">- bullet points</code>,{' '}
                 <code className="bg-accent px-1">&gt; quotes</code> — blank line = new paragraph. Upar
-                buttons select karke click karo, text apne aap format ho jayega.
+                select some text and click a button to format it automatically.
               </p>
             </div>
           </div>

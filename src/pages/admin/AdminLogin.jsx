@@ -52,7 +52,7 @@ export default function AdminLogin() {
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 className="w-full border-2 border-secondary/20 focus:border-primary pl-10 pr-4 py-3 text-sm outline-none transition-colors"
-                placeholder="admin@nexrnntechnology.in"
+                placeholder="admin@nexrnntechnologies.in"
               />
             </div>
           </div>

@@ -31,8 +31,8 @@
  *    ke "sameAs" mein jayega (local SEO boost).
  */
 
-export const GA4_ID = 'G-K4SNP45ELV'; // e.g. 'G-ABCDEF1234'
+export const GA4_ID = 'G-K4SNP45ELV'; // GA4 Measurement ID
 export const GTM_ID = ''; // e.g. 'GTM-ABC1234' (optional)
-export const CLARITY_ID = 'y9xutlx9sj'; // e.g. 'abcd1234ef'
-export const GSC_VERIFICATION = '4z7XW-LxFlEQVYfMGIoPCUVN8ziUXIoSNLleZ8WudmI'; // e.g. 'abc123XYZ_from_meta_tag'
+export const CLARITY_ID = 'y9xutlx9sj'; // Microsoft Clarity project ID
+export const GSC_VERIFICATION = '4z7XW-LxFlEQVYfMGIoPCUVN8ziUXIoSNLleZ8WudmI'; // Google Search Console verification
 export const GOOGLE_BUSINESS_PROFILE_URL = ''; // e.g. 'https://g.page/r/xxxx/review'

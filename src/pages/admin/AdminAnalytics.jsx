@@ -12,18 +12,30 @@ import {
 } from 'lucide-react';
 import {
   fetchAnalyticsEvents,
+  fetchAnalyticsSince,
   countByEvent,
   countUniqueVisitors,
   dailyPageViews,
   topBlogPosts,
   topPages,
 } from '@/data/analyticsRepo';
+import { supabase } from '@/services/supabaseClient';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
 const RANGES = [
   { days: 7, label: 'Last 7 Days' },
   { days: 30, label: 'Last 30 Days' },
+  { days: 90, label: 'Last 90 Days' },
 ];
+
+const EVENT_LABELS = {
+  page_view: 'Page View',
+  whatsapp_click: 'WhatsApp Click',
+  phone_click: 'Phone Click',
+  generate_lead: 'Lead / Form',
+  blog_read: 'Blog Read',
+  cta_click: 'CTA Click',
+};
 
 function StatCard({ icon: Icon, label, value }) {
   return (
@@ -70,12 +82,14 @@ export default function AdminAnalytics() {
   const [loading, setLoading] = useState(true);
   const [eventType, setEventType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [since, setSince] = useState(null); // tracking live since (sabse purana event)
 
   const load = async () => {
     setLoading(true);
     try {
-      const data = await fetchAnalyticsEvents(days);
+      const [data, sinceTs] = await Promise.all([fetchAnalyticsEvents(days), fetchAnalyticsSince()]);
       setEvents(data);
+      setSince(sinceTs);
     } catch {
       setEvents([]);
     } finally {
@@ -102,12 +116,42 @@ export default function AdminAnalytics() {
   }, [events, eventType, searchQuery]);
 
   const counts = useMemo(() => countByEvent(filteredEvents), [filteredEvents]);
-  const chart = useMemo(() => dailyPageViews(filteredEvents, 14), [filteredEvents]);
+  const chart = useMemo(() => dailyPageViews(filteredEvents, days), [filteredEvents, days]);
   const blogs = useMemo(() => topBlogPosts(filteredEvents, 8), [filteredEvents]);
+  // Fallback: blog_read events na ho to blog_posts ke views counter se dikhao
+  const [viewBasedBlogs, setViewBasedBlogs] = useState([]);
+  useEffect(() => {
+    if (blogs.length) return;
+    let active = true;
+    supabase
+      .from('blog_posts')
+      .select('title, views')
+      .gt('views', 0)
+      .order('views', { ascending: false })
+      .limit(8)
+      .then(({ data }) => {
+        if (!active) return;
+        setViewBasedBlogs((data ?? []).map((b) => ({ title: b.title, reads: b.views })));
+      });
+    return () => {
+      active = false;
+    };
+  }, [blogs.length]);
+  const mostRead = blogs.length ? blogs : viewBasedBlogs;
   const pages = useMemo(() => topPages(filteredEvents, 8), [filteredEvents]);
 
   const uniqueUsers = useMemo(() => countUniqueVisitors(filteredEvents), [filteredEvents]);
   const maxCount = Math.max(...chart.map((c) => c.count), 1);
+  // "Kab ka data" - selected range ki dates + tracking live since
+  const rangeFrom = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - (days - 1));
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }, [days]);
+  const rangeTo = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const sinceLabel = since
+    ? new Date(since).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+    : null;
   return (
     <div>
       <div className="flex items-center justify-between mb-1 flex-wrap gap-3">
@@ -134,9 +178,17 @@ export default function AdminAnalytics() {
           </button>
         </div>
       </div>
-      <p className="text-sm text-muted normal-case mb-6">
+      <p className="text-sm text-muted normal-case mb-1.5">
         Your own website tracking data. Detailed traffic is also available in Google Analytics
         (analytics.google.com).
+      </p>
+      <p className="text-xs text-muted normal-case mb-6">
+        Showing data from <b className="text-secondary">{rangeFrom}</b> to <b className="text-secondary">{rangeTo}</b>
+        {sinceLabel && (
+          <>
+            {' '}&bull; Tracking live since <b className="text-secondary">{sinceLabel}</b>
+          </>
+        )}
       </p>
 
       {/* Filters: event type + search */}
@@ -148,7 +200,7 @@ export default function AdminAnalytics() {
         >
           <option value="all">All Events</option>
           {eventTypes.map((t) => (
-            <option key={t} value={t}>{t}</option>
+            <option key={t} value={t}>{EVENT_LABELS[t] ?? t}</option>
           ))}
         </select>
         <div className="relative flex-1 min-w-[220px]">
@@ -180,10 +232,11 @@ export default function AdminAnalytics() {
           {/* Daily Chart (last 14 days page views) */}
           <div className="card-base bg-white p-5 sm:p-6 mb-8">
             <h3 className="text-sm font-bold text-secondary uppercase tracking-wide mb-1">
-              Daily Page Views (Last 14 Days)
+              Daily Page Views (Last {days} Days)
             </h3>
             <p className="text-xs text-muted normal-case mb-5">
-              Selected range: {days} days &bull; Total: {counts.page_view ?? 0} views
+              {rangeFrom} &rarr; {rangeTo} &bull; Total: {counts.page_view ?? 0} views
+              {sinceLabel && <> &bull; Tracking since {sinceLabel}</>}
             </p>
             <div className="flex items-end gap-1.5 sm:gap-2 h-40 sm:h-44">
               {chart.map((c) => (
@@ -216,7 +269,7 @@ export default function AdminAnalytics() {
             />
             <TopList
               title="Most Read Blog Posts"
-              rows={blogs}
+              rows={mostRead}
               emptyText="No blog read data yet."
               valueLabel="reads"
             />

@@ -1,9 +1,11 @@
 import { useCallback, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { toast } from 'react-toastify';
 import {
+  Wallet,
   LayoutDashboard, Inbox, Briefcase, GraduationCap, Layers, BookOpen, LogOut, CreditCard,
-  Video, Image as ImageIcon, Star, PartyPopper, Settings, Newspaper, BarChart3, Menu, X, Trophy, ClipboardList, FileUser,
+  Video, Image as ImageIcon, Star, PartyPopper, Settings, Newspaper, BarChart3, Menu, X, Trophy, ClipboardList, FileUser, Users, MessageSquareWarning,
 } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import useIdleTimeout from '@/hooks/useIdleTimeout';
@@ -25,6 +27,9 @@ const NAV_ITEMS = [
   { to: ADMIN_ROUTES.caseStudies, label: 'Manage Case Studies', icon: Trophy },
   { to: ADMIN_ROUTES.careers, label: 'Manage Careers', icon: ClipboardList },
   { to: ADMIN_ROUTES.internshipApplications, label: 'Applications', icon: FileUser },
+  { to: ADMIN_ROUTES.mentors, label: 'Mentors', icon: Users },
+  { to: ADMIN_ROUTES.mentorPayments, label: 'Mentor Payments', icon: Wallet },
+  { to: ADMIN_ROUTES.mentorIssues, label: 'Mentor Issues', icon: MessageSquareWarning },
   { to: ADMIN_ROUTES.clientReviews, label: 'Client Reviews', icon: Video },
   { to: ADMIN_ROUTES.portfolio, label: 'Manage Portfolio', icon: ImageIcon },
   { to: ADMIN_ROUTES.testimonials, label: 'Manage Testimonials', icon: Star },
@@ -49,6 +54,7 @@ export default function AdminLayout() {
 
   return (
     <div className="h-screen flex bg-accent overflow-hidden">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-secondary/60 z-40 lg:hidden"

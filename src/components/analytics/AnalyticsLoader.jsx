@@ -17,10 +17,10 @@ import { useLocation } from 'react-router-dom';
 import {
   GA4_ID,
   GTM_ID,
-  CLARITY_ID,
   GSC_VERIFICATION,
 } from '@/constants/analyticsConfig';
-import { trackPageView, trackWhatsAppClick, trackPhoneClick } from '@/utils/analytics';
+import { setDefaultGoogleConsent, loadClarity } from '@/utils/cookieConsent';
+import { trackPageView, trackWhatsAppClick, trackPhoneClick, trackCtaClick } from '@/utils/analytics';
 
 function injectGA4() {
   if (!GA4_ID || document.getElementById('ga4-script')) return;
@@ -50,21 +50,6 @@ function injectGTM() {
   document.head.appendChild(s);
 }
 
-function injectClarity() {
-  if (!CLARITY_ID || document.getElementById('clarity-script')) return;
-  window.clarity =
-    window.clarity ||
-    function (...args) {
-      window.clarity.q = window.clarity.q || [];
-      window.clarity.q.push(args);
-    };
-  const s = document.createElement('script');
-  s.id = 'clarity-script';
-  s.async = true;
-  s.src = 'https://www.clarity.ms/tag/' + CLARITY_ID;
-  document.head.appendChild(s);
-}
-
 function injectSearchConsoleMeta() {
   if (!GSC_VERIFICATION || document.querySelector('meta[name="google-site-verification"]')) return;
   const meta = document.createElement('meta');
@@ -78,12 +63,19 @@ export default function AnalyticsLoader() {
 
   // 1. Scripts (sirf ek baar)
   useEffect(() => {
+    // Google Consent Mode: non-essential storage DEFAULT DENIED
+    // (GA4/GTM/gtag inject hone se pehle set hona zaroori hai)
+    setDefaultGoogleConsent();
     injectSearchConsoleMeta();
     // GA4 aur GTM dono ek saath mat chalao (double counting) -
     // analyticsConfig.js mein note padho.
+    // GTM/gtag script load hoti rahti hai lekin tags consent signals
+    // (analytics_storage / ad_storage) follow karte hain - consent
+    // deny ho to cookies/tracking nahi hoti (Google Consent Mode v2).
     injectGA4();
     injectGTM();
-    injectClarity();
+    // Microsoft Clarity: script sirf experience consent milne par load hogi
+    loadClarity();
   }, []);
 
   // 2. SPA page views: har route change par
@@ -102,6 +94,12 @@ export default function AnalyticsLoader() {
         trackWhatsAppClick(text || href);
       } else if (href.startsWith('tel:')) {
         trackPhoneClick(text || href);
+      }
+      // Site-wide CTA click capture (btn-primary / btn-secondary / Get Started type buttons)
+      const cta = link.closest('.btn-primary, .btn-secondary, [data-cta]');
+      if (cta) {
+        const ctaLabel = (cta.textContent || '').trim().slice(0, 60);
+        trackCtaClick(ctaLabel || text || href, href);
       }
     };
     document.addEventListener('click', handler, true);

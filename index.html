@@ -6,16 +6,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NexRNN Technologies — Digital Marketing Agency & Technology Solutions, Lucknow</title>
     <meta name="description" content="NexRNN Technology is a digital marketing agency and technology solutions company in Lucknow offering Google Ads, Meta Ads, SEO, website development, and practical courses in digital marketing, AI and web development." />
-    <!-- Google Search Console verification AnalyticsLoader se inject hoti hai
-         (src/constants/analyticsConfig.js mein GSC_VERIFICATION paste karo) -->
+    <!-- Google Search Console verification is injected by AnalyticsLoader
+         (paste your GSC_VERIFICATION in src/constants/analyticsConfig.js) -->
 
-    <!-- Local Business schema (Google Business Profile / local SEO ke liye) -->
+    <!-- Google Consent Mode v2: non-essential storage DEFAULT DENIED.
+         The cookie banner (CookieConsent.jsx) sends the 'consent update'
+         once the user agrees. No IDs here - consent signal setup only. -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        functionality_storage: 'granted',
+        security_storage: 'granted',
+        wait_for_update: 500
+      });
+    </script>
+
+    <!-- Default social share tags (individual pages override via react-helmet) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="NexRNN Technologies" />
+    <meta property="og:title" content="NexRNN Technologies — Digital Marketing Agency &amp; Technology Solutions, Lucknow" />
+    <meta property="og:description" content="Digital marketing agency and technology solutions company in Lucknow — Google Ads, Meta Ads, SEO, website development, plus practical courses and workshops." />
+    <meta property="og:url" content="https://www.nexrnntechnologies.in/" />
+    <meta property="og:image" content="https://www.nexrnntechnologies.in/nexrnn-logo.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#1d6fe0" />
+    <link rel="canonical" href="https://www.nexrnntechnologies.in/" />
+
+    <!-- Local Business schema (for Google Business Profile / local SEO) -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "ProfessionalService",
         "name": "NexRNN Technologies",
-        "url": "https://nexrnntechnology.in",
+        "url": "https://www.nexrnntechnologies.in",
         "telephone": "+91-7520424645",
         "description": "Digital marketing agency and technology solutions company in Lucknow offering Google Ads, Meta Ads, SEO, website development, and practical courses.",
         "address": {

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { openCookieSettings } from '@/utils/cookieConsent';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { FaInstagram, FaLinkedinIn, FaFacebookF, FaYoutube } from 'react-icons/fa';
 import { SITE, SOCIAL_LINKS } from '@/constants/siteData';
@@ -103,6 +104,13 @@ export default function Footer() {
         </p>
         <div className="flex items-center gap-5 text-xs text-white/50">
           <Link to="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+          <button
+            type="button"
+            onClick={openCookieSettings}
+            className="hover:text-primary transition-colors"
+          >
+            Cookie Settings
+          </button>
           <Link to="/terms-and-conditions" className="hover:text-primary transition-colors">Terms &amp; Conditions</Link>
           <Link to="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</Link>
         </div>

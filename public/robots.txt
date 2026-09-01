@@ -1,10 +1,10 @@
 User-agent: *
 Allow: /
 
-# Admin panel ko Google se chhupa do
+# Keep the admin & mentor panels out of search engines
 Disallow: /nexrnn/
 
-# Payment return pages (internal transactional) — index ki zaroorat nahi
+# Payment return pages (internal transactional pages)
 Disallow: /application-payment-status
 Disallow: /course/application-payment-status
 Disallow: /workshop/application-payment-status

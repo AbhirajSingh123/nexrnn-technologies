@@ -253,13 +253,15 @@ export async function downloadApplicationPDF(data) {
   doc.setTextColor(11, 18, 32);
   y = 130;
 
+  // PDF text me \u20b9 jsPDF (WinAnsi) me render nahi hota - 'Rs. ' se badlo
+  const noRupeeText = (t) => String(t ?? '').replace(/\u20B9/g, 'Rs. ');
   const line = (label, value) => {
     if (!value) value = '-';
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9.5);
     doc.text(String(label), 40, y);
     doc.setFont('helvetica', 'normal');
-    const wrapped = doc.splitTextToSize(String(value), W - 220);
+    const wrapped = doc.splitTextToSize(noRupeeText(value), W - 220);
     doc.text(wrapped, 220, y);
     y += 18 * Math.max(1, wrapped.length);
     if (y > 770) {
@@ -283,7 +285,7 @@ export async function downloadApplicationPDF(data) {
   doc.text('Opening Details', 40, y);
   y += 16;
   line('Job / Internship Name', data.openingTitle);
-  line('Application Fee', data.openingFeeLabel || 'Free — ₹0');
+  line('Application Fee', noRupeeText(data.openingFeeLabel) || 'Free — Rs. 0');
   if (data.openingStipendLabel) line('Stipend', data.openingStipendLabel);
   if (data.openingDomain) line('Domain', data.openingDomain);
   if (data.openingDuration) line('Duration', data.openingDuration);
@@ -327,7 +329,7 @@ export async function downloadApplicationPDF(data) {
     doc.text('Payment Details', 40, y);
     y += 16;
     line('Payment ID', data.payment.paymentId);
-    line('Amount', data.payment.amount);
+    line('Amount', noRupeeText(data.payment.amount));
     line('Order ID', data.payment.orderId);
     line('Method', data.payment.method);
   }

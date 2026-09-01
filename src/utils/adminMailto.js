@@ -37,6 +37,34 @@ export function buildEnrollmentMailto(lead) {
 }
 
 /**
+ * Mentor mail
+ * mentor: { name, email, mentorId, mentorType, commissionPercent, dateOfJoining }
+ */
+export function buildMentorMailto(mentor) {
+  const typeNames = { course: 'Courses', workshop: 'Workshops', both: 'Courses & Workshops' };
+  const subject = `NexRNN Technologies - Mentorship`;
+  const body = [
+    `Name: ${mentor.name || ''}`,
+    `Email: ${mentor.email || ''}`,
+    `Mentor ID: ${mentor.mentorId || '-'}`,
+    `Type: ${typeNames[mentor.mentorType] || 'Courses & Workshops'}`,
+    `Commission: ${mentor.commissionPercent ?? 0}%`,
+    `Date of Joining: ${mentor.dateOfJoining || '-'}`,
+    '',
+    `Hello ${mentor.name || 'there'},`,
+    '',
+    'Thank you for being a mentor with NexRNN Technologies.',
+    'Please use the details above for any communication regarding your mentorship.',
+    '',
+    'Warm regards,',
+    'NexRNN Technologies',
+    'https://www.nexrnntechnologies.in/',
+  ].join('\n');
+
+  return `mailto:${enc(mentor.email)}?subject=${enc(subject)}&body=${enc(body)}`;
+}
+
+/**
  * Career application mail
  * app: { fullName, email, applicationId, openingCode, openingTitle, domain, typeLabel }
  */

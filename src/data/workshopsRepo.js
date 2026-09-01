@@ -32,7 +32,7 @@ export async function fetchWorkshops() {
     .from('workshops')
     .select('*')
     .eq('active', true)
-    .order('sort_order', { ascending: true });
+    .order('created_at', { ascending: false }); // newest first
   if (error || !data) return STATIC_WORKSHOPS;
   return data.map(mapRow);
 }

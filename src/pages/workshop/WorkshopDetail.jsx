@@ -14,6 +14,7 @@ import Reveal from '@/components/shared/Reveal';
 import DemoVideo from '@/components/shared/DemoVideo';
 import CertificateSample from '@/components/shared/CertificateSample';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ShareRow from '@/components/shared/ShareRow';
 
 function formatDate(iso) {
   if (!iso) return 'To be announced';
@@ -116,7 +117,8 @@ export default function WorkshopDetail() {
                 )}
               </div>
               <h1 className="text-secondary text-4xl sm:text-5xl leading-[1.05] mb-5">{workshop.title}</h1>
-              <p className="text-muted text-base leading-relaxed normal-case mb-7">{workshop.shortDescription}</p>
+              <p className="text-muted text-base leading-relaxed normal-case mb-5">{workshop.shortDescription}</p>
+              <ShareRow title={workshop.title} path={`/workshop/${workshop.slug}`} />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <InfoChip icon={Calendar} label="Date &amp; Time" value={formatDate(workshop.workshopDatetime)} />

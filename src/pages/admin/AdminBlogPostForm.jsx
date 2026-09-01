@@ -146,7 +146,7 @@ export default function AdminBlogPostForm() {
       setForm((prev) => ({ ...prev, cover_image_url: url }));
       toast.success('Cover image uploaded successfully!');
     } catch (err) {
-      // Real reason dikhaye taaki admin samajh sake kya galat hua
+      // Show the real reason so the admin understands what went wrong
       toast.error(`Image upload failed: ${err?.message || 'Check Supabase storage setup.'}`);
     } finally {
       setUploadingImage(false);
@@ -357,12 +357,12 @@ export default function AdminBlogPostForm() {
             {form.cover_image_url && imgError && (
               <div className="mt-3 border-2 border-red-300 bg-red-50 p-3 max-w-md">
                 <p className="text-xs font-bold text-red-700 flex items-center gap-1.5">
-                  ⚠ Image load nahi ho paayi
+                  ⚠ Image could not be loaded
                 </p>
                 <p className="text-[11px] text-red-600 mt-1 leading-relaxed">
-                  URL check karo — pura address <b>https://</b> se shuru hona chahiye aur
-                  image publicly accessible honi chahiye (private/broken link par site
-                  visitors ko image nahi dikhegi).
+                  Check the URL — the full address must start with <b>https://</b> and the
+                  image must be publicly accessible (private/broken links will not show the
+                  image to site visitors).
                 </p>
                 <p className="text-[10px] text-red-500 mt-1 break-all font-mono">
                   {form.cover_image_url}
@@ -456,7 +456,7 @@ export default function AdminBlogPostForm() {
               value={form.author_bio}
               onChange={handleChange}
               rows={3}
-              placeholder="Author ke baare mein 1-3 lines... ye blog ke end mein 'About the Author' card mein dikhega."
+              placeholder="1-3 lines about the author... shown in the About the Author card at the end of the blog."
               className={inputClass}
             />
             <p className="text-[11px] text-muted mt-1.5">

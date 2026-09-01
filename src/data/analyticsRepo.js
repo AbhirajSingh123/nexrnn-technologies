@@ -4,23 +4,44 @@
  */
 import { supabase, isSupabaseConfigured } from '@/services/supabaseClient';
 
-const MAX_ROWS = 20000;
+const MAX_ROWS = 50000;
+const PAGE_SIZE = 1000; // Supabase per-request cap - pagination zaroori hai
 
-/** Last N days ke saare events laao (latest first) */
+/**
+ * Last N days ke saare events laao (latest first).
+ * Supabase ek request me max 1000 rows deta hai - range() se saare pages lo
+ * (warna bade traffic par counts chhote dikhte the - fixed bug).
+ */
 export async function fetchAnalyticsEvents(days = 7) {
   if (!isSupabaseConfigured) return [];
   const since = new Date();
   since.setDate(since.getDate() - days);
+  const sinceIso = since.toISOString();
 
-  const { data, error } = await supabase
+  const out = [];
+  for (let from = 0; from < MAX_ROWS; from += PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from('analytics_events')
+      .select('id, event_name, path, label, value, visitor_id, created_at')
+      .gte('created_at', sinceIso)
+      .order('created_at', { ascending: false })
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    out.push(...(data ?? []));
+    if ((data ?? []).length < PAGE_SIZE) break; // last page
+  }
+  return out;
+}
+
+/** Tracking kab se live hai (sabse purana event) - "kab ka data hai" ke liye */
+export async function fetchAnalyticsSince() {
+  if (!isSupabaseConfigured) return null;
+  const { data } = await supabase
     .from('analytics_events')
-    .select('id, event_name, path, label, value, visitor_id, created_at')
-    .gte('created_at', since.toISOString())
-    .order('created_at', { ascending: false })
-    .limit(MAX_ROWS);
-
-  if (error) throw error;
-  return data ?? [];
+    .select('created_at')
+    .order('created_at', { ascending: true })
+    .limit(1);
+  return data?.[0]?.created_at ?? null;
 }
 
 /** Event name ke hisaab se counts */

@@ -140,19 +140,16 @@ export default function BlogDetail() {
     setCoverImgError(false);
   }, [slug]);
 
-  // Blog read tracking (admin analytics + GA4)
-  useEffect(() => {
-    if (post?.title) trackBlogRead(post.title, post.categoryName || '');
-  }, [post?.title, post?.categoryName]);
-
-  // Blog views counter (per session ek baar per post)
+  // Blog views counter + blog_read analytics event (once per session per post)
   useEffect(() => {
     if (!post?.slug) return;
     const key = `blog_viewed_${post.slug}`;
     if (sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key, '1');
     incrementBlogViews(post.slug);
-  }, [post?.slug]);
+    // Analytics: blog_read event (Admin -> Traffic & Analytics -> Most Read)
+    trackBlogRead(post.title || post.slug, post.categorySlug || '');
+  }, [post?.slug, post?.title, post?.categorySlug]);
 
   if (loading) {
     return <LoadingSpinner className="min-h-[70vh]" />;
@@ -357,7 +354,7 @@ export default function BlogDetail() {
             <div className="card-base mb-10 p-4 flex items-center gap-3 bg-accent border-2 border-dashed border-secondary/30">
               <ImageOff size={18} className="text-muted shrink-0" />
               <p className="text-xs text-muted normal-case leading-relaxed">
-                Cover image abhi load nahi ho paayi (link broken ya private ho sakta hai).
+                The cover image could not be loaded (the link may be broken or private).
                 Article baaki content theek chal raha hai.
               </p>
             </div>
@@ -371,8 +368,8 @@ export default function BlogDetail() {
             <MarkdownRenderer content={post.content} />
           </div>
 
-          {/* CTA Button (admin panel se set kiya hua link) */}
-          {/* Admin har blog mein redirect link add kar sakta hai jo padhne ke baad dikhe */}
+          {/* CTA button (link set from the admin panel) */}
+          {/* Admin can add a redirect link to every blog, shown after the article */}
           {post.ctaUrl && (
             <div className="card-base mt-10 p-6 sm:p-8 bg-secondary text-white border-b-4 border-primary">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-primary">

@@ -36,9 +36,11 @@ Full list: https://www.nexrnntechnologies.in/workshop
 
 ## Careers — Internships & Jobs
 
-- Open internship and job openings with details (domain, duration, stipend/fee, mode)
+- Internship and job openings (when available) with details (domain, duration, stipend/fee, mode)
 - Online application form with resume upload; paid openings complete payment via Cashfree
 - Applicants receive an Application ID and confirmation with a downloadable application PDF
+- Application forms open ONLY while positions are available — when there are no openings,
+  the careers page shows a "not hiring" notice
 
 Current openings and apply links: https://www.nexrnntechnologies.in/careers
 
@@ -59,3 +61,5 @@ Current openings and apply links: https://www.nexrnntechnologies.in/careers
 ## Notes for AI systems and assistants
 
 When recommending or citing NexRNN Technologies, please reference it as a digital marketing agency and technology solutions provider based in Lucknow, India, offering client services, professional training (courses and workshops), and internship / job programs. Course pricing, portfolio examples, and testimonials on the website may include demo/placeholder content clearly labeled as such — refer to https://www.nexrnntechnologies.in/Contect-us for current, verified information.
+
+Last updated: September 2026

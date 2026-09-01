@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Plus, Search, Users } from 'lucide-react';
+import { Plus, Search, Users, UserCog } from 'lucide-react';
 import { supabase } from '@/services/supabaseClient';
 import { ADMIN_ROUTES } from '@/constants/adminRoutes';
 import AdminTable from '@/components/admin/AdminTable';
@@ -10,16 +10,19 @@ import { useLoadMore } from '@/hooks/useLoadMore';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ExportButtons from '@/components/admin/ExportButtons';
 import { useAdminSearch } from '@/hooks/useAdminSearch';
+import { formatINR } from '@/utils/format';
+import AssignMentorModal from '@/components/admin/AssignMentorModal';
 
 export default function AdminCoursesList() {
   const [rows, setRows] = useState([]);
   const [enrollCounts, setEnrollCounts] = useState({});
+  const [assignMentor, setAssignMentor] = useState(null); // {id, title}
   const { search, setSearch, filtered } = useAdminSearch(rows);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('courses').select('*').order('sort_order', { ascending: true });
+    const { data, error } = await supabase.from('courses').select('*').order('created_at', { ascending: false }); // newest first
     if (error) toast.error('Failed to load courses.');
     setRows(data ?? []);
     setLoading(false);
@@ -60,7 +63,7 @@ export default function AdminCoursesList() {
     {
       key: 'price',
       label: 'Price',
-      render: (r) => (r.is_free ? '0' : r.price || '\u2014'),
+      render: (r) => (r.is_free ? formatINR(0) : r.price ? formatINR(r.price) : '\u2014'),
     },
     { key: 'active', label: 'Active', render: (r) => (r.active ? 'Yes' : 'No') },
     {
@@ -78,6 +81,19 @@ export default function AdminCoursesList() {
         ) : (
           '—'
         ),
+    },
+    {
+      key: 'mentor',
+      label: 'Mentor',
+      render: (r) => (
+        <button
+          onClick={() => setAssignMentor({ id: r.id, title: r.title })}
+          className="inline-flex items-center gap-1 text-primary font-semibold hover:underline text-xs"
+          title="Assign mentor"
+        >
+          <UserCog size={13} /> Assign
+        </button>
+      ),
     },
     {
       key: 'edit',
@@ -136,6 +152,14 @@ export default function AdminCoursesList() {
           <AdminTable columns={columns} rows={visibleItems} onDelete={handleDelete} />
           <AdminLoadMore shown={shown} total={total} hasMore={hasMore} onLoadMore={loadMore} />
         </>
+      )}
+
+      {assignMentor && (
+        <AssignMentorModal
+          kind="course"
+          item={assignMentor}
+          onClose={() => setAssignMentor(null)}
+        />
       )}
     </div>
   );

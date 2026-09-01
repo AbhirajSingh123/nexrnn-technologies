@@ -46,6 +46,24 @@ export default function Navbar() {
         scrolled ? 'shadow-[0_4px_0_0_rgba(11,18,32,0.06)]' : ''
       }`}
     >
+      {/* Announcement bar (Site Settings se control hota hai) */}
+      {settings.announcementEnabled && (settings.announcementText || settings.announcementButtonText) && (
+        <div className="bg-secondary text-white">
+          <div className="container-section flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-2 text-center">
+            {settings.announcementText && (
+              <p className="text-[11px] sm:text-xs font-medium tracking-wide">
+                {settings.announcementText}
+              </p>
+            )}
+            {settings.announcementButtonText && (
+              <AnnouncementLink href={settings.announcementButtonLink}>
+                {settings.announcementButtonText}
+              </AnnouncementLink>
+            )}
+          </div>
+        </div>
+      )}
+
       <nav className="container-section flex items-center justify-between h-[76px]" aria-label="Primary">
         <Link to="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5">
           <span className="w-9 h-9 bg-primary border-2 border-secondary flex items-center justify-center text-white text-sm font-heading shrink-0">
@@ -164,5 +182,27 @@ export default function Navbar() {
       {/* Website Search */}
       {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
     </header>
+  );
+}
+
+// Announcement button: internal link same tab me (react-router), external naye tab me
+function AnnouncementLink({ href, children }) {
+  const pillClass =
+    'inline-flex items-center border-2 border-white/70 bg-primary px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide text-white transition-colors hover:bg-primary/85';
+  if (!href) {
+    return <span className={pillClass}>{children}</span>;
+  }
+  const external = href.startsWith('http://') || href.startsWith('https://');
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={pillClass}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link to={href} className={pillClass}>
+      {children}
+    </Link>
   );
 }

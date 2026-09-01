@@ -1,5 +1,19 @@
 import { supabase, isSupabaseConfigured } from '@/services/supabaseClient';
 
+// stats_json -> [{label, value, suffix}] (galat JSON ho to khali list)
+function parseStatsJson(raw) {
+  if (!raw) return [];
+  try {
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .slice(0, 4)
+      .map((s) => ({ label: String(s.label || ''), value: Number(s.value) || 0, suffix: String(s.suffix || '') }));
+  } catch {
+    return [];
+  }
+}
+
 const DEFAULT_SETTINGS = {
   showServices: true,
   showCourses: true,
@@ -12,6 +26,12 @@ const DEFAULT_SETTINGS = {
   popupEnabled: false,
   popupImageUrl: '',
   popupLink: '',
+  announcementEnabled: false,
+  announcementText: 'Admissions open for new batches — limited seats!',
+  announcementButtonText: 'Contact Us',
+  announcementButtonLink: '/Contect-us',
+  statsBandEnabled: true,
+  statsList: [],
 };
 
 function mapRow(row) {
@@ -26,6 +46,12 @@ function mapRow(row) {
     popupEnabled: row.popup_enabled,
     popupImageUrl: row.popup_image_url,
     popupLink: row.popup_link,
+    announcementEnabled: row.announcement_enabled ?? false,
+    announcementText: row.announcement_text ?? '',
+    announcementButtonText: row.announcement_button_text ?? '',
+    announcementButtonLink: row.announcement_button_link ?? '',
+    statsBandEnabled: row.stats_band_enabled ?? true,
+    statsList: parseStatsJson(row.stats_json),
   };
 }
 
@@ -50,6 +76,12 @@ export async function updateSiteSettings(settings) {
       popup_enabled: settings.popupEnabled,
       popup_image_url: settings.popupImageUrl,
       popup_link: settings.popupLink,
+      announcement_enabled: settings.announcementEnabled,
+      announcement_text: settings.announcementText,
+      announcement_button_text: settings.announcementButtonText,
+      announcement_button_link: settings.announcementButtonLink,
+      stats_band_enabled: settings.statsBandEnabled,
+      stats_json: JSON.stringify(settings.statsList ?? []),
     })
     .eq('id', 1);
   if (error) throw error;

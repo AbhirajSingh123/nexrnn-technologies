@@ -42,7 +42,7 @@ async function downloadEnrollmentPDF({ name, itemTitle, referenceId, batchId, fe
     ['Student Name', name || '-'],
     ['Program', itemTitle || '-'],
     ['Batch ID', batchId || 'Will be shared soon'],
-    ['Fees', fee != null ? `\u20B9${Number(fee).toLocaleString('en-IN')}` : '\u20B90'],
+    ['Fees', fee != null ? `Rs. ${Number(fee).toLocaleString('en-IN')}` : 'Rs. 0'],
     ['Payment Type', isFree ? 'Free' : 'Paid'],
     ['Reference No.', referenceId || '-'],
     ['Date', new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })],

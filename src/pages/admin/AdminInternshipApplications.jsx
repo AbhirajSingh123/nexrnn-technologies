@@ -626,7 +626,7 @@ function ApplicationDetailModal({ editing, setEditing, onSave, saving, onDownloa
             </div>
           </div>
           <div className="mt-4">
-            <label className={labelClass}>Admin Remarks (internal — students ko kabhi nahi dikhega)</label>
+            <label className={labelClass}>Admin Remarks (internal — never shown to students)</label>
             <textarea rows={3} value={editing.adminRemarks} onChange={(e) => set('adminRemarks', e.target.value)} className={`${inputClass} resize-y`} placeholder="e.g. Strong technical profile / Needs additional verification" />
           </div>
         </div>

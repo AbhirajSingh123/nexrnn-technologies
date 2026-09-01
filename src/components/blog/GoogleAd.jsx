@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { ADSENSE_CLIENT, isAdsConfigured } from '@/constants/adsConfig';
+import { hasAdvertisingConsent, subscribeConsent } from '@/utils/cookieConsent';
 
 // AdSense script poore site par sirf EK baar load hota hai,
 // aur wo bhi tab jab pehla ad render ho (sirf blog pages par).
@@ -26,7 +27,9 @@ export default function GoogleAd({ slot, format = 'auto', className = '' }) {
   const pushedRef = useRef(false);
 
   useEffect(() => {
+    // Cookie consent: advertising allow na ho to koi ad script / ad push nahi
     if (!isAdsConfigured() || !slot || !adRef.current || pushedRef.current) return;
+    if (!hasAdvertisingConsent()) return;
 
     loadAdsScript();
     try {
@@ -39,8 +42,23 @@ export default function GoogleAd({ slot, format = 'auto', className = '' }) {
     }
   }, [slot]);
 
-  // Config nahi hui to bilkul kuch na dikhe
-  if (!isAdsConfigured() || !slot) return null;
+  // Banner/modal se "Allow Advertising" hote hi current ads render ho jayein
+  useEffect(() => {
+    const unsub = subscribeConsent((consent) => {
+      if (!consent?.advertising || !adRef.current || pushedRef.current) return;
+      loadAdsScript();
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        pushedRef.current = true;
+      } catch {
+        /* ignore */
+      }
+    });
+    return unsub;
+  }, []);
+
+  // Config nahi hui (ya advertising consent nahi) to bilkul kuch na dikhe
+  if (!isAdsConfigured() || !slot || !hasAdvertisingConsent()) return null;
 
   return (
     <div className={`my-8 google-ad-wrap ${className}`}>

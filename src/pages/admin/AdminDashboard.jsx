@@ -41,7 +41,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const load = async () => {
-      const tables = ['leads_contact', 'leads_service', 'leads_course', 'leads_workshop', 'services', 'courses', 'workshops', 'blog_posts'];
+      const tables = ['leads_contact', 'leads_service', 'leads_course', 'leads_workshop', 'services', 'courses', 'workshops', 'blog_posts', 'mentors'];
       const results = await Promise.all(
         tables.map((t) => supabase.from(t).select('*', { count: 'exact', head: true }))
       );
@@ -161,6 +161,7 @@ export default function AdminDashboard() {
         <StatCard icon={Newspaper} label="Blog Listed" value={counts.blog_posts} to={ADMIN_ROUTES.blogPosts} />
         <StatCard icon={IndianRupee} label={'Total Payments Received'} value={'\u20b9' + (paymentsInfo.total ?? 0).toLocaleString('en-IN')} to={ADMIN_ROUTES.payments} />
         <StatCard icon={Wallet} label="Today Payments Received" value={'\u20b9' + (paymentsInfo.today ?? 0).toLocaleString('en-IN')} to={ADMIN_ROUTES.payments} />
+        <StatCard icon={Users} label="Total Mentors" value={counts.mentors} to={ADMIN_ROUTES.mentors} />
       </div>
 
       {/* Type filter pills */}

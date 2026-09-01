@@ -245,7 +245,7 @@ export default function AdminCareerForm() {
             <div>
               <label className={labelClass}>Last Date to Apply</label>
               <input type="date" name="last_date_apply" value={form.last_date_apply} onChange={handleChange} className={inputClass} />
-              <p className="mt-1.5 text-[11px] text-muted normal-case">Iske baad card par "Applications Closed" dikhega.</p>
+              <p className="mt-1.5 text-[11px] text-muted normal-case">The card will then show "Applications Closed".</p>
             </div>
             <div>
               <label className={labelClass}>Application Fee *</label>
@@ -276,7 +276,7 @@ export default function AdminCareerForm() {
                   <option key={d} value={d} />
                 ))}
               </datalist>
-              <p className="mt-1.5 text-[11px] text-muted normal-case">Applicants ke form par yehi domain fixed dikhega.</p>
+              <p className="mt-1.5 text-[11px] text-muted normal-case">Applicants will see this domain as fixed on the form.</p>
             </div>
             {form.type === 'internship' && (
               <div>
@@ -288,7 +288,7 @@ export default function AdminCareerForm() {
                   <option value="3 Months">3 Months</option>
                   <option value="6 Months">6 Months</option>
                 </select>
-                <p className="mt-1.5 text-[11px] text-muted normal-case">Applicants ke form par yeh duration fixed dikhega (not editable).</p>
+                <p className="mt-1.5 text-[11px] text-muted normal-case">Applicants will see this duration as fixed on the form (not editable).</p>
               </div>
             )}
             <div className="grid grid-cols-2 gap-3">

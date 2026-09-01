@@ -6,7 +6,7 @@ export const SITE = {
   name: 'NexRNN Technologies',
   shortName: 'NexRNN',
   tagline: 'Your Digital Growth & Technology Partner',
-  domain: 'https://nexrnntechnology.in',
+  domain: 'https://www.nexrnntechnologies.in',
   phone: '7520424645',
   phoneDisplay: '+91 75204 24645',
   email: 'nexrnntechnologies@gmail.com',
@@ -34,8 +34,8 @@ export const NAV_LINKS = [
 
 export const HERO_STATS = [
   { label: 'Services Offered', value: 14, suffix: '+' },
-  { label: 'Course Programs', value: 3, suffix: '' },
-  { label: 'Focus Areas', value: 4, suffix: '' },
+  { label: 'Course Programs', value: 3, suffix: '+' },
+  { label: 'Focus Areas', value: 4, suffix: '+' },
   { label: 'Based In', value: 0, suffix: 'India', isText: true },
 ];
 

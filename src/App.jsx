@@ -3,11 +3,16 @@ import { Routes, Route } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { ToastContainer } from 'react-toastify';
 import AnalyticsLoader from '@/components/analytics/AnalyticsLoader';
+import CookieConsent from '@/components/shared/CookieConsent';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import RootLayout from '@/layouts/RootLayout';
 import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
+import { MentorAuthProvider } from '@/contexts/MentorAuthContext';
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute';
+import MentorLayout from '@/layouts/MentorLayout';
+import MentorProtectedRoute from '@/components/MentorProtectedRoute';
 import { ADMIN_ROUTES } from '@/constants/adminRoutes';
+import { MENTOR_ROUTES } from '@/constants/mentorRoutes';
 import Home from '@/pages/Home';
 import { SITE, SOCIAL_LINKS } from '@/constants/siteData';
 import 'react-toastify/dist/ReactToastify.css';
@@ -47,6 +52,21 @@ const AdminLeadsServices = lazy(() => import('@/pages/admin/AdminLeadsServices')
 const AdminLeadsCourses = lazy(() => import('@/pages/admin/AdminLeadsCourses'));
 const AdminLeadsWorkshops = lazy(() => import('@/pages/admin/AdminLeadsWorkshops'));
 const AdminPayments = lazy(() => import('@/pages/admin/AdminPayments'));
+const AdminMentors = lazy(() => import('@/pages/admin/AdminMentors'));
+const AdminMentorIssues = lazy(() => import('@/pages/admin/AdminMentorIssues'));
+const MentorLogin = lazy(() => import('@/pages/mentor/MentorLogin'));
+const MentorDashboard = lazy(() => import('@/pages/mentor/MentorDashboard'));
+const MentorCourseRegistrations = lazy(() => import('@/pages/mentor/MentorCourseRegistrations'));
+const MentorWorkshopRegistrations = lazy(() => import('@/pages/mentor/MentorWorkshopRegistrations'));
+const MentorCourses = lazy(() => import('@/pages/mentor/MentorCourses'));
+const MentorWorkshops = lazy(() => import('@/pages/mentor/MentorWorkshops'));
+const MentorDetails = lazy(() => import('@/pages/mentor/MentorDetails'));
+const MentorCommission = lazy(() => import('@/pages/mentor/MentorCommission'));
+const MentorContact = lazy(() => import('@/pages/mentor/MentorContact'));
+const MentorIssue = lazy(() => import('@/pages/mentor/MentorIssue'));
+const MentorBlog = lazy(() => import('@/pages/mentor/MentorBlog'));
+const MentorWithdrawals = lazy(() => import('@/pages/mentor/MentorWithdrawals'));
+const AdminMentorPayments = lazy(() => import('@/pages/admin/AdminMentorPayments'));
 const AdminServicesList = lazy(() => import('@/pages/admin/AdminServicesList'));
 const AdminServiceForm = lazy(() => import('@/pages/admin/AdminServiceForm'));
 const AdminCoursesList = lazy(() => import('@/pages/admin/AdminCoursesList'));
@@ -81,6 +101,7 @@ function App() {
     <HelmetProvider>
       {/* GA4 + GTM + Clarity + page views + global click tracking */}
       <AnalyticsLoader />
+      <CookieConsent />
       <Helmet>
         <title>{`${SITE.name} — ${SITE.tagline}`}</title>
         <meta
@@ -130,6 +151,7 @@ function App() {
       </Helmet>
 
       <AdminAuthProvider>
+      <MentorAuthProvider>
         <ErrorBoundary>
           <Suspense fallback={<RouteFallback />}>
             <Routes>
@@ -179,6 +201,24 @@ function App() {
               </Route>
 
               <Route path={ADMIN_ROUTES.login} element={<AdminLogin />} />
+              {/* MENTOR PANEL (alag auth - Mentor ID + mobile, edge function token) */}
+              <Route path={MENTOR_ROUTES.login} element={<MentorLogin />} />
+              <Route element={<MentorProtectedRoute />}>
+                <Route element={<MentorLayout />}>
+                  <Route path={MENTOR_ROUTES.dashboard} element={<MentorDashboard />} />
+                  <Route path={MENTOR_ROUTES.workshopRegistrations} element={<MentorWorkshopRegistrations />} />
+                  <Route path={MENTOR_ROUTES.courseRegistrations} element={<MentorCourseRegistrations />} />
+                  <Route path={MENTOR_ROUTES.courses} element={<MentorCourses />} />
+                  <Route path={MENTOR_ROUTES.workshops} element={<MentorWorkshops />} />
+                  <Route path={MENTOR_ROUTES.details} element={<MentorDetails />} />
+                  <Route path={MENTOR_ROUTES.commission} element={<MentorCommission />} />
+                  <Route path={MENTOR_ROUTES.blog} element={<MentorBlog />} />
+                  <Route path={MENTOR_ROUTES.withdrawals} element={<MentorWithdrawals />} />
+                  <Route path={MENTOR_ROUTES.contact} element={<MentorContact />} />
+                  <Route path={MENTOR_ROUTES.issue} element={<MentorIssue />} />
+                </Route>
+              </Route>
+
               <Route element={<AdminProtectedRoute />}>
                 <Route element={<AdminLayout />}>
                   <Route path={ADMIN_ROUTES.dashboard} element={<AdminDashboard />} />
@@ -209,6 +249,9 @@ function App() {
                   <Route path={ADMIN_ROUTES.careerEditPath} element={<AdminCareerForm />} />
                   <Route path={ADMIN_ROUTES.careerNew} element={<AdminCareerForm />} />
                   <Route path={ADMIN_ROUTES.internshipApplications} element={<AdminInternshipApplications />} />
+                  <Route path={ADMIN_ROUTES.mentors} element={<AdminMentors />} />
+                  <Route path={ADMIN_ROUTES.mentorIssues} element={<AdminMentorIssues />} />
+                  <Route path={ADMIN_ROUTES.mentorPayments} element={<AdminMentorPayments />} />
                   <Route path={ADMIN_ROUTES.clientReviews} element={<AdminClientReviewsList />} />
                   <Route path={ADMIN_ROUTES.clientReviewEditPath} element={<AdminClientReviewForm />} />
                   <Route path={ADMIN_ROUTES.clientReviewNew} element={<AdminClientReviewForm />} />
@@ -224,6 +267,7 @@ function App() {
             </Routes>
           </Suspense>
         </ErrorBoundary>
+      </MentorAuthProvider>
       </AdminAuthProvider>
 
       <ToastContainer position="top-right" autoClose={4000} theme="light" />

@@ -37,7 +37,7 @@ export async function fetchCourses() {
     .from('courses')
     .select('*')
     .eq('active', true)
-    .order('sort_order', { ascending: true });
+    .order('created_at', { ascending: false }); // newest first
   if (error || !data?.length) return STATIC_ACTIVE_COURSES;
   return data.map(mapRow);
 }

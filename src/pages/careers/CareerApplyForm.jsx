@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useCareer, useCareers } from '@/hooks/useCareers';
 import { isLastDatePassed } from '@/data/careersRepo';
+import { isSupabaseConfigured } from '@/services/supabaseClient';
 import { createCashfreeOrder } from '@/data/paymentsRepo';
 import { startCashfreeCheckout } from '@/utils/cashfreeSdk';
 import {
@@ -37,13 +38,15 @@ export default function CareerApplyForm() {
   const { openings, loading: openingsLoading } = useCareers();
   const applicationType = career?.type || routeType;
 
-  // Gate: koi open opening hi nahi (ya URL wali opening closed hai) to form na khule —
-  // "We are currently not hiring" message dikhe (Careers page jaisa).
+  // Gate: form sirf tab khule jab LIVE database me koi open opening ho.
+  // - Demo mode (Supabase configured nahi) me form KABHI nahi khulega
+  // - Koi open opening nahi (ya URL wali opening closed) to "not hiring" message
   const checkingOpenings = careerLoading || openingsLoading;
   const openingBlocked = !checkingOpenings && (
-    openingSlug
+    !isSupabaseConfigured ||
+    (openingSlug
       ? !career || isLastDatePassed(career.lastDateApply)
-      : !openings.some((c) => !isLastDatePassed(c.lastDateApply))
+      : !openings.some((c) => !isLastDatePassed(c.lastDateApply)))
   );
   const isInternship = applicationType === 'internship';
 

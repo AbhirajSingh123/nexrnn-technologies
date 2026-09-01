@@ -15,6 +15,7 @@ import Reveal from '@/components/shared/Reveal';
 import DemoVideo from '@/components/shared/DemoVideo';
 import CertificateSample from '@/components/shared/CertificateSample';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ShareRow from '@/components/shared/ShareRow';
 
 function InfoChip({ icon: Icon, label, value }) {
   return (
@@ -122,7 +123,8 @@ export default function CourseDetail() {
                 <Icon size={28} className="text-white" />
               </div>
               <h1 className="text-secondary text-4xl sm:text-5xl leading-[1.05] mb-5">{course.title}</h1>
-              <p className="text-muted text-base leading-relaxed normal-case mb-7">{course.shortDescription}</p>
+              <p className="text-muted text-base leading-relaxed normal-case mb-5">{course.shortDescription}</p>
+              <ShareRow title={course.title} path={`/course/${course.slug}`} />
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <InfoChip icon={Clock} label="Duration" value={course.duration} />
