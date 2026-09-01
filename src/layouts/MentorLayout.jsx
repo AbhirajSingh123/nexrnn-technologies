@@ -11,10 +11,10 @@ import { MENTOR_ROUTES } from '@/constants/mentorRoutes';
 
 const NAV_ITEMS = [
   { to: MENTOR_ROUTES.dashboard, label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: MENTOR_ROUTES.workshopRegistrations, label: 'Workshop Registrations', icon: PartyPopper },
-  { to: MENTOR_ROUTES.courseRegistrations, label: 'Course Registrations', icon: GraduationCap },
-  { to: MENTOR_ROUTES.courses, label: 'Manage Courses', icon: BookOpen },
-  { to: MENTOR_ROUTES.workshops, label: 'Manage Workshops', icon: Layers },
+  { to: MENTOR_ROUTES.workshopRegistrations, label: 'Workshop Registrations', icon: PartyPopper, kind: 'workshop' },
+  { to: MENTOR_ROUTES.courseRegistrations, label: 'Course Registrations', icon: GraduationCap, kind: 'course' },
+  { to: MENTOR_ROUTES.courses, label: 'Manage Courses', icon: BookOpen, kind: 'course' },
+  { to: MENTOR_ROUTES.workshops, label: 'Manage Workshops', icon: Layers, kind: 'workshop' },
   { to: MENTOR_ROUTES.details, label: 'Mentor Details', icon: IdCard },
   { to: MENTOR_ROUTES.commission, label: 'Commission', icon: IndianRupee },
   { to: MENTOR_ROUTES.withdrawals, label: 'Withdrawal Payment', icon: Wallet },
@@ -25,6 +25,9 @@ const NAV_ITEMS = [
 
 export default function MentorLayout() {
   const { mentor, logout } = useMentorAuth();
+  // Mentor type ke hisaab se nav: workshop-only mentor ko course options nahi dikhte (aur vice versa)
+  const mentorKind = mentor?.mentorType || 'both';
+  const navItems = NAV_ITEMS.filter((it) => !it.kind || it.kind === 'both' || mentorKind === 'both' || it.kind === mentorKind);
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -57,7 +60,7 @@ export default function MentorLayout() {
         </div>
 
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-          {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+          {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}

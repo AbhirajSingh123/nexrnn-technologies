@@ -152,8 +152,9 @@ export default function AdminMentors() {
         name: form.name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
-        commissionCourse: form.commissionCourse || 0,
-        commissionWorkshop: form.commissionWorkshop || 0,
+        // Non-applicable commission is 0 hoti hai (workshop-only ko course commission nahi)
+        commissionCourse: form.mentorType === 'workshop' ? 0 : form.commissionCourse || 0,
+        commissionWorkshop: form.mentorType === 'course' ? 0 : form.commissionWorkshop || 0,
         location: form.location.trim(),
         gender: form.gender || '',
         mentorType: form.mentorType,
@@ -249,7 +250,10 @@ export default function AdminMentors() {
     if (!assignOpen) return;
     setAssignSaving(true);
     try {
-      await saveMentorAssignments(assignOpen.mentor.id, assignOpen.selected.courses, assignOpen.selected.workshops);
+      // Type ke bahar ki assignments force-empty (purani galti bhi clear ho jaye)
+      const courses = assignOpen.mentor.mentorType === 'workshop' ? [] : assignOpen.selected.courses;
+      const workshops = assignOpen.mentor.mentorType === 'course' ? [] : assignOpen.selected.workshops;
+      await saveMentorAssignments(assignOpen.mentor.id, courses, workshops);
       toast.success('Assignments saved.');
       setAssignOpen(null);
     } catch (err) {
@@ -308,18 +312,30 @@ export default function AdminMentors() {
               </button>
             </div>
             <div className="p-5 sm:p-7 pt-4">
-              <AssignGroup
-                label={`Courses (${assignOpen.selected.courses.length} selected)`}
-                items={assignOpen.courses.map((c) => ({ id: c.id, title: c.course_title }))}
-                selected={assignOpen.selected.courses}
-                onToggle={(id) => toggleAssign('courses', id)}
-              />
-              <AssignGroup
-                label={`Workshops (${assignOpen.selected.workshops.length} selected)`}
-                items={assignOpen.workshops.map((w) => ({ id: w.id, title: w.workshop_title }))}
-                selected={assignOpen.selected.workshops}
-                onToggle={(id) => toggleAssign('workshops', id)}
-              />
+              {assignOpen.mentor.mentorType !== 'workshop' ? (
+                <AssignGroup
+                  label={`Courses (${assignOpen.selected.courses.length} selected)`}
+                  items={assignOpen.courses.map((c) => ({ id: c.id, title: c.course_title }))}
+                  selected={assignOpen.selected.courses}
+                  onToggle={(id) => toggleAssign('courses', id)}
+                />
+              ) : (
+                <p className="text-xs text-muted normal-case border-2 border-secondary/15 bg-accent px-4 py-3 mb-1">
+                  This mentor is workshop-only — course assignments are not available (and no course commission is paid).
+                </p>
+              )}
+              {assignOpen.mentor.mentorType !== 'course' ? (
+                <AssignGroup
+                  label={`Workshops (${assignOpen.selected.workshops.length} selected)`}
+                  items={assignOpen.workshops.map((w) => ({ id: w.id, title: w.workshop_title }))}
+                  selected={assignOpen.selected.workshops}
+                  onToggle={(id) => toggleAssign('workshops', id)}
+                />
+              ) : (
+                <p className="text-xs text-muted normal-case border-2 border-secondary/15 bg-accent px-4 py-3 mb-1">
+                  This mentor is course-only — workshop assignments are not available (and no workshop commission is paid).
+                </p>
+              )}
               <div className="flex items-center justify-end gap-3 pt-4">
                 <button onClick={() => setAssignOpen(null)} className="btn-secondary">Cancel</button>
                 <button onClick={handleAssignSave} disabled={assignSaving} className="btn-primary inline-flex items-center gap-2 disabled:opacity-60">
@@ -360,14 +376,18 @@ export default function AdminMentors() {
                   <label className={labelClass}>Number</label>
                   <input className={inputClass} value={form.phone} onChange={set('phone')} placeholder="10-digit mobile" />
                 </div>
-                <div>
-                  <label className={labelClass}>Course Commission (%)</label>
-                  <input type="number" min="0" max="100" className={inputClass} value={form.commissionCourse} onChange={set('commissionCourse')} placeholder="e.g. 15" />
-                </div>
-                <div>
-                  <label className={labelClass}>Workshop Commission (%)</label>
-                  <input type="number" min="0" max="100" className={inputClass} value={form.commissionWorkshop} onChange={set('commissionWorkshop')} placeholder="e.g. 10" />
-                </div>
+                {form.mentorType !== 'workshop' && (
+                  <div>
+                    <label className={labelClass}>Course Commission (%)</label>
+                    <input type="number" min="0" max="100" className={inputClass} value={form.commissionCourse} onChange={set('commissionCourse')} placeholder="e.g. 15" />
+                  </div>
+                )}
+                {form.mentorType !== 'course' && (
+                  <div>
+                    <label className={labelClass}>Workshop Commission (%)</label>
+                    <input type="number" min="0" max="100" className={inputClass} value={form.commissionWorkshop} onChange={set('commissionWorkshop')} placeholder="e.g. 10" />
+                  </div>
+                )}
                 <div>
                   <label className={labelClass}>Location</label>
                   <input className={inputClass} value={form.location} onChange={set('location')} placeholder="City, State" />
@@ -432,8 +452,8 @@ export default function AdminMentors() {
                 <Detail label="Location" value={detail.location || '—'} />
                 <Detail label="Gender" value={detail.gender || '—'} />
                 <Detail label="Type" value={typeName(detail.mentorType)} />
-                <Detail label="Course Commission" value={`${detail.commissionCourse}%`} />
-                <Detail label="Workshop Commission" value={`${detail.commissionWorkshop}%`} />
+                {detail.mentorType !== 'workshop' && <Detail label="Course Commission" value={`${detail.commissionCourse}%`} />}
+                {detail.mentorType !== 'course' && <Detail label="Workshop Commission" value={`${detail.commissionWorkshop}%`} />}
                 <Detail label="Date of Joining" value={detail.dateOfJoining || '—'} />
                 <Detail label="Unique ID" value={detail.mentorId} mono />
               </div>

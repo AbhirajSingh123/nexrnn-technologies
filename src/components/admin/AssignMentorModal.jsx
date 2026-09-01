@@ -24,11 +24,12 @@ export default function AssignMentorModal({ kind, item, onClose, onSaved }) {
           return;
         }
         const [m, cur] = await Promise.all([
-          supabase.from('mentors').select('id, mentor_id, name').order('created_at', { ascending: true }),
+          supabase.from('mentors').select('id, mentor_id, name, mentor_type').order('created_at', { ascending: true }),
           fetchItemMentor(kind, item.id),
         ]);
         if (!active) return;
-        setMentors(m.data ?? []);
+        // Sirf sahi type ke mentor: course item par course/both, workshop par workshop/both
+        setMentors((m.data ?? []).filter((x) => !x.mentor_type || x.mentor_type === 'both' || x.mentor_type === kind));
         setCurrent(cur);
         setSelected(cur?.uuid || '');
       } catch {

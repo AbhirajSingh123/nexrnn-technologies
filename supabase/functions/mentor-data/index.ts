@@ -121,11 +121,16 @@ Deno.serve(async (req) => {
   const commissionWorkshop = Number(mentor.commission_workshop ?? mentor.commission_percent) || 0;
   const rateFor = (isWorkshop) => (isWorkshop ? commissionWorkshop : commissionCourse);
 
+  // Mentor type guard (server-side): workshop-only mentor ko courses ka data NAHI milega,
+  // course-only ko workshops ka nahi - chahe galti se assignment DB me ho.
+  const allowCourses = (mentor.mentor_type || 'both') !== 'workshop';
+  const allowWorkshops = (mentor.mentor_type || 'both') !== 'course';
+
   // Assigned items ki puri details (leads ko batch_id/slug se jodna hai)
-  const assignedCourseRows = courseIds.length
+  const assignedCourseRows = allowCourses && courseIds.length
     ? (await supabase.from('courses').select('id, title, slug, batch_id, price, original_price, duration, level, mode, short_description, active').in('id', courseIds).order('created_at', { ascending: false })).data ?? []
     : [];
-  const assignedWorkshopRows = workshopIds.length
+  const assignedWorkshopRows = allowWorkshops && workshopIds.length
     ? (await supabase.from('workshops').select('id, title, slug, batch_id, price, original_price, workshop_datetime, registration_deadline, short_description, details, active').in('id', workshopIds).order('created_at', { ascending: false })).data ?? []
     : [];
   const courseBatchIds = assignedCourseRows.map((c) => c.batch_id).filter(Boolean);
@@ -504,9 +509,9 @@ Deno.serve(async (req) => {
           mentorId: mentor.mentor_id,
           name: mentor.name,
           email: mentor.email,
+          mentorType: mentor.mentor_type || 'both',
           phone: mentor.phone,
           location: mentor.location,
-          mentorType: mentor.mentor_type,
           commissionPercent: commissionCourse,
           commissionCourse,
           commissionWorkshop,
@@ -566,7 +571,7 @@ Deno.serve(async (req) => {
         }
       }
       records.sort((x, y) => (y.date || '').localeCompare(x.date || ''));
-      return json({ commissionPercent: commissionCourse, commissionCourse, commissionWorkshop, records, byDay });
+      return json({ mentorType: mentor.mentor_type || 'both', commissionPercent: commissionCourse, commissionCourse, commissionWorkshop, records, byDay });
     }
 
     // ================= WALLET (available balance) =================

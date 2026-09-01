@@ -441,6 +441,10 @@ This README is updated **every time a task/feature is completed** — newest wor
 - ✅ **Sitemap cleaned for launch**: `/internship` and `/job` removed from sitemap.xml and the on-site
   sitemap page; `<lastmod>` added; admin/mentor panels stay hidden (`Disallow: /nexrnn/` in robots.txt
   + `noindex, nofollow` on both layouts)
+- ✅ **Mentor type enforcement everywhere**: workshop-only mentors don't see Course Registrations /
+  Manage Courses (and vice versa); non-applicable commission is hidden, forced to 0, their Assign
+  Programs modal blocks the other kind, per-item mentor dropdowns only list matching mentors, and the
+  edge function refuses to serve the other kind's data (server-side guard)
 - ✅ **Live SEO fixes**: site domain constant corrected to `https://www.nexrnntechnologies.in`
   (canonicals/OG/schema were pointing at a typo domain), default Open Graph + Twitter card +
   theme-color + canonical added to index.html, Local Business schema URL fixed, llms.txt refreshed

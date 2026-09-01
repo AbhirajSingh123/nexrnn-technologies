@@ -11,6 +11,7 @@ function typeName(t) {
 
 export default function MentorDetails() {
   const { data, error, loading } = useMentorData('profile');
+  const mentorKind = data?.mentor?.mentorType || 'both';
   const [docBusy, setDocBusy] = useState('');
 
   const handleDoc = async (kind) => {
@@ -59,14 +60,14 @@ export default function MentorDetails() {
               <Detail label="Date of Joining" value={data.mentor.dateOfJoining || '—'} />
               <Detail label="Mentor Status" value="Active" />
               <Detail label="Mentor Type" value={typeName(data.mentor.mentorType)} />
-              <Detail label="Course Commission" value={`${data.mentor.commissionCourse ?? data.mentor.commissionPercent ?? 0}%`} />
-              <Detail label="Workshop Commission" value={`${data.mentor.commissionWorkshop ?? data.mentor.commissionPercent ?? 0}%`} />
+              {mentorKind !== 'workshop' && <Detail label="Course Commission" value={`${data.mentor.commissionCourse ?? data.mentor.commissionPercent ?? 0}%`} />}
+              {mentorKind !== 'course' && <Detail label="Workshop Commission" value={`${data.mentor.commissionWorkshop ?? data.mentor.commissionPercent ?? 0}%`} />}
               <Detail label="Gender" value={data.mentor.gender || '—'} />
             </div>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-5 mb-6">
-            <div className="card-base bg-white p-6">
+            <div className={`card-base bg-white p-6 ${mentorKind === 'workshop' ? 'hidden' : ''}`}>
               <h3 className="text-sm font-bold text-secondary uppercase tracking-wide mb-3">Assigned Courses</h3>
               {data.assignedCourses.length === 0 ? (
                 <p className="text-xs text-muted normal-case">None yet</p>
@@ -81,7 +82,7 @@ export default function MentorDetails() {
                 </ul>
               )}
             </div>
-            <div className="card-base bg-white p-6">
+            <div className={`card-base bg-white p-6 ${mentorKind === 'course' ? 'hidden' : ''}`}>
               <h3 className="text-sm font-bold text-secondary uppercase tracking-wide mb-3">Assigned Workshops</h3>
               {data.assignedWorkshops.length === 0 ? (
                 <p className="text-xs text-muted normal-case">None yet</p>

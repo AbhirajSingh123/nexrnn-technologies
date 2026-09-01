@@ -6,6 +6,7 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
 export default function MentorDashboard() {
   const { mentor } = useMentorAuth();
+  const mentorKind = mentor?.mentorType || 'both'; // 'course' | 'workshop' | 'both'
   const { data, error, loading } = useMentorData('dashboard');
 
   return (
@@ -30,10 +31,10 @@ export default function MentorDashboard() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <MiniCard icon={Percent} label="Course Commission" value={`${data.commissionCourse ?? data.commissionPercent ?? 0}%`} />
-            <MiniCard icon={Percent} label="Workshop Commission" value={`${data.commissionWorkshop ?? data.commissionPercent ?? 0}%`} />
-            <MiniCard icon={Layers} label="Assigned Courses" value={data.assignedCourses} />
-            <MiniCard icon={PartyPopper} label="Assigned Workshops" value={data.assignedWorkshops} />
+            {mentorKind !== 'workshop' && <MiniCard icon={Percent} label="Course Commission" value={`${data.commissionCourse ?? data.commissionPercent ?? 0}%`} />}
+            {mentorKind !== 'course' && <MiniCard icon={Percent} label="Workshop Commission" value={`${data.commissionWorkshop ?? data.commissionPercent ?? 0}%`} />}
+            {mentorKind !== 'workshop' && <MiniCard icon={Layers} label="Assigned Courses" value={data.assignedCourses} />}
+            {mentorKind !== 'course' && <MiniCard icon={PartyPopper} label="Assigned Workshops" value={data.assignedWorkshops} />}
           </div>
 
           {(data.wallet?.pending ?? 0) > 0 && (

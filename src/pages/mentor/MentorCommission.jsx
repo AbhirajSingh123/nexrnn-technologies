@@ -45,6 +45,7 @@ function EarningsChart({ byDay }) {
 
 export default function MentorCommission() {
   const { data, error, loading } = useMentorData('commissions');
+  const mentorKind = data?.mentorType || 'both'; // edge profile se aata hai
   const [range, setRange] = useState('30');
 
   const records = useMemo(() => data?.records ?? [], [data]);
@@ -85,8 +86,8 @@ export default function MentorCommission() {
       ) : (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6">
-            <StatCard icon={Percent} label="Course Commission" value={`${data.commissionCourse ?? data.commissionPercent ?? 0}%`} />
-            <StatCard icon={Percent} label="Workshop Commission" value={`${data.commissionWorkshop ?? data.commissionPercent ?? 0}%`} />
+            {mentorKind !== 'workshop' && <StatCard icon={Percent} label="Course Commission" value={`${data.commissionCourse ?? data.commissionPercent ?? 0}%`} />}
+            {mentorKind !== 'course' && <StatCard icon={Percent} label="Workshop Commission" value={`${data.commissionWorkshop ?? data.commissionPercent ?? 0}%`} />}
             <StatCard icon={Wallet} label="Total Earnings" value={inr(totalEarnings)} />
             <StatCard icon={CalendarDays} label="Today's Earnings" value={inr(todayEarnings)} />
             <StatCard icon={IndianRupee} label="This Month" value={inr(monthEarnings)} />
