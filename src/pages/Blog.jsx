@@ -1,7 +1,7 @@
 import { useState, useMemo, Fragment } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { BookOpen, Sparkles, ArrowRight, Calendar, Clock , Rss } from 'lucide-react';
+import { BookOpen, Sparkles, ArrowRight, Calendar, Clock } from 'lucide-react';
 import { useBlogCategories, useBlogPosts } from '@/hooks/useBlog';
 import { formatBlogDate } from '@/utils/blogUtils';
 import { SITE } from '@/constants/siteData';
@@ -61,15 +61,6 @@ export default function Blog() {
             Actionable strategies, expert analyses, and practical tutorials on marketing,
             modern web development, and AI tools from our team in Lucknow.
           </p>
-          <a
-            href="/rss.xml"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 mt-6 border-2 border-secondary/25 bg-white px-4 py-2 text-xs font-bold text-secondary hover:border-primary hover:text-primary transition-colors"
-            title="Subscribe via RSS reader"
-          >
-            <Rss size={14} className="text-orange-500" /> Subscribe via RSS
-          </a>
         </div>
       </section>
 

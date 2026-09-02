@@ -113,6 +113,13 @@ export default function Footer() {
           </button>
           <Link to="/terms-and-conditions" className="hover:text-primary transition-colors">Terms &amp; Conditions</Link>
           <Link to="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</Link>
+          <a
+            href="/rss.xml"
+            title="RSS feed — new articles"
+            className="hover:text-primary transition-colors"
+          >
+            RSS
+          </a>
         </div>
       </div>
 

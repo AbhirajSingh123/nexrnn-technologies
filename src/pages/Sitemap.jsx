@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { Home, Sparkles, Briefcase, GraduationCap, MonitorPlay, BookOpen, FileText, Map as MapIcon } from 'lucide-react';
+import { Home, Sparkles, Briefcase, GraduationCap, MonitorPlay, BookOpen, FileText, Map as MapIcon , Rss } from 'lucide-react';
 import { fetchServices } from '@/data/servicesRepo';
 import { fetchCourses } from '@/data/coursesRepo';
 import { fetchWorkshops } from '@/data/workshopsRepo';
@@ -38,6 +38,12 @@ export default function Sitemap() {
     { to: '/terms-and-conditions', label: 'Terms & Conditions' },
     { to: '/refund-policy', label: 'Refund Policy' },
     { to: '/sitemap', label: 'Sitemap' },
+  ];
+
+  // Machine-readable files (search engines & RSS feed readers)
+  const feedLinks = [
+    { href: '/sitemap.xml', label: 'XML Sitemap', desc: 'For search engines' },
+    { href: '/rss.xml', label: 'RSS Feed', desc: 'Newest blog articles for RSS readers & newsletters' },
   ];
 
   return (
@@ -114,6 +120,32 @@ export default function Sitemap() {
 
               {/* Legal */}
               <SitemapCard icon={FileText} title="Legal & Policies" links={legalPages} />
+
+              {/* Data feeds (sitemap.xml / rss.xml) */}
+              <div className="card-base bg-white p-6 flex flex-col">
+                <div className="flex items-center gap-3 mb-4 pb-4 border-b-2 border-secondary/10">
+                  <span className="w-10 h-10 bg-primary/10 border-2 border-primary/20 flex items-center justify-center shrink-0">
+                    <Rss size={18} className="text-primary" />
+                  </span>
+                  <h2 className="text-secondary normal-case text-lg">Data Feeds</h2>
+                </div>
+                <ul className="space-y-2.5 flex-1">
+                  {feedLinks.map((f) => (
+                    <li key={f.href}>
+                      <a
+                        href={f.href}
+                        className="text-sm text-muted hover:text-primary transition-colors normal-case inline-flex items-start gap-2"
+                      >
+                        <span className="text-primary mt-1.5 w-1 h-1 bg-primary shrink-0" />
+                        <span>
+                          <span className="font-medium text-secondary/80 hover:text-primary">{f.label}</span>
+                          <span className="block text-xs text-muted normal-case mt-0.5">{f.desc}</span>
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           )}
         </div>
