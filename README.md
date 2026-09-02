@@ -441,6 +441,9 @@ This README is updated **every time a task/feature is completed** — newest wor
 - ✅ **Sitemap cleaned for launch**: `/internship` and `/job` removed from sitemap.xml and the on-site
   sitemap page; `<lastmod>` added; admin/mentor panels stay hidden (`Disallow: /nexrnn/` in robots.txt
   + `noindex, nofollow` on both layouts)
+- ✅ **follow.it subscription on the blog**: "Subscribe by Email" + "Follow via RSS" buttons
+  in the blog hero — readers get an automatic notification (email/RSS) of every new article via
+  follow.it (free newsletter service, powered by the site's rss.xml)
 - ✅ RSS link relocated: off the blog hero → now a discreet "RSS" link in the footer bottom bar
   and a "Data Feeds" card on the Sitemap page (with sitemap.xml)
 - ✅ **User-friendly error screens (no technical details shown)**: file/chunk load failures
