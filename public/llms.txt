@@ -47,6 +47,7 @@ Current openings and apply links: https://www.nexrnntechnologies.in/careers
 ## Resources
 
 - Blog — digital marketing and technology articles: https://www.nexrnntechnologies.in/blog
+- RSS feed (newest articles, auto-updated): https://www.nexrnntechnologies.in/rss.xml
 - Case Studies — client project stories: https://www.nexrnntechnologies.in/case-studies
 - FAQs: https://www.nexrnntechnologies.in/faqs
 - Sitemap (all pages): https://www.nexrnntechnologies.in/sitemap

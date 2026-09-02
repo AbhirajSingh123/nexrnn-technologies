@@ -441,6 +441,16 @@ This README is updated **every time a task/feature is completed** — newest wor
 - ✅ **Sitemap cleaned for launch**: `/internship` and `/job` removed from sitemap.xml and the on-site
   sitemap page; `<lastmod>` added; admin/mentor panels stay hidden (`Disallow: /nexrnn/` in robots.txt
   + `noindex, nofollow` on both layouts)
+- ✅ **User-friendly error screens (no technical details shown)**: file/chunk load failures
+  never reveal file paths — the error boundary and a global guard auto-reload once (loop-safe),
+  then show a simple "We're making some updates / Something went wrong" screen with Reload + Contact Us.
+  Mentor-facing service error messages simplified too
+- ✅ **Dynamic Sitemap + RSS (SEO core)**: `npm run build` now generates `public/sitemap.xml`
+  (static pages + all published blogs, live courses/workshops, services, case studies with real lastmod
+  dates) and `public/rss.xml` (latest 30 posts) straight from Supabase. Safe fallbacks: no env / DB
+  unreachable → existing sitemap preserved, build never fails. RSS subscribe button on the blog,
+  auto-discovery link in index.html, llms.txt updated. After publishing content: redeploy (sitemap
+  refreshes) + Google Search Console "Request Indexing" for instant pickup
 - ✅ **Mentor type enforcement hardened (round 2)**: the edge function now BLOCKS `item_create`
   for the wrong kind (workshop-only mentors cannot create courses — server-side 403), dashboard/profile
   counts and assigned lists use type-guarded data, Manage pages redirect on direct-URL access, the Add

@@ -60,16 +60,16 @@ export async function loginMentor(mentorId, phone) {
       body: JSON.stringify({ mentorId, phone }),
     });
   } catch {
-    throw new Error('Login service unreachable — deploy the "mentor-login" edge function in Supabase, then try again.');
+    throw new Error('Login service is temporarily unavailable. Please try again in a while.');
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.error) {
     if (res.status === 404) {
-      throw new Error('Login service not found — deploy the "mentor-login" edge function in Supabase first.');
+      throw new Error('Login service is temporarily unavailable. Please try again in a while.');
     }
     throw new Error(data.error || (res.status === 401
       ? 'Invalid Mentor ID or mobile number.'
-      : `Login service error (${res.status}). Check edge function logs.`));
+      : 'Login failed. Please try again in a while or contact us.'));
   }
   try {
     sessionStorage.setItem(TOKEN_KEY, data.token);
@@ -137,12 +137,12 @@ export async function mentorData(action, payload = {}) {
     });
   } catch {
     // Network/CORS failure - almost always: mentor-data edge function deployed nahi hai
-    const err = new Error('Data service unreachable — deploy the "mentor-data" edge function in Supabase, then refresh.');
+    const err = new Error('Data service is temporarily unavailable. Please try again in a while, or contact us if the issue continues.');
     err.noRetryHint = true;
     throw err;
   }
   if (res.status === 404) {
-    const err = new Error('Data service not found — deploy the "mentor-data" edge function in Supabase first.');
+    const err = new Error('Data service is temporarily unavailable. Please try again in a while, or contact us if the issue continues.');
     err.status = 404;
     throw err;
   }
