@@ -134,6 +134,41 @@ export default function AdminSiteSettings() {
           </div>
         </div>
 
+        {/* Payment popup settings */}
+        <div className="card-base bg-white p-7 mb-7">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg text-secondary normal-case">Payment Popup — Platform Fees</h2>
+            <label className="flex items-center gap-2.5">
+              <input type="checkbox" className="w-5 h-5 accent-primary" checked={form.platformFeeEnabled} onChange={handleToggle('platformFeeEnabled')} />
+              <span className="text-sm font-semibold text-secondary">Show / Charge</span>
+            </label>
+          </div>
+          <p className="text-xs text-muted normal-case mb-5">
+            Shown as &ldquo;Platform Fees&rdquo; in the payment confirmation popup (before the gateway).
+            Off = the row is hidden and no fee is charged.
+          </p>
+          {form.platformFeeEnabled && (
+            <div className="max-w-xs">
+              <label className={labelClass}>Platform Fee Amount (Rs.)</label>
+              <input type="number" min="0" className={inputClass} value={form.platformFeeAmount || ''} onChange={handleChange('platformFeeAmount')} placeholder="e.g. 49" />
+            </div>
+          )}
+
+          <div className="border-t-2 border-dashed border-secondary/15 mt-6 pt-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-secondary uppercase tracking-wide">Promo Code Box</h3>
+              <label className="flex items-center gap-2.5">
+                <input type="checkbox" className="w-5 h-5 accent-primary" checked={form.promoBoxEnabled} onChange={handleToggle('promoBoxEnabled')} />
+                <span className="text-sm font-semibold text-secondary">Show</span>
+              </label>
+            </div>
+            <p className="text-xs text-muted normal-case mt-2">
+              Show/hide the promo code field in the payment popup. Codes themselves are managed in
+              Admin &rarr; Promo Codes. Off = the field is hidden but existing codes still work if typed by support.
+            </p>
+          </div>
+        </div>
+
         <div className="card-base bg-white p-7">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg text-secondary normal-case">Announcement Bar (Top Strip)</h2>

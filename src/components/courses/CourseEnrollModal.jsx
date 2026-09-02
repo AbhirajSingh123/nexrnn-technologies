@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +12,7 @@ import { trackLead, trackBeginCheckout } from '@/utils/analytics';
 import { parseRupeeAmount, formatINR } from '@/utils/format';
 import { useCourseEnrollModal } from '@/contexts/CourseEnrollContext';
 import Modal from '@/components/shared/Modal';
+import PaymentConfirmModal from '@/components/shared/PaymentConfirmModal';
 import ConsentCheckbox from '@/components/shared/ConsentCheckbox';
 
 const inputClass =
@@ -21,6 +23,10 @@ const errorClass = 'mt-1.5 text-xs text-primary normal-case';
 export default function CourseEnrollModal() {
   const { course, closeCourseEnroll } = useCourseEnrollModal();
   const navigate = useNavigate();
+  // Paid flow: form submit -> PAYMENT CONFIRMATION POPUP -> Pay Now -> gateway
+  // pendingPay me title/id snapshot rakhte hain (course close hone par null ho jata hai -
+  // popup ko us par depend nahi karna, warna crash hota tha)
+  const [pendingPay, setPendingPay] = useState(null); // { lead, data, amount, title, id }
 
   const {
     register,
@@ -47,9 +53,20 @@ export default function CourseEnrollModal() {
         return;
       }
 
-      // 3. Paid courses: ask our backend (Edge Function) to create a Cashfree
-      //    order — the Cashfree secret key is only ever used server-side.
+      // 3. Paid courses: PAYMENT CONFIRMATION POPUP dikhao
+      //    (fee breakdown + platform fee + promo code + Total Pay -> Pay Now -> gateway)
       const amount = parseRupeeAmount(course.price);
+      setPendingPay({ lead, data, amount, title: course.title, id: course.id });
+    } catch (err) {
+      toast.error(err.message || 'Something went wrong. Please try again.');
+    }
+  };
+
+  // Pay Now (popup se): order banao aur Cashfree par le jao
+  const handleConfirmPay = async (promoCode) => {
+    if (!pendingPay) return;
+    const { lead, data, amount } = pendingPay;
+    try {
       const { paymentSessionId } = await createCashfreeOrder({
         leadId: lead.id,
         leadType: 'course',
@@ -57,22 +74,25 @@ export default function CourseEnrollModal() {
         customerName: data.name,
         customerEmail: data.email,
         customerPhone: data.phone,
-        itemTitle: course.title,
+        itemTitle: pendingPay.title,
+        promoCode,
+        itemId: pendingPay.id,
       });
 
       reset();
+      setPendingPay(null);
       closeCourseEnroll();
 
-      // 4. Redirect to Cashfree's hosted checkout page.
       // Checkout tracking - GA4 funnel: view -> begin_checkout -> purchase
       trackBeginCheckout(course.title, amount, 'course');
       await startCashfreeCheckout(paymentSessionId);
     } catch (err) {
-      toast.error(err.message || 'Something went wrong. Please try again.');
+      toast.error(err.message || 'Payment could not be started. Please try again.');
     }
   };
 
   return (
+    <>
     <Modal isOpen={Boolean(course)} onClose={closeCourseEnroll} title={course ? `Enroll: ${course.title}` : 'Enroll'}>
       {course && (
         <div className="card-base bg-accent p-5 mb-6 flex items-center justify-between">
@@ -137,5 +157,17 @@ export default function CourseEnrollModal() {
         </button>
       </form>
     </Modal>
+
+    {/* Payment confirmation popup (gateway se pehle) - Modal se bahar, null-safe props */}
+    <PaymentConfirmModal
+      open={Boolean(pendingPay)}
+      onClose={() => setPendingPay(null)}
+      itemTitle={pendingPay?.title || ''}
+      kind="course"
+      baseAmount={pendingPay?.amount ?? 0}
+      itemId={pendingPay?.id || null}
+      onPay={handleConfirmPay}
+    />
+    </>
   );
 }

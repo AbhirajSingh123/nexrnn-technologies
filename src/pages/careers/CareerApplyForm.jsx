@@ -8,6 +8,7 @@ import { useCareer, useCareers } from '@/hooks/useCareers';
 import { isLastDatePassed } from '@/data/careersRepo';
 import { isSupabaseConfigured } from '@/services/supabaseClient';
 import { createCashfreeOrder } from '@/data/paymentsRepo';
+import PaymentConfirmModal from '@/components/shared/PaymentConfirmModal';
 import { startCashfreeCheckout } from '@/utils/cashfreeSdk';
 import {
   submitApplication, uploadResume, validateResumeFile, downloadApplicationPDF,
@@ -28,6 +29,8 @@ const SECTION_HEADING = {
 };
 
 export default function CareerApplyForm() {
+  // Paid opening: application save hone ke baad PAYMENT CONFIRMATION POPUP
+  const [pendingPay, setPendingPay] = useState(null); // { snapshot, orderIdCtx }
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const openingSlug = params.get('opening') || '';
@@ -215,33 +218,11 @@ export default function CareerApplyForm() {
         skills: form.skills.trim(),
         expectations: form.expectations.trim(),
       };
-      // Paid opening: Cashfree gateway se payment, phir success page par redirect
+      // Paid opening: PAYMENT CONFIRMATION POPUP (fee + platform fee + promo + Total Pay)
       if (isPaid) {
-        try {
-          const order = await createCashfreeOrder({
-            leadId: result.id,
-            leadType: 'career',
-            amount: Number(career.feeAmount),
-            customerName: form.fullName.trim(),
-            customerEmail: form.email.trim(),
-            customerPhone: digits,
-            itemTitle: openingTitle,
-            applicationId: result.id,
-          });
-          // Success page par form data wapas lene ke liye snapshot save karo
-          try {
-            sessionStorage.setItem(`career_app_${order.orderId}`, JSON.stringify({ ...snapshot, id: result.id }));
-          } catch { /* ignore */ }
-          await startCashfreeCheckout(order.paymentSessionId);
-          return; // redirect ho gaya
-        } catch (payErr) {
-          setErrors((prev) => ({
-            ...prev,
-            submit: (payErr.message || 'Payment could not be started.') + ' Your application is saved — please contact us if the amount was deducted.',
-          }));
-          setSubmitting(false);
-          return;
-        }
+        setSubmitting(false);
+        setPendingPay({ appId: result.id, digits, snapshot });
+        return; // popup se Pay Now par gateway chalega
       }
 
       setSubmittedData(snapshot);
@@ -251,6 +232,34 @@ export default function CareerApplyForm() {
       setErrors((prev) => ({ ...prev, submit: err.message || 'Submission failed. Please try again.' }));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // Pay Now (popup se): order banao aur Cashfree par le jao
+  const handleConfirmPay = async (promoCode) => {
+    if (!pendingPay) return;
+    const { appId, digits, snapshot } = pendingPay;
+    try {
+      const order = await createCashfreeOrder({
+        leadId: appId,
+        leadType: 'career',
+        amount: Number(career.feeAmount),
+        customerName: form.fullName.trim(),
+        customerEmail: form.email.trim(),
+        customerPhone: digits,
+        itemTitle: openingTitle,
+        applicationId: appId,
+        promoCode,
+        itemId: career?.id || null,
+      });
+      // Success page par form data wapas lene ke liye snapshot save karo
+      try {
+        sessionStorage.setItem(`career_app_${order.orderId}`, JSON.stringify({ ...snapshot, id: appId }));
+      } catch { /* ignore */ }
+      setPendingPay(null);
+      await startCashfreeCheckout(order.paymentSessionId);
+    } catch (payErr) {
+      toast.error((payErr.message || 'Payment could not be started.') + ' Your application is saved — please contact us if the amount was deducted.');
     }
   };
 
@@ -604,6 +613,17 @@ export default function CareerApplyForm() {
           </form>
         </div>
       </div>
+
+      {/* Payment confirmation popup (gateway se pehle) */}
+      <PaymentConfirmModal
+        open={Boolean(pendingPay)}
+        onClose={() => setPendingPay(null)}
+        itemTitle={openingTitle}
+        kind="career"
+        baseAmount={Number(career?.feeAmount) || 0}
+        itemId={career?.id || null}
+        onPay={handleConfirmPay}
+      />
     </>
   );
 }

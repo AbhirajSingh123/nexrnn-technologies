@@ -32,6 +32,9 @@ const DEFAULT_SETTINGS = {
   announcementButtonLink: '/Contect-us',
   statsBandEnabled: true,
   statsList: [],
+  platformFeeEnabled: false,
+  platformFeeAmount: 0,
+  promoBoxEnabled: true,
 };
 
 function mapRow(row) {
@@ -52,6 +55,9 @@ function mapRow(row) {
     announcementButtonLink: row.announcement_button_link ?? '',
     statsBandEnabled: row.stats_band_enabled ?? true,
     statsList: parseStatsJson(row.stats_json),
+    platformFeeEnabled: row.platform_fee_enabled ?? false,
+    platformFeeAmount: Number(row.platform_fee_amount) || 0,
+    promoBoxEnabled: row.promo_box_enabled ?? true,
   };
 }
 
@@ -82,6 +88,9 @@ export async function updateSiteSettings(settings) {
       announcement_button_link: settings.announcementButtonLink,
       stats_band_enabled: settings.statsBandEnabled,
       stats_json: JSON.stringify(settings.statsList ?? []),
+      platform_fee_enabled: settings.platformFeeEnabled,
+      platform_fee_amount: Number(settings.platformFeeAmount) || 0,
+      promo_box_enabled: settings.promoBoxEnabled,
     })
     .eq('id', 1);
   if (error) throw error;

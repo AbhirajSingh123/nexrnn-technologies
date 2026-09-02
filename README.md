@@ -441,7 +441,40 @@ This README is updated **every time a task/feature is completed** — newest wor
 - ✅ **Sitemap cleaned for launch**: `/internship` and `/job` removed from sitemap.xml and the on-site
   sitemap page; `<lastmod>` added; admin/mentor panels stay hidden (`Disallow: /nexrnn/` in robots.txt
   + `noindex, nofollow` on both layouts)
-- ✅ **follow.it subscription on the blog**: "Subscribe by Email" + "Follow via RSS" buttons
+- ✅ **Payment Confirmation Popup + Promo Codes (new)**: before any Cashfree checkout
+  (course / workshop / job), a popup shows Course/Workshop/Job Fee, **Platform Fees** (admin-managed
+  amount + show/hide in Site Settings), optional **Promo Code** box (admin show/hide) with server-side
+  Apply validation, **Total Pay** and Pay Now. Free items skip the popup as before
+- ✅ **Admin → Promo Codes page**: create codes with percent or flat discount, scope them to
+  all / courses-only / workshops-only / jobs-only, optionally pin to ONE specific course, workshop or
+  opening, set max uses, and **Activate / Deactivate / Delete** anytime (usage counter included)
+- ✅ Server-side money math: the `create-cashfree-order` edge function recalculates discount
+  (from `promo_codes`) + platform fee (from `site_settings`) — frontend numbers are never trusted;
+  `payments` rows now store base_amount / discount_amount / promo_code / platform_fee; new
+  `validate-promo` edge function powers the popup's Apply button
+- ✅ Popup crash-proofing: the course/workshop enroll modals snapshot the item title/id into
+  state while open and render the payment popup with fully null-safe props — the popup can never
+  read from a closed modal's context, so page load never crashes (real-browser tested: every
+  public page + the full enroll → confirm-payment → Pay Now flow, zero console errors)
+- ✅ Admin Payments upgrades: new **Promo Code** column (code shown per payment), search now
+  matches promo codes too, and exports (CSV / Excel / PDF) include the full fee breakdown —
+  Total Pay, base_amount, discount_amount, promo_code, platform_fee — alongside the existing fields
+- ✅ **Payment Slip download** in Admin Payments: per-row "Download" button generates a
+  certificate-style PDF receipt (logo + double blue border + digital note + website URL) with the
+  complete payment info — item fee, promo code + discount, platform fees, total pay, student
+  details, reference ID, order/payment IDs, method and date. Old payments (no base_amount) show
+  Item Fee = Total Pay. jspdf stays dynamic; PDF uses `Rs.` (never ₹)
+- ✅ RSS fully removed from the visible UI (footer Quick Links, footer bottom bar, Sitemap page
+  card — all gone, user request): raw XML was ugly to open and no mainstream site shows RSS links
+  in UI. The feed still works "in the background" — rss.xml is generated on every build and stays
+  discoverable by machines (invisible auto-discovery `<link>` in index.html, robots/sitemap) for
+  follow.it, feed readers and search engines
+- ✅ follow.it subscription form removed (user request); RSS Feed link (with RSS icon) lives
+  in the footer Quick Links → site's own rss.xml
+- ✅ **follow.it subscription on the blog**: official follow.it **email subscription form embedded**
+  in the blog hero (email field + Subscribe button, POSTs straight to follow.it) — the plain follow-link
+  was erroring ("didn't get a valid rss feed"), the form is their supported on-site method. A small
+  "or follow via RSS" link points to the site's own rss.xml
   in the blog hero — readers get an automatic notification (email/RSS) of every new article via
   follow.it (free newsletter service, powered by the site's rss.xml)
 - ✅ RSS link relocated: off the blog hero → now a discreet "RSS" link in the footer bottom bar

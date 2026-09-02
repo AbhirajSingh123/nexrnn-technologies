@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +13,7 @@ import { parseRupeeAmount, formatINR } from '@/utils/format';
 import { useWorkshopEnrollModal } from '@/contexts/WorkshopEnrollContext';
 import { isRegistrationClosed } from '@/utils/workshopUtils';
 import Modal from '@/components/shared/Modal';
+import PaymentConfirmModal from '@/components/shared/PaymentConfirmModal';
 import ConsentCheckbox from '@/components/shared/ConsentCheckbox';
 
 const inputClass =
@@ -22,6 +24,8 @@ const errorClass = 'mt-1.5 text-xs text-primary normal-case';
 export default function WorkshopEnrollModal() {
   const { workshop, closeWorkshopEnroll } = useWorkshopEnrollModal();
   const navigate = useNavigate();
+  // Paid flow: form submit -> PAYMENT CONFIRMATION POPUP -> Pay Now -> gateway
+  const [pendingPay, setPendingPay] = useState(null);
 
   // DEADLINE GUARD: registration deadline cross ho to submit bilkul nahi hoga
   const regClosed = workshop ? isRegistrationClosed(workshop) : false;
@@ -50,6 +54,17 @@ export default function WorkshopEnrollModal() {
       }
 
       const amount = parseRupeeAmount(workshop.price);
+      setPendingPay({ lead, data, amount, title: workshop.title, id: workshop.id });
+    } catch (err) {
+      toast.error(err.message || 'Something went wrong. Please try again.');
+    }
+  };
+
+  // Pay Now (popup se): order banao aur Cashfree par le jao
+  const handleConfirmPay = async (promoCode) => {
+    if (!pendingPay) return;
+    const { lead, data, amount } = pendingPay;
+    try {
       const { paymentSessionId } = await createCashfreeOrder({
         leadId: lead.id,
         leadType: 'workshop',
@@ -57,17 +72,20 @@ export default function WorkshopEnrollModal() {
         customerName: data.name,
         customerEmail: data.email,
         customerPhone: data.phone,
-        itemTitle: workshop.title,
+        itemTitle: pendingPay.title,
+        promoCode,
+        itemId: pendingPay.id,
       });
 
       reset();
+      setPendingPay(null);
       closeWorkshopEnroll();
 
       // Checkout tracking
       trackBeginCheckout(workshop.title, amount, 'workshop');
       await startCashfreeCheckout(paymentSessionId);
     } catch (err) {
-      toast.error(err.message || 'Something went wrong. Please try again.');
+      toast.error(err.message || 'Payment could not be started. Please try again.');
     }
   };
 
@@ -86,6 +104,7 @@ export default function WorkshopEnrollModal() {
   }
 
   return (
+    <>
     <Modal isOpen={Boolean(workshop)} onClose={closeWorkshopEnroll} title={workshop ? `Register: ${workshop.title}` : 'Register'}>
       {workshop && (
         <div className="card-base bg-accent p-5 mb-6 flex items-center justify-between">
@@ -150,5 +169,17 @@ export default function WorkshopEnrollModal() {
         </button>
       </form>
     </Modal>
+
+    {/* Payment confirmation popup (gateway se pehle) - Modal se bahar, null-safe props */}
+    <PaymentConfirmModal
+      open={Boolean(pendingPay)}
+      onClose={() => setPendingPay(null)}
+      itemTitle={pendingPay?.title || ''}
+      kind="workshop"
+      baseAmount={pendingPay?.amount ?? 0}
+      itemId={pendingPay?.id || null}
+      onPay={handleConfirmPay}
+    />
+    </>
   );
 }

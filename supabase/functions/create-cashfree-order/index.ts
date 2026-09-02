@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { leadId, leadType, amount, customerName, customerEmail, customerPhone, itemTitle, applicationId } = await req.json();
+    const { leadId, leadType, amount, customerName, customerEmail, customerPhone, itemTitle, applicationId, promoCode, itemId } = await req.json();
 
     // Career application flow: leadType 'career' + applicationId (application pehle create hoti hai)
 
@@ -54,12 +54,58 @@ Deno.serve(async (req) => {
     const siteUrl = Deno.env.get('SITE_URL') ?? 'https://www.nexrnntechnologies.in';
     const functionsBase = `${Deno.env.get('SUPABASE_URL')}/functions/v1`;
 
+    // ---- Server-side amount: base (client bhejta hai) + promo discount + platform fee ----
+    // Promo/platform YAHIN se recalc hote hain (DB se) - frontend ke numbers par bharosa nahi.
+    const baseAmount = Math.max(0, Math.round(Number(amount) || 0));
+    let discountAmount = 0;
+    let appliedPromo = '';
+    const cleanPromo = String(promoCode || '').trim().toUpperCase();
+
+    if (cleanPromo) {
+      const { data: promo } = await supabase
+        .from('promo_codes')
+        .select('code, discount_type, discount_value, applies_to, item_id, max_uses, used_count, active')
+        .eq('code', cleanPromo)
+        .maybeSingle();
+      const kindForPromo = isCareer ? 'career' : leadType;
+      const promoOk =
+        promo &&
+        promo.active &&
+        (!promo.max_uses || (promo.used_count ?? 0) < promo.max_uses) &&
+        ((promo.applies_to || 'all') === 'all' ||
+          ((promo.applies_to === kindForPromo) && (!promo.item_id || !itemId || String(promo.item_id) === String(itemId))));
+      if (promoOk) {
+        discountAmount = promo.discount_type === 'percent'
+          ? Math.round((baseAmount * Number(promo.discount_value)) / 100)
+          : Math.round(Number(promo.discount_value));
+        discountAmount = Math.max(0, Math.min(discountAmount, baseAmount));
+        appliedPromo = promo.code;
+      }
+    }
+
+    // Platform fee admin settings se (site_settings, id=1)
+    let platformFee = 0;
+    const { data: settings } = await supabase
+      .from('site_settings')
+      .select('platform_fee_enabled, platform_fee_amount')
+      .eq('id', 1)
+      .maybeSingle();
+    if (settings?.platform_fee_enabled) platformFee = Math.max(0, Math.round(Number(settings.platform_fee_amount) || 0));
+
+    const finalAmount = Math.max(baseAmount - discountAmount, 0) + platformFee;
+    if (finalAmount <= 0) {
+      return new Response(JSON.stringify({ error: 'Payable amount is zero. Please contact us.' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const cfResponse = await fetch(`${getCashfreeBaseUrl()}/orders`, {
       method: 'POST',
       headers: cashfreeHeaders(),
       body: JSON.stringify({
         order_id: orderId,
-        order_amount: Number(amount),
+        order_amount: finalAmount,
         order_currency: 'INR',
         customer_details: {
           customer_id: `cust_${String(leadId).replace(/-/g, '')}`,
@@ -88,12 +134,21 @@ Deno.serve(async (req) => {
 
     const paymentRecord: Record<string, unknown> = {
       cashfree_order_id: orderId,
-      amount: Number(amount),
+      amount: finalAmount,
+      base_amount: baseAmount,
+      discount_amount: discountAmount,
+      promo_code: appliedPromo,
+      platform_fee: platformFee,
       currency: 'INR',
       status: 'created',
       raw_response: cfData,
       lead_type: leadType,
     };
+
+    // Promo usage count badhao (sahi apply hua ho to)
+    if (appliedPromo) {
+      await supabase.rpc('increment_promo_used_count', { p_code: appliedPromo });
+    }
     if (isCareer) {
       paymentRecord.application_id = applicationId || leadId;
       paymentRecord.item_title = itemTitle || '';
@@ -111,7 +166,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ orderId, paymentSessionId: cfData.payment_session_id }),
+      JSON.stringify({ orderId, paymentSessionId: cfData.payment_session_id, baseAmount, discountAmount, promoCode: appliedPromo, platformFee, finalAmount }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err) {

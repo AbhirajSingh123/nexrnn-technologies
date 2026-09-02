@@ -1,7 +1,7 @@
 import { useState, useMemo, Fragment } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { BookOpen, Sparkles, ArrowRight, Calendar, Clock, Mail, Rss } from 'lucide-react';
+import { BookOpen, Sparkles, ArrowRight, Calendar, Clock } from 'lucide-react';
 import { useBlogCategories, useBlogPosts } from '@/hooks/useBlog';
 import { formatBlogDate } from '@/utils/blogUtils';
 import { SITE } from '@/constants/siteData';
@@ -62,30 +62,6 @@ export default function Blog() {
             modern web development, and AI tools from our team in Lucknow.
           </p>
 
-          {/* Newsletter / RSS subscription (follow.it) - naye articles ki notification */}
-          <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a
-              href="https://follow.it/follow?pub=Tm_48AsURmEm5agR9iueuX_2aGw1bEWs9ngkNC3yjDE"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary inline-flex items-center gap-2"
-              title="Get new articles by email"
-            >
-              <Mail size={16} /> Subscribe by Email
-            </a>
-            <a
-              href="https://follow.it/follow?pub=Tm_48AsURmEm5agR9iueuX_2aGw1bEWs9ngkNC3yjDE"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 border-2 border-secondary/25 bg-white px-4 py-2.5 text-xs font-bold text-secondary hover:border-primary hover:text-primary transition-colors"
-              title="Follow via RSS reader"
-            >
-              <Rss size={15} className="text-orange-500" /> Follow via RSS
-            </a>
-          </div>
-          <p className="text-[11px] text-muted normal-case mt-3">
-            Get notified whenever we publish a new article — free, no spam, unsubscribe anytime.
-          </p>
         </div>
       </section>
 

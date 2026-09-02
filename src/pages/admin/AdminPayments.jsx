@@ -8,6 +8,7 @@ import AdminLoadMore from '@/components/admin/AdminLoadMore';
 import { useLoadMore } from '@/hooks/useLoadMore';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ExportButtons from '@/components/admin/ExportButtons';
+import { downloadPaymentSlipPDF } from '@/data/paymentsRepo';
 
 const STATUS_STYLES = {
   created: 'bg-accent text-secondary border-secondary/30',
@@ -39,6 +40,28 @@ function getTypeLabel(r) {
   return r.lead_type === 'career' ? 'Career Application' : r.lead_type === 'workshop' ? 'Workshop' : 'Course';
 }
 
+// Slip ke liye payment row ka poora data (student/item/reference resolved)
+function buildSlipData(r) {
+  return {
+    orderId: r.cashfree_order_id || '',
+    cfPaymentId: r.cf_payment_id || '',
+    paymentMethod: r.payment_method || '',
+    status: r.status || '',
+    amount: r.amount ?? 0,
+    baseAmount: r.base_amount,
+    discountAmount: r.discount_amount,
+    promoCode: r.promo_code || '',
+    platformFee: r.platform_fee,
+    createdAt: r.created_at || '',
+    itemName: getItemTitle(r),
+    itemTypeLabel: getTypeLabel(r),
+    referenceId: getReferenceId(r),
+    studentName: getStudent(r)?.name ?? '',
+    email: getStudent(r)?.email ?? '',
+    phone: String(getStudent(r)?.phone ?? ''),
+  };
+}
+
 export default function AdminPayments() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +69,7 @@ export default function AdminPayments() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [slippingId, setSlippingId] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -92,6 +116,7 @@ export default function AdminPayments() {
         const haystack = [
           r.cashfree_order_id, r.cf_payment_id, getReferenceId(r),
           student?.name, student?.email, student?.phone, getItemTitle(r),
+          r.promo_code,
         ].join(' ').toLowerCase();
         if (!haystack.includes(q)) return false;
       }
@@ -113,6 +138,10 @@ export default function AdminPayments() {
     item: getItemTitle(r),
     lead_type: getTypeLabel(r),
     amount: r.amount ?? 0,
+    base_amount: r.base_amount ?? '',
+    discount_amount: r.discount_amount ?? '',
+    promo_code: r.promo_code || '',
+    platform_fee: r.platform_fee ?? '',
     currency: r.currency || 'INR',
     status: r.status || '',
     cashfree_order_id: r.cashfree_order_id || '',
@@ -122,12 +151,25 @@ export default function AdminPayments() {
     created_at: r.created_at || '',
   }));
 
+  const handleDownloadSlip = async (r) => {
+    if (slippingId) return;
+    setSlippingId(r.cashfree_order_id);
+    try {
+      await downloadPaymentSlipPDF(buildSlipData(r));
+    } catch (err) {
+      toast.error(err?.message || 'Payment slip could not be downloaded. Please try again.');
+    } finally {
+      setSlippingId(null);
+    }
+  };
+
   const columns = [
     { key: 'created_at', label: 'Date', render: (r) => formatDateTimeWithDay(r.created_at) },
     { key: 'name', label: 'Name', render: (r) => getStudent(r)?.name ?? '—' },
     { key: 'item', label: 'Course / Workshop', render: (r) => getItemTitle(r) },
     { key: 'lead_type', label: 'Type', render: (r) => getTypeLabel(r) },
-    { key: 'amount', label: 'Amount', render: (r) => `\u20b9${r.amount}` },
+    { key: 'amount', label: 'Total Pay', render: (r) => `\u20b9${r.amount}` },
+    { key: 'promo_code', label: 'Promo Code', render: (r) => r.promo_code || '—' },
     { key: 'cashfree_order_id', label: 'Order ID' },
     { key: 'cf_payment_id', label: 'Payment ID', render: (r) => r.cf_payment_id || '—' },
     { key: 'reference_id', label: 'Reference ID/Application ID', render: (r) => getReferenceId(r) || '—' },
@@ -141,6 +183,20 @@ export default function AdminPayments() {
         </span>
       ),
     },
+    {
+      key: 'actions',
+      label: 'Slip',
+      render: (r) => (
+        <button
+          type="button"
+          onClick={() => handleDownloadSlip(r)}
+          disabled={slippingId === r.cashfree_order_id}
+          className="text-xs font-bold text-primary hover:underline disabled:opacity-60 whitespace-nowrap"
+        >
+          {slippingId === r.cashfree_order_id ? 'Preparing…' : 'Download'}
+        </button>
+      ),
+    },
   ];
 
   return (
@@ -151,7 +207,7 @@ export default function AdminPayments() {
       <AdminFilterBar
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search name, order ID, payment ID, reference…"
+        searchPlaceholder="Search name, order ID, payment ID, promo code, reference…"
         dateFrom={dateFrom}
         onDateFromChange={setDateFrom}
         dateTo={dateTo}

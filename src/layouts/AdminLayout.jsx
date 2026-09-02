@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'react-toastify';
 import {
+  Tag,
   Wallet,
   LayoutDashboard, Inbox, Briefcase, GraduationCap, Layers, BookOpen, LogOut, CreditCard,
   Video, Image as ImageIcon, Star, PartyPopper, Settings, Newspaper, BarChart3, Menu, X, Trophy, ClipboardList, FileUser, Users, MessageSquareWarning,
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { to: ADMIN_ROUTES.leadsCourses, label: 'Course Enrollments', icon: GraduationCap },
   { to: ADMIN_ROUTES.leadsWorkshops, label: 'Workshop Registrations', icon: PartyPopper },
   { to: ADMIN_ROUTES.payments, label: 'Payments', icon: CreditCard },
+  { to: ADMIN_ROUTES.promoCodes, label: 'Promo Codes', icon: Tag },
   { to: ADMIN_ROUTES.services, label: 'Manage Services', icon: Layers },
   { to: ADMIN_ROUTES.courses, label: 'Manage Courses', icon: BookOpen },
   { to: ADMIN_ROUTES.workshops, label: 'Manage Workshops', icon: PartyPopper },

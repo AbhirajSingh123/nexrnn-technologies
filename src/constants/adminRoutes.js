@@ -39,6 +39,7 @@ export const ADMIN_ROUTES = {
   mentors: `${ADMIN_BASE}/mentors`,
   mentorIssues: `${ADMIN_BASE}/mentor-issues`,
   mentorPayments: `${ADMIN_BASE}/mentor-payments`,
+  promoCodes: `${ADMIN_BASE}/promo-codes`,
   clientReviews: `${ADMIN_BASE}/client-reviews`,
   clientReviewNew: `${ADMIN_BASE}/client-reviews/new`,
   clientReviewEdit: (id) => `${ADMIN_BASE}/client-reviews/${id}/edit`,

@@ -67,6 +67,7 @@ const MentorIssue = lazy(() => import('@/pages/mentor/MentorIssue'));
 const MentorBlog = lazy(() => import('@/pages/mentor/MentorBlog'));
 const MentorWithdrawals = lazy(() => import('@/pages/mentor/MentorWithdrawals'));
 const AdminMentorPayments = lazy(() => import('@/pages/admin/AdminMentorPayments'));
+const AdminPromoCodes = lazy(() => import('@/pages/admin/AdminPromoCodes'));
 const AdminServicesList = lazy(() => import('@/pages/admin/AdminServicesList'));
 const AdminServiceForm = lazy(() => import('@/pages/admin/AdminServiceForm'));
 const AdminCoursesList = lazy(() => import('@/pages/admin/AdminCoursesList'));
@@ -230,6 +231,7 @@ function App() {
                   <Route path={ADMIN_ROUTES.leadsCourses} element={<AdminLeadsCourses />} />
                   <Route path={ADMIN_ROUTES.leadsWorkshops} element={<AdminLeadsWorkshops />} />
                   <Route path={ADMIN_ROUTES.payments} element={<AdminPayments />} />
+                  <Route path={ADMIN_ROUTES.promoCodes} element={<AdminPromoCodes />} />
                   <Route path={ADMIN_ROUTES.services} element={<AdminServicesList />} />
                   <Route path={ADMIN_ROUTES.serviceEditPath} element={<AdminServiceForm />} />
                   <Route path={ADMIN_ROUTES.serviceNew} element={<AdminServiceForm />} />
