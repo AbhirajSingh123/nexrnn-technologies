@@ -15,6 +15,7 @@ import Reveal from '@/components/shared/Reveal';
 import DemoVideo from '@/components/shared/DemoVideo';
 import CertificateSample from '@/components/shared/CertificateSample';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import MarkdownContent from '@/components/shared/MarkdownContent';
 import ShareRow from '@/components/shared/ShareRow';
 
 function InfoChip({ icon: Icon, label, value }) {
@@ -50,7 +51,7 @@ function FAQItem({ item, isOpen, onToggle }) {
             transition={{ duration: 0.3 }}
             className="overflow-hidden bg-white border-t-2 border-secondary"
           >
-            <p className="px-6 py-5 text-sm text-muted leading-relaxed normal-case">{item.a}</p>
+            <MarkdownContent content={item.a} className="px-6 py-5 text-sm text-muted leading-relaxed normal-case" />
           </motion.div>
         )}
       </AnimatePresence>
@@ -123,7 +124,7 @@ export default function CourseDetail() {
                 <Icon size={28} className="text-white" />
               </div>
               <h1 className="text-secondary text-4xl sm:text-5xl leading-[1.05] mb-5">{course.title}</h1>
-              <p className="text-muted text-base leading-relaxed normal-case mb-5">{course.shortDescription}</p>
+              <MarkdownContent content={course.shortDescription} className="text-muted text-base leading-relaxed normal-case mb-5" />
               <ShareRow title={course.title} path={`/course/${course.slug}`} />
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

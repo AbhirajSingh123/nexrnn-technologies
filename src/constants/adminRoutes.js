@@ -9,7 +9,6 @@ export const ADMIN_ROUTES = {
   leadsCourses: `${ADMIN_BASE}/leads/courses`,
   leadsWorkshops: `${ADMIN_BASE}/leads/workshops`,
   payments: `${ADMIN_BASE}/payments`,
-  analytics: `${ADMIN_BASE}/analytics`,
   importantLinks: `${ADMIN_BASE}/important-links`,
   announcements: `${ADMIN_BASE}/announcements`,
   courseParticipantsPath: `${ADMIN_BASE}/courses/:batchId/enrollment`,

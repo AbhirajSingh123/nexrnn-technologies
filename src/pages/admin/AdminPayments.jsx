@@ -250,7 +250,7 @@ export default function AdminPayments() {
               <option value="created">Created</option>
               <option value="pending">Pending</option>
               <option value="paid">Paid</option>
-              <option value="failed">Failed</option>
+              <option value="failed">Failed (Rejected)</option>
               <option value="expired">Expired</option>
             </select>
             <div>

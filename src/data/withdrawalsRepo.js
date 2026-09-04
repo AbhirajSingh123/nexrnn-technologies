@@ -68,7 +68,7 @@ function mapRow(row) {
     accName: row.acc_name || '',
     bankIfsc: row.bank_ifsc || '',
     upiId: row.upi_id || '',
-    status: ['Created', 'In progress', 'Payment Done'].includes(row.status) ? row.status : 'Created',
+    status: ['Created', 'In progress', 'Payment Done', 'Rejected'].includes(row.status) ? row.status : 'Created',
     refNo: row.ref_no || '',
     adminMessage: row.admin_message || '',
     requestedAt: row.requested_at || row.created_at,

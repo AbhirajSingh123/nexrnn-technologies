@@ -184,7 +184,7 @@ Deno.serve(async (req) => {
     for (const w of wrows ?? []) {
       const a = Number(w.amount) || 0;
       if (w.status === 'Payment Done') withdrawn += a;
-      else pending += a;
+      else if (w.status !== 'Rejected') pending += a; // Rejected request wallet block na kare
     }
     return { earned, withdrawn, pending, available: Math.max(earned - withdrawn - pending, 0) };
   };
@@ -267,7 +267,7 @@ Deno.serve(async (req) => {
     if (action === 'blogs_list') {
       const { data } = await supabase
         .from('blog_posts')
-        .select('id, blog_code, slug, title, excerpt, content, cover_image_url, author_name, author_role, tags, reading_time, is_published, published_at, category_slug, views')
+        .select('id, blog_code, slug, title, excerpt, content, cover_image_url, author_name, author_role, author_bio, cta_text, cta_url, tags, reading_time, is_published, published_at, category_slug, views')
         .eq('sales_uuid', salesUuid)
         .order('created_at', { ascending: false });
       return json({
@@ -281,6 +281,9 @@ Deno.serve(async (req) => {
           coverImageUrl: b.cover_image_url,
           authorName: b.author_name,
           authorRole: b.author_role,
+          authorBio: b.author_bio || '',
+          ctaText: b.cta_text || '',
+          ctaUrl: b.cta_url || '',
           tags: b.tags || [],
           readingTime: b.reading_time,
           isPublished: b.is_published,
@@ -306,11 +309,22 @@ Deno.serve(async (req) => {
         excerpt: String(f.excerpt || '').slice(0, 400),
         content,
         cover_image_url: String(f.cover_image_url || '').slice(0, 500),
-        author_name: member.name || 'NexRNN Sales',
-        author_role: 'Sales, NexRNN Technologies',
+        author_name: String(f.author_name || member.name || 'NexRNN Sales').slice(0, 120),
+        author_role: String(f.author_role || 'Sales, NexRNN Technologies').slice(0, 120),
+        reading_time: String(f.reading_time || '5 min read').slice(0, 60),
+        author_bio: String(f.author_bio || '').slice(0, 2000),
+        cta_text: String(f.cta_text || '').slice(0, 60),
+        cta_url: String(f.cta_url || '').slice(0, 500),
         tags: Array.isArray(f.tags) ? f.tags.map((t) => String(t).slice(0, 30)).slice(0, 8) : [],
         is_published: f.is_published !== false,
       };
+      // Publication date (admin jaisa control; na ho to abhi ka time)
+      let publishedAt = new Date().toISOString();
+      if (f.published_at) {
+        const d = new Date(String(f.published_at));
+        if (!isNaN(d.getTime())) publishedAt = d.toISOString();
+      }
+      base.published_at = publishedAt;
 
       if (body.id) {
         // Sirf apna hi blog update ho sakta hai
@@ -323,14 +337,17 @@ Deno.serve(async (req) => {
         if (!owned) return json({ error: 'You can edit only your own posts.' }, 403);
         const payload = { ...base, updated_at: new Date().toISOString() };
         if (f.slug) payload.slug = String(f.slug).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').slice(0, 120);
+        if (!f.published_at) delete payload.published_at; // edit me date waisi hi rehne do jab tak naya diya na ho
         const { error } = await supabase.from('blog_posts').update(payload).eq('id', body.id);
         if (error) return json({ error: 'Could not save. ' + (error.message || '') }, 500);
         return json({ ok: true });
       }
 
-      // Naya post: slug unique banana (title + random suffix)
-      const slugBase = slugifyLocal(title) || 'post';
-      const slug = `${slugBase}-${Date.now().toString(36).slice(-5)}`;
+      // Naya post: slug (manual ho to wahi, warna title + random suffix)
+      const slugBase = slugifyLocal(f.slug || title) || 'post';
+      const slug = f.slug
+        ? String(f.slug).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 120)
+        : `${slugBase}-${Date.now().toString(36).slice(-5)}`;
       const { data: createdPost, error } = await supabase
         .from('blog_posts')
         .insert({ ...base, slug, sales_uuid: salesUuid })
@@ -343,6 +360,24 @@ Deno.serve(async (req) => {
         return json({ error: msg }, 500);
       }
       return json({ post: createdPost });
+    }
+
+    // ================= BLOG COVER UPLOAD (admin-parity, blog-assets bucket) =================
+    if (action === 'blog_cover_upload') {
+      const att = body.attachment;
+      if (!att || !att.data) return json({ error: 'No file received.' }, 400);
+      const okTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (!okTypes.includes(att.type || '')) return json({ error: 'Only JPG, PNG, WEBP or GIF images are allowed.' }, 400);
+      const raw = atob(String(att.data).replace(/^data:[^,]*,/, ''));
+      if (raw.length > 6 * 1024 * 1024) return json({ error: 'Image must be under 6 MB.' }, 400);
+      const ext = att.type === 'image/png' ? 'png' : att.type === 'image/webp' ? 'webp' : att.type === 'image/gif' ? 'gif' : 'jpg';
+      const path = `posts/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const bytes = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+      const { error: upErr } = await supabase.storage.from('blog-assets').upload(path, bytes, { contentType: att.type });
+      if (upErr) return json({ error: 'Image upload failed. Please try again.' }, 500);
+      const { data: pub } = supabase.storage.from('blog-assets').getPublicUrl(path);
+      return json({ url: pub?.publicUrl || '' });
     }
 
     // ================= PROFILE =================

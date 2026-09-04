@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -6,6 +6,7 @@ import { supabase } from '@/services/supabaseClient';
 import { ADMIN_ROUTES } from '@/constants/adminRoutes';
 import { ICONS } from '@/utils/iconMap';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import { slugify } from '@/utils/blogUtils';
 
 const inputClass = 'w-full border-2 border-secondary/20 focus:border-primary px-4 py-2.5 text-sm outline-none transition-colors bg-white';
 const labelClass = 'block text-xs font-bold text-secondary uppercase tracking-wide mb-2';
@@ -20,6 +21,7 @@ export default function AdminServiceForm() {
   const isNew = !id || id === 'new';
   const navigate = useNavigate();
   const [form, setForm] = useState(emptyForm);
+  const slugTouched = useRef(false); // user ne slug khud likha ho to title se override na ho
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
 
@@ -44,7 +46,8 @@ export default function AdminServiceForm() {
 
   const handleChange = (field) => (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setForm((f) => ({ ...f, [field]: value }));
+    if (field === 'slug') slugTouched.current = true;
+    setForm((f) => (field === 'title' && !slugTouched.current ? { ...f, title: value, slug: slugify(value) } : { ...f, [field]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -96,8 +99,13 @@ export default function AdminServiceForm() {
             <input required className={inputClass} value={form.title} onChange={handleChange('title')} />
           </div>
           <div>
-            <label className={labelClass}>Slug (URL, unique)</label>
-            <input required className={inputClass} value={form.slug} onChange={handleChange('slug')} placeholder="google-ads" />
+            <label className={labelClass}>Slug (URL, unique) — Auto-generate from Title</label>
+            <div className="flex items-center gap-2">
+              <input required className={inputClass} value={form.slug} onChange={handleChange('slug')} placeholder="google-ads" />
+<button type="button" title="Auto-generate from Title" onClick={() => { slugTouched.current = false; setForm((f) => ({ ...f, slug: slugify(f.title) })); }} className="shrink-0 border-2 border-secondary/20 bg-white px-3 py-2.5 text-xs font-bold text-secondary hover:border-primary hover:text-primary transition-colors">
+                Auto
+              </button>
+            </div>
           </div>
         </div>
 
@@ -111,7 +119,7 @@ export default function AdminServiceForm() {
         </div>
 
         <div>
-          <label className={labelClass}>Short Description</label>
+          <label className={labelClass}>Short Description (Markdown supported)</label>
           <textarea required rows={2} className={`${inputClass} resize-none`} value={form.short_description} onChange={handleChange('short_description')} />
         </div>
 

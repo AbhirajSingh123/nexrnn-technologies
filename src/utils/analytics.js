@@ -3,21 +3,21 @@
  * CENTRAL TRACKING HELPERS (simple syntax)
  * ============================================================
  *
- * trackEvent() har event ko 3 jagah bhejta hai:
+ * trackEvent() har event ko 2 jagah bhejta hai (analytics_events
+ * table DB storage full kar rahi thi — hatadi gayi; traffic ab
+ * Google Analytics (GA4/GTM) se dekha jata hai):
  *   1. GTM dataLayer  (agar GTM setup hai)
  *   2. GA4 gtag       (agar GA4 setup hai)
- *   3. Supabase analytics_events table (Admin panel dashboard ke liye)
  *
  * Rules:
  * - Kabhi error throw nahi karta (tracking fail ho to site chalti rahe)
  * - fire-and-forget: UI wait nahi karta
  */
-import { supabase, isSupabaseConfigured } from '@/services/supabaseClient';
 
 export function trackEvent(name, params = {}) {
   try {
-    // 1. GTM dataLayer
     if (typeof window !== 'undefined') {
+      // 1. GTM dataLayer
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({ event: name, ...params });
 
@@ -28,44 +28,6 @@ export function trackEvent(name, params = {}) {
     }
   } catch {
     /* ignore */
-  }
-
-  logToSupabase(name, params);
-}
-
-/**
- * Unique visitor id - browser mein save rehta hai (localStorage).
- * Ek hi visitor ko baar-baar count na karna iske liye.
- */
-function getVisitorId() {
-  try {
-    let id = localStorage.getItem('nx_vid');
-    if (!id) {
-      id = typeof crypto !== 'undefined' && crypto.randomUUID
-        ? crypto.randomUUID()
-        : 'v-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-      localStorage.setItem('nx_vid', id);
-    }
-    return id;
-  } catch {
-    return '';
-  }
-}
-
-/** Admin dashboard ke liye apne Supabase mein event save karo */
-async function logToSupabase(name, params) {
-  if (!isSupabaseConfigured) return;
-  try {
-    await supabase.from('analytics_events').insert({
-      event_name: name,
-      path: params.page_path || (typeof window !== 'undefined' ? window.location.pathname : ''),
-      label: params.label || '',
-      value: typeof params.value === 'number' ? params.value : null,
-      visitor_id: getVisitorId(),
-      meta: params,
-    });
-  } catch {
-    /* tracking kabhi site na roke */
   }
 }
 

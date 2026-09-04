@@ -20,9 +20,10 @@ const STATUS_STYLES = {
   on_call: 'bg-blue-50 text-blue-700 border-blue-300',
   done: 'bg-green-50 text-green-700 border-green-300',
   undone: 'bg-red-50 text-primary border-primary/30',
+  rejected: 'bg-red-50 text-red-700 border-red-300',
 };
 
-const STATUS_LABELS = { pending: 'Pending', on_call: 'On Call', done: 'Done', undone: 'Undone' };
+const STATUS_LABELS = { pending: 'Pending', on_call: 'On Call', done: 'Done', undone: 'Undone', rejected: 'Rejected' };
 
 export default function AdminLeadsServices() {
   const [rows, setRows] = useState([]);
@@ -156,6 +157,7 @@ export default function AdminLeadsServices() {
           <option value="on_call">On Call</option>
           <option value="done">Done</option>
           <option value="undone">Undone</option>
+          <option value="rejected">Rejected</option>
         </select>
       ),
     },

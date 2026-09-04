@@ -49,7 +49,6 @@ const NotFound = lazy(() => import('@/pages/NotFound'));
 const AdminLogin = lazy(() => import('@/pages/admin/AdminLogin'));
 const AdminLayout = lazy(() => import('@/layouts/AdminLayout'));
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
-const AdminAnalytics = lazy(() => import('@/pages/admin/AdminAnalytics'));
 const AdminImportantLinks = lazy(() => import('@/pages/admin/AdminImportantLinks'));
 const AdminAnnouncements = lazy(() => import('@/pages/admin/AdminAnnouncements'));
 const AdminBatchEnrollment = lazy(() => import('@/pages/admin/AdminBatchEnrollment'));
@@ -267,7 +266,6 @@ function App() {
               <Route element={<AdminProtectedRoute />}>
                 <Route element={<AdminLayout />}>
                   <Route path={ADMIN_ROUTES.dashboard} element={<AdminDashboard />} />
-                  <Route path={ADMIN_ROUTES.analytics} element={<AdminAnalytics />} />
                   <Route path={ADMIN_ROUTES.importantLinks} element={<AdminImportantLinks />} />
                   <Route path={ADMIN_ROUTES.announcements} element={<AdminAnnouncements />} />
                   <Route path={ADMIN_ROUTES.courseParticipantsPath} element={<AdminBatchEnrollment />} />

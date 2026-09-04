@@ -7,6 +7,7 @@ import { getIcon } from '@/utils/iconMap';
 import { formatINR } from '@/utils/format';
 import { SITE } from '@/constants/siteData';
 import Reveal from '@/components/shared/Reveal';
+import MarkdownContent from '@/components/shared/MarkdownContent';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ServiceCard from '@/components/services/ServiceCard';
 
@@ -65,7 +66,7 @@ export default function ServiceDetail() {
                 <Icon size={28} className="text-white" />
               </div>
               <h1 className="text-secondary text-4xl sm:text-5xl leading-[1.05] mb-5">{service.title}</h1>
-              <p className="text-muted text-base leading-relaxed normal-case">{service.shortDescription}</p>
+              <MarkdownContent content={service.shortDescription} className="text-muted text-base leading-relaxed normal-case" />
             </div>
 
             <Reveal className="card-base bg-secondary text-white p-7">

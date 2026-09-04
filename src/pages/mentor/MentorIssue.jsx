@@ -18,6 +18,7 @@ const STATUS_STYLES = {
   'In Progress': 'bg-orange-50 text-orange-600 border-orange-300',
   Resolved: 'bg-green-50 text-green-700 border-green-300',
   Closed: 'bg-accent text-secondary border-secondary/30',
+  Rejected: 'bg-red-50 text-red-700 border-red-300',
 };
 
 export default function MentorIssue() {

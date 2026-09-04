@@ -58,6 +58,64 @@ function slugifyLocal(s: string): string {
     .slice(0, 100);
 }
 
+/** List field: array of strings, capped */
+function listField(v: unknown, max: number, cap = 120): string[] | undefined {
+  if (!Array.isArray(v)) return undefined;
+  return v.map((x) => String(x).slice(0, cap)).filter(Boolean).slice(0, max);
+}
+
+/** FAQs field: [{q,a}], capped */
+function faqsField(v: unknown): { q: string; a: string }[] | undefined {
+  if (!Array.isArray(v)) return undefined;
+  return v
+    .map((x) => ({ q: String((x as { q?: unknown })?.q || '').slice(0, 200), a: String((x as { a?: unknown })?.a || '').slice(0, 1000) }))
+    .filter((x) => x.q && x.a)
+    .slice(0, 20);
+}
+
+/**
+ * Admin-parity item fields (mentor create/update whitelist).
+ * Sirf jo fields body me aayen wahi set hoti hain (undefined = skip).
+ */
+function itemPayloadFromFields(f: Record<string, unknown>, isWorkshop: boolean): Record<string, unknown> {
+  const payload: Record<string, unknown> = {};
+  if (f.icon !== undefined) payload.icon = String(f.icon).slice(0, 40) || 'sparkles';
+  if (f.short_description !== undefined) payload.short_description = String(f.short_description).slice(0, 600);
+  if (f.is_free !== undefined) payload.is_free = !!f.is_free;
+  if (f.price !== undefined) payload.price = String(f.price).slice(0, 20);
+  if (f.original_price !== undefined) payload.original_price = String(f.original_price).slice(0, 20);
+  if (f.discount_percent !== undefined) payload.discount_percent = f.discount_percent === '' || f.discount_percent === null ? null : Math.max(0, Math.min(99, Number(f.discount_percent) || 0));
+  if (f.is_demo_price !== undefined) payload.is_demo_price = !!f.is_demo_price;
+  if (f.demo_video_url !== undefined) payload.demo_video_url = String(f.demo_video_url).slice(0, 500);
+  if (f.has_certificate_sample !== undefined) payload.has_certificate_sample = !!f.has_certificate_sample;
+  if (f.projects !== undefined) payload.projects = Math.max(0, Math.min(99, Number(f.projects) || 0));
+  if (f.certificate !== undefined) payload.certificate = !!f.certificate;
+  if (f.mentorship !== undefined) payload.mentorship = !!f.mentorship;
+  const topics = listField(f.topics, 40);
+  if (topics !== undefined) payload.topics = topics;
+  const wyl = listField(f.what_you_learn, 30);
+  if (wyl !== undefined) payload.what_you_learn = wyl;
+  const wsj = listField(f.who_should_join, 30);
+  if (wsj !== undefined) payload.who_should_join = wsj;
+  if (f.whatsapp_group_link !== undefined) payload.whatsapp_group_link = String(f.whatsapp_group_link).slice(0, 400);
+  const faqs = faqsField(f.faqs);
+  if (faqs !== undefined) payload.faqs = faqs;
+  if (f.sort_order !== undefined) payload.sort_order = Math.max(0, Math.min(9999, Number(f.sort_order) || 0));
+  if (isWorkshop) {
+    if (f.details !== undefined) payload.details = String(f.details).slice(0, 20000);
+    if (f.workshop_datetime !== undefined) payload.workshop_datetime = f.workshop_datetime || null;
+    if (f.registration_deadline !== undefined) payload.registration_deadline = f.registration_deadline || null;
+    if (f.banner_url !== undefined) payload.banner_url = String(f.banner_url).slice(0, 600);
+    if (f.mentor_name !== undefined) payload.mentor_name = String(f.mentor_name).slice(0, 120);
+    if (f.mentor_intro !== undefined) payload.mentor_intro = String(f.mentor_intro).slice(0, 1000);
+  } else {
+    if (f.duration !== undefined) payload.duration = String(f.duration).slice(0, 60);
+    if (f.level !== undefined) payload.level = String(f.level).slice(0, 40);
+    if (f.mode !== undefined) payload.mode = String(f.mode).slice(0, 40);
+  }
+  return payload;
+}
+
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
@@ -128,10 +186,10 @@ Deno.serve(async (req) => {
 
   // Assigned items ki puri details (leads ko batch_id/slug se jodna hai)
   const assignedCourseRows = allowCourses && courseIds.length
-    ? (await supabase.from('courses').select('id, title, slug, batch_id, price, original_price, duration, level, mode, short_description, active').in('id', courseIds).order('created_at', { ascending: false })).data ?? []
+    ? (await supabase.from('courses').select('*').in('id', courseIds).order('created_at', { ascending: false })).data ?? []
     : [];
   const assignedWorkshopRows = allowWorkshops && workshopIds.length
-    ? (await supabase.from('workshops').select('id, title, slug, batch_id, price, original_price, workshop_datetime, registration_deadline, short_description, details, active').in('id', workshopIds).order('created_at', { ascending: false })).data ?? []
+    ? (await supabase.from('workshops').select('*').in('id', workshopIds).order('created_at', { ascending: false })).data ?? []
     : [];
   const courseBatchIds = assignedCourseRows.map((c) => c.batch_id).filter(Boolean);
   const workshopBatchIds = assignedWorkshopRows.map((w) => w.batch_id).filter(Boolean);
@@ -189,7 +247,7 @@ Deno.serve(async (req) => {
     for (const w of wrows ?? []) {
       const a = Number(w.amount) || 0;
       if (w.status === 'Payment Done') withdrawn += a;
-      else pending += a;
+      else if (w.status !== 'Rejected') pending += a; // Rejected request wallet block na kare
     }
     return { earned, withdrawn, pending, available: Math.max(earned - withdrawn - pending, 0) };
   };
@@ -315,8 +373,29 @@ Deno.serve(async (req) => {
         details: it.details || '',
         workshopDatetime: it.workshop_datetime || '',
         registrationDeadline: it.registration_deadline || '',
+        workshopDatetimeISO: it.workshop_datetime || '',
+        registrationDeadlineISO: it.registration_deadline || '',
         status: it.active === false ? 'Inactive' : 'Active',
         students: countFor(it),
+        // Admin-parity fields (edit form prefill ke liye)
+        icon: it.icon || 'sparkles',
+        isFree: it.is_free !== false,
+        discountPercent: it.discount_percent ?? '',
+        isDemoPrice: !!it.is_demo_price,
+        demoVideoUrl: it.demo_video_url || '',
+        hasCertificateSample: it.has_certificate_sample !== false,
+        projects: Number(it.projects) || 0,
+        certificate: it.certificate !== false,
+        mentorship: it.mentorship !== false,
+        topics: it.topics ?? [],
+        whatYouLearn: it.what_you_learn ?? [],
+        whoShouldJoin: it.who_should_join ?? [],
+        whatsappGroupLink: it.whatsapp_group_link || '',
+        faqs: it.faqs ?? [],
+        sortOrder: Number(it.sort_order) || 0,
+        bannerUrl: it.banner_url || '',
+        mentorName: it.mentor_name || '',
+        mentorIntro: it.mentor_intro || '',
       }));
       return json({ rows });
     }
@@ -354,6 +433,8 @@ Deno.serve(async (req) => {
         if (f.details !== undefined) payload.details = String(f.details).slice(0, 20000);
       }
       if (f.active !== undefined) payload.active = !!f.active;
+      // Admin-parity fields (icon, pricing, topics, faqs, banner, mentor intro…)
+      Object.assign(payload, itemPayloadFromFields(f, isWorkshop));
       payload.updated_at = new Date().toISOString();
 
       const { error } = await supabase.from(isWorkshop ? 'workshops' : 'courses').update(payload).eq('id', id);
@@ -380,16 +461,8 @@ Deno.serve(async (req) => {
         price: String(f.price || '0').slice(0, 20),
         original_price: String(f.original_price || '').slice(0, 20),
         active: f.active !== false,
+        ...itemPayloadFromFields(f, isWorkshop),
       };
-      if (isWorkshop) {
-        payload.details = String(f.details || '').slice(0, 20000);
-        if (f.workshop_datetime) payload.workshop_datetime = f.workshop_datetime;
-        if (f.registration_deadline) payload.registration_deadline = f.registration_deadline;
-      } else {
-        payload.duration = String(f.duration || '').slice(0, 60);
-        payload.level = String(f.level || '').slice(0, 40);
-        payload.mode = String(f.mode || '').slice(0, 40);
-      }
 
       const { data: created, error } = await supabase
         .from(isWorkshop ? 'workshops' : 'courses')
@@ -421,7 +494,7 @@ Deno.serve(async (req) => {
     if (action === 'blogs_list') {
       const { data } = await supabase
         .from('blog_posts')
-        .select('id, blog_code, slug, title, excerpt, content, cover_image_url, author_name, author_role, tags, reading_time, is_published, published_at, category_slug, views')
+        .select('id, blog_code, slug, title, excerpt, content, cover_image_url, author_name, author_role, author_bio, cta_text, cta_url, tags, reading_time, is_published, published_at, category_slug, views')
         .eq('mentor_uuid', mentorUuid)
         .order('created_at', { ascending: false });
       return json({
@@ -435,6 +508,9 @@ Deno.serve(async (req) => {
           coverImageUrl: b.cover_image_url,
           authorName: b.author_name,
           authorRole: b.author_role,
+          authorBio: b.author_bio || '',
+          ctaText: b.cta_text || '',
+          ctaUrl: b.cta_url || '',
           tags: b.tags || [],
           readingTime: b.reading_time,
           isPublished: b.is_published,
@@ -460,11 +536,22 @@ Deno.serve(async (req) => {
         excerpt: String(f.excerpt || '').slice(0, 400),
         content,
         cover_image_url: String(f.cover_image_url || '').slice(0, 500),
-        author_name: mentor.name || 'NexRNN Mentor',
-        author_role: 'Mentor, NexRNN Technologies',
+        author_name: String(f.author_name || mentor.name || 'NexRNN Mentor').slice(0, 120),
+        author_role: String(f.author_role || 'Mentor, NexRNN Technologies').slice(0, 120),
+        reading_time: String(f.reading_time || '5 min read').slice(0, 60),
+        author_bio: String(f.author_bio || '').slice(0, 2000),
+        cta_text: String(f.cta_text || '').slice(0, 60),
+        cta_url: String(f.cta_url || '').slice(0, 500),
         tags: Array.isArray(f.tags) ? f.tags.map((t) => String(t).slice(0, 30)).slice(0, 8) : [],
         is_published: f.is_published !== false,
       };
+      // Publication date (admin jaisa control; na ho to abhi ka time)
+      let publishedAt = new Date().toISOString();
+      if (f.published_at) {
+        const d = new Date(String(f.published_at));
+        if (!isNaN(d.getTime())) publishedAt = d.toISOString();
+      }
+      base.published_at = publishedAt;
 
       if (body.id) {
         // Sirf apna hi blog update ho sakta hai
@@ -477,14 +564,17 @@ Deno.serve(async (req) => {
         if (!owned) return json({ error: 'You can edit only your own posts.' }, 403);
         const payload = { ...base, updated_at: new Date().toISOString() };
         if (f.slug) payload.slug = String(f.slug).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').slice(0, 120);
+        if (!f.published_at) delete payload.published_at; // edit me date waisi hi rehne do jab tak naya diya na ho
         const { error } = await supabase.from('blog_posts').update(payload).eq('id', body.id);
         if (error) return json({ error: 'Could not save. ' + (error.message || '') }, 500);
         return json({ ok: true });
       }
 
-      // Naya post: slug unique banana (title + random suffix)
-      const slugBase = slugifyLocal(title) || 'post';
-      const slug = `${slugBase}-${Date.now().toString(36).slice(-5)}`;
+      // Naya post: slug (manual ho to wahi, warna title + random suffix)
+      const slugBase = slugifyLocal(f.slug || title) || 'post';
+      const slug = f.slug
+        ? String(f.slug).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 120)
+        : `${slugBase}-${Date.now().toString(36).slice(-5)}`;
       const { data: createdPost, error } = await supabase
         .from('blog_posts')
         .insert({ ...base, slug, mentor_uuid: mentorUuid })
@@ -610,6 +700,43 @@ Deno.serve(async (req) => {
         .single();
       if (error) return json({ error: 'Could not send reply. Please try again.' }, 500);
       return json({ ok: true, reply: { id: reply.id, name: reply.replier_name, message: reply.message, createdAt: reply.created_at, mine: true } });
+    }
+
+    // ================= BLOG COVER UPLOAD (admin-parity, blog-assets bucket) =================
+    if (action === 'blog_cover_upload') {
+      const att = body.attachment;
+      if (!att || !att.data) return json({ error: 'No file received.' }, 400);
+      const okTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (!okTypes.includes(att.type || '')) return json({ error: 'Only JPG, PNG, WEBP or GIF images are allowed.' }, 400);
+      const raw = atob(String(att.data).replace(/^data:[^,]*,/, ''));
+      if (raw.length > 6 * 1024 * 1024) return json({ error: 'Image must be under 6 MB.' }, 400);
+      const ext = att.type === 'image/png' ? 'png' : att.type === 'image/webp' ? 'webp' : att.type === 'image/gif' ? 'gif' : 'jpg';
+      const path = `posts/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const bytes = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+      const { error: upErr } = await supabase.storage.from('blog-assets').upload(path, bytes, { contentType: att.type });
+      if (upErr) return json({ error: 'Image upload failed. Please try again.' }, 500);
+      const { data: pub } = supabase.storage.from('blog-assets').getPublicUrl(path);
+      return json({ url: pub?.publicUrl || '' });
+    }
+
+    // ================= WORKSHOP BANNER UPLOAD (admin-parity, workshop-assets bucket) =================
+    if (action === 'item_banner_upload') {
+      if (!allowWorkshops) return json({ error: 'Your mentor type does not allow workshops.' }, 403);
+      const att = body.attachment;
+      if (!att || !att.data) return json({ error: 'No file received.' }, 400);
+      const okTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (!okTypes.includes(att.type || '')) return json({ error: 'Only JPG, PNG, WEBP or GIF images are allowed.' }, 400);
+      const raw = atob(String(att.data).replace(/^data:[^,]*,/, ''));
+      if (raw.length > 6 * 1024 * 1024) return json({ error: 'Image must be under 6 MB.' }, 400);
+      const ext = att.type === 'image/png' ? 'png' : att.type === 'image/webp' ? 'webp' : att.type === 'image/gif' ? 'gif' : 'jpg';
+      const path = `banner-${Date.now()}.${ext}`;
+      const bytes = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+      const { error: upErr } = await supabase.storage.from('workshop-assets').upload(path, bytes, { contentType: att.type, upsert: true });
+      if (upErr) return json({ error: 'Banner upload failed. Please try again.' }, 500);
+      const { data: pub } = supabase.storage.from('workshop-assets').getPublicUrl(path);
+      return json({ url: pub?.publicUrl || '' });
     }
 
     // ================= PROFILE =================

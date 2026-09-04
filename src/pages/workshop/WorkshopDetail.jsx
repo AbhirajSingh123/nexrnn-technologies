@@ -11,6 +11,7 @@ import { isRegistrationClosed } from '@/utils/workshopUtils';
 import { formatINR } from '@/utils/format';
 import { SITE } from '@/constants/siteData';
 import Reveal from '@/components/shared/Reveal';
+import MarkdownContent from '@/components/shared/MarkdownContent';
 import DemoVideo from '@/components/shared/DemoVideo';
 import CertificateSample from '@/components/shared/CertificateSample';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
@@ -54,7 +55,7 @@ function FAQItem({ item, isOpen, onToggle }) {
             transition={{ duration: 0.3 }}
             className="overflow-hidden bg-white border-t-2 border-secondary"
           >
-            <p className="px-6 py-5 text-sm text-muted leading-relaxed normal-case">{item.a}</p>
+            <MarkdownContent content={item.a} className="px-6 py-5 text-sm text-muted leading-relaxed normal-case" />
           </motion.div>
         )}
       </AnimatePresence>
@@ -117,7 +118,7 @@ export default function WorkshopDetail() {
                 )}
               </div>
               <h1 className="text-secondary text-4xl sm:text-5xl leading-[1.05] mb-5">{workshop.title}</h1>
-              <p className="text-muted text-base leading-relaxed normal-case mb-5">{workshop.shortDescription}</p>
+              <MarkdownContent content={workshop.shortDescription} className="text-muted text-base leading-relaxed normal-case mb-5" />
               <ShareRow title={workshop.title} path={`/workshop/${workshop.slug}`} />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -213,7 +214,7 @@ export default function WorkshopDetail() {
       <section className="section-padding bg-accent">
         <div className="container-section max-w-3xl">
           <h2 className="text-2xl text-secondary mb-5">About This Workshop</h2>
-          <p className="text-sm text-secondary/80 leading-relaxed normal-case whitespace-pre-line mb-12">{workshop.details}</p>
+          <MarkdownContent content={workshop.details} className="text-sm text-secondary/80 leading-relaxed normal-case mb-12" />
 
           {workshop.faqs?.length > 0 && (
             <>

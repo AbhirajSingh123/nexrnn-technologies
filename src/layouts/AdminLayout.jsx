@@ -6,7 +6,7 @@ import {
   Tag,
   Wallet,
   LayoutDashboard, Inbox, Briefcase, GraduationCap, Layers, BookOpen, LogOut, CreditCard,
-  Video, Image as ImageIcon, Star, PartyPopper, Settings, Newspaper, BarChart3, Menu, X, Trophy, ClipboardList, FileUser, Users, MessageSquareWarning, Handshake, ReceiptText , Link2, Megaphone } from 'lucide-react';
+  Video, Image as ImageIcon, Star, PartyPopper, Settings, Newspaper, Menu, X, Trophy, ClipboardList, FileUser, Users, MessageSquareWarning, Handshake, ReceiptText , Link2, Megaphone } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import useIdleTimeout from '@/hooks/useIdleTimeout';
 import { SITE } from '@/constants/siteData';
@@ -16,7 +16,6 @@ const NAV_ITEMS = [
   { to: ADMIN_ROUTES.dashboard, label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: ADMIN_ROUTES.importantLinks, label: 'Important Links', icon: Link2 },
   { to: ADMIN_ROUTES.announcements, label: 'Announcements', icon: Megaphone },
-  { to: ADMIN_ROUTES.analytics, label: 'Traffic & Analytics', icon: BarChart3 },
   { to: ADMIN_ROUTES.leadsContact, label: 'Contact Leads', icon: Inbox },
   { to: ADMIN_ROUTES.leadsServices, label: 'Service Leads', icon: Briefcase },
   { to: ADMIN_ROUTES.leadsCourses, label: 'Course Enrollments', icon: GraduationCap },

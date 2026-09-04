@@ -46,6 +46,7 @@ const STATUS_STYLES = {
   Created: 'bg-blue-50 text-blue-700 border-blue-300',
   'In progress': 'bg-orange-50 text-orange-600 border-orange-300',
   'Payment Done': 'bg-green-50 text-green-700 border-green-300',
+  Rejected: 'bg-red-50 text-red-700 border-red-300',
 };
 
 export default function SalesWithdrawals() {

@@ -14,13 +14,14 @@ const inputClass =
   'w-full border-2 border-secondary/20 focus:border-primary px-3 py-2 text-sm outline-none transition-colors bg-white normal-case';
 const labelClass = 'block text-xs font-bold text-secondary uppercase tracking-wide mb-1.5';
 
-const STATUSES = ['Open', 'In Progress', 'Resolved', 'Closed'];
+const STATUSES = ['Open', 'In Progress', 'Resolved', 'Closed', 'Rejected'];
 
 const STATUS_STYLES = {
   Open: 'bg-blue-50 text-blue-700 border-blue-300',
   'In Progress': 'bg-orange-50 text-orange-600 border-orange-300',
   Resolved: 'bg-green-50 text-green-700 border-green-300',
   Closed: 'bg-accent text-secondary border-secondary/30',
+  Rejected: 'bg-red-50 text-red-700 border-red-300',
 };
 
 export default function AdminSalesIssues() {

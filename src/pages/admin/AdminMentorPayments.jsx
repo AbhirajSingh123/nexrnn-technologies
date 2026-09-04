@@ -16,12 +16,13 @@ const inputClass =
   'w-full border-2 border-secondary/20 focus:border-primary px-3 py-2 text-sm outline-none transition-colors bg-white normal-case';
 const labelClass = 'block text-xs font-bold text-secondary uppercase tracking-wide mb-1.5';
 
-const STATUSES = ['Created', 'In progress', 'Payment Done'];
+const STATUSES = ['Created', 'In progress', 'Payment Done', 'Rejected'];
 
 const STATUS_STYLES = {
   Created: 'bg-blue-50 text-blue-700 border-blue-300',
   'In progress': 'bg-orange-50 text-orange-600 border-orange-300',
   'Payment Done': 'bg-green-50 text-green-700 border-green-300',
+  Rejected: 'bg-red-50 text-red-700 border-red-300',
 };
 
 /** Payment ki poori info ke saath mailto link (mentor ki mail id par) */

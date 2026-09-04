@@ -644,3 +644,127 @@ This README is updated **every time a task/feature is completed** — newest wor
   SQL Editor, then redeploy BOTH edge functions (sales-data AND mentor-data)
 - ✅ Deploy steps for this round: run `migration_33_sales_blog_announcements.sql` in the
   Supabase SQL Editor, then redeploy BOTH edge functions (sales-data AND mentor-data)
+
+## R36: "Rejected" status option everywhere in the panels
+
+- ✅ Migration **35** (`migration_35_rejected_statuses.sql`): widens the DB status checks so
+  admin can set **Rejected** on mentor/sales withdrawals, mentor/sales issues and service
+  leads (internship applications already had Rejected; course/workshop enrollments already
+  had Declined; Cashfree payments keep their gateway statuses — "Failed" is the rejected
+  state there, so the filter is simply labelled "Failed (Rejected)")
+- ✅ Admin set-flows updated: Mentor Payments + Sales Team Payments withdrawal modal
+  (Created / In progress / Payment Done / **Rejected**), Mentor/Sales Issues modal
+  (Open / In Progress / Resolved / Closed / **Rejected**), Service Leads inline status
+  (Pending / On Call / Done / Undone / **Rejected**) — all saved to the same Status column
+  and included in exports automatically
+- ✅ Members see it too: mentor/sales Withdrawal History and Issue list badges render
+  Rejected (red) — a rejected withdrawal instantly returns the amount to the member's
+  wallet (server-side wallet math now excludes Rejected requests from "pending"), so the
+  member can raise a fresh request without admin intervention
+- ✅ Deploy steps for this round: run `migration_35_rejected_statuses.sql` in the Supabase
+  SQL Editor, then redeploy BOTH edge functions (sales-data AND mentor-data) for the
+  wallet fix
+
+## R37: Reject bug fix, Markdown everywhere, slug auto-generate, analytics_events removed
+
+- ✅ **Bug fix — rejected withdrawals "re-appearing" on admin side**: the admin repos
+  (withdrawalsRepo / salesWithdrawalsRepo) mapped unknown statuses back to "Created", so a
+  request the admin had REJECTED (and the member correctly saw as Rejected) showed up again
+  as "Created" in the admin Payments list after reload. Status whitelist now includes
+  Rejected; admin list stays in sync with what the member sees (E2E verified: DB Rejected
+  row renders REJECTED badge, reject → save → reload still REJECTED). Issues/leads pages
+  were already reading raw statuses — checked all panels, no other whitelist exists
+- ✅ **Markdown supported in every content text field**: detail pages now render markdown
+  (headings, **bold**, *italic*, - lists, > quotes) via the shared MarkdownContent component
+  — Workshop "Details About Workshop" + short description + FAQ answers (Course Detail too),
+  Course short description + FAQ answers, Service short description. Career "Full Details",
+  Case Study "Full Story" and blog content were already markdown. Admin form labels now say
+  "(Markdown supported)" — Course (Short Description + FAQs), Workshop (Short Description,
+  Details About Workshop, FAQs), Service (Short Description), Career (Full Details)
+- ✅ **Slug = Auto-generate from Title on every admin form**: Course, Workshop and Service
+  forms now auto-fill the slug from the title as you type (until you manually edit it, then
+  your slug is respected) + an "Auto" button to regenerate; Career and Case Study forms
+  (which already auto-generated) got the same "Auto" button. Label says
+  "Auto-generate from Title"
+- ✅ **analytics_events table removed (DB storage)**: client tracking now sends events ONLY
+  to Google Analytics (GA4) / GTM — the Supabase insert is gone (utils/analytics.js).
+  Admin "Traffic & Analytics" page, its route and nav item removed; Admin Dashboard's
+  "Traffic (Last 7 Days)" card (page views / WhatsApp / phone clicks / unique users) removed
+  — site traffic now lives in your GA4 dashboard instead of the database. Lead/enrollment/
+  payment counters on the dashboard are unaffected. Migration **36**
+  (`migration_36_drop_analytics_events.sql`) drops the table — run it to actually free the
+  storage
+- ✅ Deploy steps for this round: run `migration_36_drop_analytics_events.sql` in the
+  Supabase SQL Editor (frees the storage), then redeploy as usual (no edge changes this
+  round — only if you still have an undeployed sales-data/mentor-data from earlier rounds)
+- ✅ Full sweep after changes: production build ✓, oxlint 8 warnings / 0 errors, real-browser
+  E2E 18/18 (reject badge + PATCH, slug auto/manual/Auto button, markdown labels, analytics
+  removal, dashboard intact, mobile 390px) — 0 console errors
+
+## R38: Mentor gets the full admin Course/Workshop/Blog forms + Sales full blog form
+
+- ✅ **Mentor Manage Courses / Manage Workshops = admin-level forms** (same fields the admin
+  form has; mentor-data whitelist extended server-side with the same sanitization):
+  - Course: Icon, Short Description (Markdown supported), Pricing Type (Paid/Free),
+    Original/Final Price, Discount %, "Demo pricing" label, Demo Video URL, Projects,
+    Certificate + Mentorship toggles, certificate sample preview toggle, Topics/Curriculum,
+    What You'll Learn, Who Should Join (one per line), WhatsApp Group Link (shown on the
+    payment success page), FAQs editor (answers support Markdown), Sort Order, Active
+  - Workshop: Banner URL **+ Upload** (goes to the workshop-assets bucket through the edge
+    function with preview), Workshop Date & Time, Registration Last Date & Time (auto-complete
+    note), Details About Workshop (Markdown supported), Pricing fields, Workshop Video URL,
+    certificate sample toggle, WhatsApp Group Link, Mentor Name + Short Introduction
+    (empty = section hidden), FAQs editor, Sort Order, Active
+  - Slug on both: Auto-generate from Title while typing + "Auto" button (manual edit respected)
+  - Edit prefill loads all fields back from the server; Batch ID stays fixed as before;
+    mentor still cannot delete items and still only sees/edits their own assigned programs
+    (server-side ownership + mentor-type guards unchanged)
+- ✅ **Mentor + Sales My Blogs = admin-level article form**: Article Title, URL Slug
+  (Auto-generate from Title + Auto button), Category, Publication Date, Cover Image URL
+  **or Upload** (blog-assets bucket via edge, with preview), Short Excerpt, Article Content
+  (Markdown supported, live word count, format hints), Author Name + Author Role (defaults:
+  member's name / "Mentor, NexRNN Technologies" or "Sales, NexRNN Technologies"), Reading
+  Time, Author Bio (About the Author), Call-to-Action button (Text + Link — internal /course
+  style or full https:// links) shown at the end of the article, Tags, Published-immediately
+  checkbox (uncheck = draft). Blogs list shows the same cards as before; edit prefills
+  everything (server rows now carry author_bio / cta_text / cta_url)
+- ✅ Edge function updates (mentor-data AND sales-data): `item_create` / `item_save` accept the
+  full admin field whitelist (server-sanitized: lengths, counts, discount 0-99, faq caps),
+  `items` returns the extended fields for prefill (+ raw ISO datetimes), NEW
+  `item_banner_upload` (mentor, workshop-assets) and `blog_cover_upload` (mentor + sales,
+  blog-assets) — 6 MB, JPG/PNG/WEBP/GIF; `blog_save` now stores slug (manual or auto),
+  published_at (publication date), reading_time, author_bio, cta_text, cta_url and editable
+  author name/role; `blogs_list` returns them
+- ✅ No DB migration needed this round (all blog_posts / courses / workshops columns already
+  exist). Deploy step: redeploy BOTH edge functions (sales-data AND mentor-data)
+- ✅ Real-browser E2E 65/65 (every form label present, slug auto/manual/Auto, save payloads
+  carry all admin fields, edit prefills, workshop form correctly hides course-only fields,
+  sales blog parity, mobile 390px) — 0 console errors; build ✓, oxlint 8 warnings / 0 errors
+
+## R39: Sales My Blogs redirect bug fixed + final legal policies live
+
+- ✅ **Bug fix — Sales → My Blogs redirected to the mentor panel**: the sales blog page was
+  still using the MENTOR data hook (a leftover from the previous round's clone), so it called
+  the mentor-data edge function with the sales token, got a 401, and the mentor hook bounced
+  the user to the mentor login. Fixed: the page now uses the sales hook/edge end-to-end
+  (verified in a real browser: the sales blog page makes ZERO mentor-data calls, stays on
+  /nexrnn/panel/sales/my-blogs and renders the member's posts)
+- ✅ **Final legal policies live** (draft disclaimers removed everywhere):
+  - /privacy-policy — full 17-section policy (what we collect, how, usage, contact rules,
+    payments, sharing, cookies, retention, your rights, children's privacy, changes,
+    agreement) — Last Updated: August 30, 2026
+  - /terms-and-conditions — full 26-section terms (about us, fair website use, services,
+    service agreements, course/workshop enrollment, content access rules, certificates,
+    payments, refunds summary, client responsibilities, scope changes, IP ownership,
+    client content, marketing results, third-party platforms, accuracy, availability,
+    liability, termination, privacy, governing law (India), contact) — Last Updated:
+    August 30, 2026
+  - /refund-policy — full 12-section refund & cancellation policy (course/workshop refunds
+    + 24–48h duplicate-payment window, service refund stages, how to request, review steps,
+    5–7 business day timelines, non-refundables) — Last Updated: August 30, 2026
+  - All three pages are data-driven sections (easy to edit later), mobile friendly, still
+    linked from the footer, and NO "Draft template / not reviewed by a legal professional"
+    banners remain anywhere on the site
+- ✅ E2E 31/31 (redirect regression incl. request-level check, all headings, no draft text,
+  footer links, viewport fit) — 0 console errors; build ✓, oxlint 8 warnings / 0 errors.
+  No DB or edge changes this round — deploy the site and you're done

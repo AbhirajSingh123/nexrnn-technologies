@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Plus, Pencil, X, Newspaper, ExternalLink } from 'lucide-react';
+import { Loader2, Plus, Pencil, X, Newspaper, ExternalLink, UploadCloud } from 'lucide-react';
 import useMentorData from '@/hooks/useMentorData';
 import { mentorData } from '@/data/mentorAuth';
 import { MENTOR_ROUTES } from '@/constants/mentorRoutes';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import { slugify } from '@/utils/blogUtils';
 
 const inputClass =
   'w-full border-2 border-secondary/20 focus:border-primary px-3 py-2 text-sm outline-none transition-colors bg-white normal-case';
@@ -102,20 +103,30 @@ export default function MentorBlog() {
   );
 }
 
-/** Blog write/edit form (sirf apne posts) */
+/** Blog write/edit form — ADMIN jaisa full form (markdown, upload, CTA, author bio) */
 function BlogForm({ post, onClose, onSaved }) {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [f, setF] = useState({
     title: post?.title || '',
+    slug: post?.slug || '',
     category_slug: post?.categorySlug || '',
+    published_at: post?.publishedAt ? String(post.publishedAt).slice(0, 16) : '',
+    cover_image_url: post?.coverImageUrl || '',
     excerpt: post?.excerpt || '',
     content: post?.content || '',
-    cover_image_url: post?.coverImageUrl || '',
+    author_name: post?.authorName || '',
+    author_role: post?.authorRole || '',
+    reading_time: post?.readingTime || '',
+    author_bio: post?.authorBio || '',
+    cta_text: post?.ctaText || '',
+    cta_url: post?.ctaUrl || '',
     tags: (post?.tags || []).join(', '),
     is_published: post ? !!post.isPublished : true,
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const slugTouched = useRef(!!post?.slug); // edit me slug pehle se hota hai
 
   useEffect(() => {
     let active = true;
@@ -134,8 +145,50 @@ function BlogForm({ post, onClose, onSaved }) {
   }, []);
 
   const set = (field) => (e) => setF((prev) => ({ ...prev, [field]: e.target.value }));
+  const setTitle = (e) => {
+    const value = e.target.value;
+    setF((prev) => (slugTouched.current ? { ...prev, title: value } : { ...prev, title: value, slug: slugify(value) }));
+  };
+  const setSlug = (e) => {
+    slugTouched.current = true;
+    setF((prev) => ({ ...prev, slug: e.target.value }));
+  };
+  const autoSlug = () => {
+    slugTouched.current = false;
+    setF((prev) => ({ ...prev, slug: slugify(prev.title) }));
+  };
 
   const words = (f.content || '').trim().split(/\s+/).filter(Boolean).length;
+
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 6 * 1024 * 1024) {
+      toast.error('Image must be under 6 MB.');
+      return;
+    }
+    setUploading(true);
+    try {
+      const data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+        reader.onerror = () => reject(new Error('read failed'));
+        reader.readAsDataURL(file);
+      });
+      const res = await mentorData('blog_cover_upload', { attachment: { name: file.name, type: file.type, data } });
+      setF((prev) => ({ ...prev, cover_image_url: res.url || prev.cover_image_url }));
+      toast.success('Cover image uploaded.');
+    } catch (err) {
+      if (err?.status === 401) {
+        navigate(MENTOR_ROUTES.login, { replace: true });
+        return;
+      }
+      toast.error(err.message || 'Upload failed.');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
 
   const handleSubmit = async () => {
     if (!f.title.trim() || !f.content.trim() || !f.category_slug) {
@@ -148,6 +201,8 @@ function BlogForm({ post, onClose, onSaved }) {
         id: post?.id,
         fields: {
           ...f,
+          slug: f.slug.trim() || slugify(f.title),
+          published_at: f.published_at ? new Date(f.published_at).toISOString() : '',
           tags: f.tags.split(',').map((t) => t.trim()).filter(Boolean),
         },
       });
@@ -185,8 +240,17 @@ function BlogForm({ post, onClose, onSaved }) {
 
         <div className="p-5 sm:p-7 pt-4 space-y-4">
           <div>
-            <label className={labelClass}>Title *</label>
-            <input className={inputClass} value={f.title} onChange={set('title')} placeholder="Post title" />
+            <label className={labelClass}>Article Title *</label>
+            <input className={inputClass} value={f.title} onChange={setTitle} placeholder="Post title" />
+          </div>
+          <div>
+            <label className={labelClass}>URL Slug * (Auto-generate from Title)</label>
+            <div className="flex items-center gap-2">
+              <input className={`${inputClass} font-mono text-xs`} value={f.slug} onChange={setSlug} placeholder="auto-from-title" />
+              <button type="button" title="Auto-generate from Title" onClick={autoSlug} className="shrink-0 border-2 border-secondary/20 bg-white px-3 py-2.5 text-xs font-bold text-secondary hover:border-primary hover:text-primary transition-colors">
+                Auto
+              </button>
+            </div>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
@@ -199,34 +263,79 @@ function BlogForm({ post, onClose, onSaved }) {
               </select>
             </div>
             <div>
-              <label className={labelClass}>Tags (comma separated)</label>
-              <input className={inputClass} value={f.tags} onChange={set('tags')} placeholder="google-ads, marketing" />
+              <label className={labelClass}>Publication Date</label>
+              <input type="datetime-local" className={inputClass} value={f.published_at} onChange={set('published_at')} />
             </div>
           </div>
           <div>
-            <label className={labelClass}>Excerpt (short summary)</label>
-            <textarea rows={2} className={`${inputClass} resize-y`} value={f.excerpt} onChange={set('excerpt')} placeholder="1-2 line summary" />
+            <label className={labelClass}>Cover Image URL (or upload)</label>
+            <div className="flex items-center gap-2">
+              <input className={inputClass} value={f.cover_image_url} onChange={set('cover_image_url')} placeholder="https://… (must start with https://)" />
+              <label className={`shrink-0 inline-flex items-center gap-1.5 border-2 border-secondary/20 bg-white px-3 py-2.5 text-xs font-bold text-secondary hover:border-primary transition-colors cursor-pointer ${uploading ? 'opacity-60' : ''}`}>
+                {uploading ? <Loader2 size={13} className="animate-spin" /> : <UploadCloud size={13} />} Upload
+                <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} disabled={uploading} />
+              </label>
+            </div>
+            {f.cover_image_url && <img src={f.cover_image_url} alt="Cover preview" className="mt-2 w-full max-h-36 object-cover border-2 border-secondary/15" />}
           </div>
           <div>
-            <label className={labelClass}>Cover Image URL (optional)</label>
-            <input className={inputClass} value={f.cover_image_url} onChange={set('cover_image_url')} placeholder="https://…" />
+            <label className={labelClass}>Short Excerpt / Summary *</label>
+            <textarea rows={2} className={`${inputClass} resize-y`} value={f.excerpt} onChange={set('excerpt')} placeholder="2-3 line summary shown on cards" />
           </div>
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className={`${labelClass} !mb-0`}>Content * (markdown supported)</label>
+              <label className={`${labelClass} !mb-0`}>Article Content (Markdown supported) *</label>
               <span className="text-[10px] text-muted normal-case">{words} words</span>
             </div>
-            <textarea rows={12} className={`${inputClass} resize-y font-mono text-xs`} value={f.content} onChange={set('content')} placeholder="Write your article here…" />
+            <p className="text-[11px] text-muted normal-case mb-2">Supports ## Heading 2, ### Heading 3, **bold**, - bullet points, &gt; quotes</p>
+            <textarea rows={14} className={`${inputClass} resize-y font-mono text-xs`} value={f.content} onChange={set('content')} placeholder="Write your article here…" />
+          </div>
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div>
+              <label className={labelClass}>Author Name</label>
+              <input className={inputClass} value={f.author_name} onChange={set('author_name')} placeholder="Your name" />
+            </div>
+            <div>
+              <label className={labelClass}>Author Role</label>
+              <input className={inputClass} value={f.author_role} onChange={set('author_role')} placeholder="Mentor, NexRNN Technologies" />
+            </div>
+            <div>
+              <label className={labelClass}>Reading Time</label>
+              <input className={inputClass} value={f.reading_time} onChange={set('reading_time')} placeholder="5 min read" />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Author Bio (About the Author paragraph)</label>
+            <textarea rows={2} className={`${inputClass} resize-y`} value={f.author_bio} onChange={set('author_bio')} placeholder="Appears at the end of the article. Leave empty to use the default bio." />
+          </div>
+          <div>
+            <label className={labelClass}>Call-to-Action Link (Optional) — blog ke end mein button</label>
+            <p className="text-[11px] text-muted normal-case mb-2">Article ke end me ek button — course, service, contact ya koi bhi page link kar sakte hain. Empty = button nahi dikhega.</p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Button Text</label>
+                <input className={inputClass} value={f.cta_text} onChange={set('cta_text')} placeholder="e.g. Explore the Course" />
+              </div>
+              <div>
+                <label className={labelClass}>Button Link (URL)</label>
+                <input className={inputClass} value={f.cta_url} onChange={set('cta_url')} placeholder="/course or https://…" />
+              </div>
+            </div>
+            <p className="mt-1 text-[11px] text-muted normal-case">Internal links like /course ya /services bhi chalte hain, aur full https:// links (new tab me khulenge).</p>
+          </div>
+          <div>
+            <label className={labelClass}>Tags (comma-separated)</label>
+            <input className={inputClass} value={f.tags} onChange={set('tags')} placeholder="google-ads, marketing" />
           </div>
           <label className="flex items-center gap-2.5">
             <input type="checkbox" className="w-4 h-4 accent-primary" checked={f.is_published} onChange={(e) => setF((prev) => ({ ...prev, is_published: e.target.checked }))} />
-            <span className="text-sm font-semibold text-secondary">Published (uncheck for draft — only visible to you)</span>
+            <span className="text-sm font-semibold text-secondary">Published immediately (uncheck to save as draft)</span>
           </label>
 
           <div className="flex items-center justify-end gap-3 pt-1">
             <button onClick={onClose} className="btn-secondary">Cancel</button>
             <button onClick={handleSubmit} disabled={saving} className="btn-primary inline-flex items-center gap-2 disabled:opacity-60">
-              {saving ? <><Loader2 size={15} className="animate-spin" /> Saving…</> : post ? 'Update Post' : 'Create Post'}
+              {saving ? <><Loader2 size={15} className="animate-spin" /> Saving…</> : 'Publish Article'}
             </button>
           </div>
         </div>

@@ -174,8 +174,13 @@ export default function AdminCaseStudyForm() {
               <input name="title" value={form.title} onChange={handleChange} className={`${inputClass} normal-case`} placeholder="How we 3x'd leads for a real estate firm" required />
             </div>
             <div>
-              <label className={labelClass}>Slug (URL)</label>
-              <input name="slug" value={form.slug} onChange={handleChange} className={`${inputClass} normal-case font-mono text-xs`} placeholder="auto-generated from title" />
+              <label className={labelClass}>Slug (URL) — Auto-generate from Title</label>
+              <div className="flex items-center gap-2">
+                <input name="slug" value={form.slug} onChange={handleChange} className={`${inputClass} normal-case font-mono text-xs`} placeholder="auto-generated from title" />
+                <button type="button" title="Auto-generate from Title" onClick={() => setForm((f) => ({ ...f, slug: slugify(f.title) }))} className="shrink-0 border-2 border-secondary/20 bg-white px-3 py-2.5 text-xs font-bold text-secondary hover:border-primary hover:text-primary transition-colors">
+                  Auto
+                </button>
+              </div>
               <p className="mt-1.5 text-[11px] text-muted normal-case">/case-studies/{form.slug || 'your-slug'}</p>
             </div>
             <div className="grid sm:grid-cols-2 gap-5">
