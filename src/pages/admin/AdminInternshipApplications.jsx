@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { useSearchParams } from 'react-router-dom';
-import { Download, Eye, X, Loader2, CalendarDays, FileText, Award, Mail } from 'lucide-react';
+import { Download, Eye, X, Loader2, CalendarDays, FileText, Award, Mail, Banknote } from 'lucide-react';
+import { markApplicationPaidOffline, OFFLINE_METHODS } from '@/data/offlinePaymentsRepo';
 import {
   fetchAdminApplications, updateApplicationAdmin, getResumeDownloadUrl, downloadApplicationPDF,
 } from '@/data/applicationsRepo';
@@ -189,6 +190,7 @@ export default function AdminInternshipApplications() {
     { key: 'fullName', label: 'Name', render: (r) => (
       <span className="text-sm font-semibold text-secondary normal-case">{r.fullName}</span>
     ) },
+    { key: 'referralCode', label: 'Referral Code', render: (r) => (r.referralCode ? <span className="font-mono text-xs font-bold text-primary">{r.referralCode}</span> : '—') },
     { key: 'mobile', label: 'Contact', render: (r) => (
       <span className="text-xs text-secondary normal-case">
         {r.mobile}
@@ -261,6 +263,7 @@ export default function AdminInternshipApplications() {
     name: r.fullName || '',
     email: r.email || '',
     mobile: r.mobile || '',
+    referral_code: r.referralCode || '',
     gender: r.gender || '',
     city: r.city || '',
     state: r.state || '',
@@ -291,6 +294,7 @@ export default function AdminInternshipApplications() {
     { key: 'name', label: 'Name' },
     { key: 'email', label: 'Email' },
     { key: 'mobile', label: 'Mobile' },
+    { key: 'referral_code', label: 'Referral Code' },
     { key: 'gender', label: 'Gender' },
     { key: 'city', label: 'City' },
     { key: 'state', label: 'State' },
@@ -380,12 +384,52 @@ export default function AdminInternshipApplications() {
         onDownloadResume={() => handleDownloadResume(editing.row)}
         onAutoCalculateEnd={autoCalculateEnd}
         onToast={(msg, type) => (type === 'error' ? toast.error(msg) : toast.success(msg))}
+        onOfflineDone={() => {
+          setEditing(null);
+          load();
+        }}
       />}
     </div>
   );
 }
 
-function ApplicationDetailModal({ editing, setEditing, onSave, saving, onDownloadResume, onAutoCalculateEnd, onToast }) {
+function ApplicationDetailModal({ editing, setEditing, onSave, saving, onDownloadResume, onAutoCalculateEnd, onToast, onOfflineDone }) {
+  // Offline payment (career fee cash/UPI/bank me liya — payments record bhi banta hai)
+  const [offOpen, setOffOpen] = useState(false);
+  const [offForm, setOffForm] = useState({ amount: '', method: 'Cash', note: '', countCommission: true });
+  const [offSaving, setOffSaving] = useState(false);
+
+  useEffect(() => {
+    if (editing) {
+      setOffOpen(false);
+      setOffForm({ amount: String(editing.row?.paymentAmount || 0), method: 'Cash', note: '', countCommission: true });
+    }
+  }, [editing]);
+
+  const handleOfflinePay = async () => {
+    if (!editing) return;
+    if (!String(offForm.note).trim()) {
+      onToast('A short note/reason is required for offline payments.', 'error');
+      return;
+    }
+    setOffSaving(true);
+    try {
+      await markApplicationPaidOffline({
+        applicationId: editing.id,
+        amount: Number(offForm.amount) || 0,
+        method: offForm.method,
+        note: offForm.note,
+        countCommission: offForm.countCommission,
+      });
+      onToast('Payment marked as done (offline). Application is now Paid.', 'success');
+      onOfflineDone();
+    } catch (err) {
+      onToast(err?.message || 'Could not mark the payment as done.', 'error');
+    } finally {
+      setOffSaving(false);
+    }
+  };
+
   const r = editing.row;
   const set = (name, value) => setEditing((prev) => ({ ...prev, [name]: value }));
   const [docBusy, setDocBusy] = useState('');
@@ -625,6 +669,63 @@ function ApplicationDetailModal({ editing, setEditing, onSave, saving, onDownloa
               </select>
             </div>
           </div>
+          {/* Offline fee collection: gateway skip */}
+          {editing.paymentStatus !== 'paid' && editing.paymentStatus !== 'free' && (
+            <div className="mt-4">
+              {!offOpen ? (
+                <button
+                  type="button"
+                  onClick={() => setOffOpen(true)}
+                  className="inline-flex items-center gap-2 border-2 border-green-300 bg-green-50 px-3.5 py-2 text-xs font-bold text-green-700 hover:border-green-400 transition-colors"
+                >
+                  <Banknote size={14} /> Mark Fee as Paid — Offline
+                </button>
+              ) : (
+                <div className="border-2 border-secondary/15 p-4 space-y-3.5">
+                  <p className="text-xs font-bold uppercase tracking-wide text-secondary flex items-center gap-1.5">
+                    <Banknote size={14} className="text-primary" /> Offline Payment
+                  </p>
+                  <div className="grid sm:grid-cols-2 gap-3.5">
+                    <div>
+                      <label className={labelClass}>Amount Received (₹)</label>
+                      <input type="number" min="0" value={offForm.amount} onChange={(e) => setOffForm((f) => ({ ...f, amount: e.target.value }))} className={inputClass} placeholder="e.g. 99" />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Method</label>
+                      <select value={offForm.method} onChange={(e) => setOffForm((f) => ({ ...f, method: e.target.value }))} className={inputClass}>
+                        {OFFLINE_METHODS.map((m) => (
+                          <option key={m} value={m}>{m}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Note / Reason (required)</label>
+                    <textarea rows={2} className={`${inputClass} resize-none`} value={offForm.note} onChange={(e) => setOffForm((f) => ({ ...f, note: e.target.value }))} placeholder="e.g. Fee collected in cash at the center" />
+                  </div>
+                  {editing.row.referralCode ? (
+                    <label className="flex items-start gap-2.5 text-xs text-secondary normal-case cursor-pointer">
+                      <input type="checkbox" className="mt-0.5 accent-[#1d4ed8]" checked={offForm.countCommission} onChange={(e) => setOffForm((f) => ({ ...f, countCommission: e.target.checked }))} />
+                      <span>
+                        Count referral commission for this payment (referred by{' '}
+                        <b className="font-mono">{editing.row.referralCode}</b>). Untick if this member
+                        should NOT earn commission on it.
+                      </span>
+                    </label>
+                  ) : (
+                    <p className="text-[11px] text-muted normal-case">No referral code on this application — no commission will be counted.</p>
+                  )}
+                  <div className="flex items-center justify-end gap-2.5">
+                    <button type="button" onClick={() => setOffOpen(false)} className="btn-secondary">Cancel</button>
+                    <button type="button" onClick={handleOfflinePay} disabled={offSaving} className="btn-primary inline-flex items-center gap-2 disabled:opacity-60">
+                      {offSaving ? <><Loader2 size={15} className="animate-spin" /> Saving…</> : 'Confirm — Mark as Paid'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="mt-4">
             <label className={labelClass}>Admin Remarks (internal — never shown to students)</label>
             <textarea rows={3} value={editing.adminRemarks} onChange={(e) => set('adminRemarks', e.target.value)} className={`${inputClass} resize-y`} placeholder="e.g. Strong technical profile / Needs additional verification" />

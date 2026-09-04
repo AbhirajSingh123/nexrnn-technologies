@@ -298,8 +298,11 @@ export async function downloadWithdrawalSlipPDF(w, contact = {}) {
   y += 30;
 
   // Details grid
-  y = gridRow(doc, y, W, M, 'Mentor Name', w.name || '-');
-  y = gridRow(doc, y, W, M, 'Mentor ID', w.mentorId || '-');
+  // idLabel: sales withdrawal slip par 'Sales ID' dikhta hai (mentor par 'Mentor ID')
+  const idLabel = w.idLabel || 'Mentor ID';
+  const whoLabel = w.idLabel ? 'Member Name' : 'Mentor Name';
+  y = gridRow(doc, y, W, M, whoLabel, w.name || '-');
+  y = gridRow(doc, y, W, M, idLabel, w.mentorId || '-');
   if (contact.email) y = gridRow(doc, y, W, M, 'Email', contact.email);
   if (contact.phone) y = gridRow(doc, y, W, M, 'Phone', contact.phone);
   y = gridRow(doc, y, W, M, 'Payment Method', w.method === 'bank' ? 'Bank Account' : 'UPI');

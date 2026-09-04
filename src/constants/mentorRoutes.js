@@ -12,6 +12,7 @@ export const MENTOR_ROUTES = {
   commission: `${MENTOR_BASE}/commission`,
   withdrawals: `${MENTOR_BASE}/withdrawal-payment`,
   blog: `${MENTOR_BASE}/blog`,
+  announcements: `${MENTOR_BASE}/announcements`,
   contact: `${MENTOR_BASE}/contact`,
   issue: `${MENTOR_BASE}/issue`,
 };

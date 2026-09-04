@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { CreditCard, Loader2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { courseEnrollSchema } from '@/utils/validation';
+import { getStoredReferral } from '@/utils/referral';
 import { submitWorkshopEnrollment } from '@/data/leadsRepo';
 import { createCashfreeOrder } from '@/data/paymentsRepo';
 import { startCashfreeCheckout } from '@/utils/cashfreeSdk';
@@ -35,7 +36,7 @@ export default function WorkshopEnrollModal() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm({ resolver: zodResolver(courseEnrollSchema), mode: 'onBlur' });
+  } = useForm({ resolver: zodResolver(courseEnrollSchema), mode: 'onBlur', defaultValues: { referralCode: getStoredReferral() } });
 
   const onSubmit = async (data) => {
     try {
@@ -148,6 +149,16 @@ export default function WorkshopEnrollModal() {
         <div>
           <label htmlFor="we-college" className={labelClass}>College (optional)</label>
           <input id="we-college" className={inputClass} {...register('college')} placeholder="Your college / institution" />
+        </div>
+
+        <div>
+          <label htmlFor="we-referral" className={labelClass}>Referral Code (optional)</label>
+          <input
+            id="we-referral"
+            className={`${inputClass} uppercase`}
+            {...register('referralCode')}
+            placeholder="Enter referral code if you have one"
+          />
         </div>
 
         <ConsentCheckbox register={register} error={errors.consent} id="workshop-enroll-consent" />

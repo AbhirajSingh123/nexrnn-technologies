@@ -124,7 +124,7 @@ export async function fetchAdminCareerById(id) {
 /** Admin: save (insert ya update) */
 export async function saveCareer(formData, id = null) {
   if (!isSupabaseConfigured) {
-    throw new Error('Supabase is not configured.');
+    throw new Error('This section is temporarily unavailable. Please try again in a while.');
   }
 
   const payload = {

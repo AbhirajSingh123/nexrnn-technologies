@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { toast } from 'react-toastify';
 import {
   LayoutDashboard, GraduationCap, BookOpen, Layers, PartyPopper, IdCard,
-  IndianRupee, Mail, AlertTriangle, LogOut, Menu, X, Newspaper, Wallet,
+  IndianRupee, Mail, AlertTriangle, LogOut, Menu, X, Newspaper, Wallet, Megaphone,
 } from 'lucide-react';
 import { useMentorAuth } from '@/contexts/MentorAuthContext';
 import { MENTOR_ROUTES } from '@/constants/mentorRoutes';
@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { to: MENTOR_ROUTES.commission, label: 'Commission', icon: IndianRupee },
   { to: MENTOR_ROUTES.withdrawals, label: 'Withdrawal Payment', icon: Wallet },
   { to: MENTOR_ROUTES.blog, label: 'My Blogs', icon: Newspaper },
+  { to: MENTOR_ROUTES.announcements, label: 'Announcements', icon: Megaphone },
   { to: MENTOR_ROUTES.contact, label: 'Contact Us', icon: Mail },
   { to: MENTOR_ROUTES.issue, label: 'Report an Issue', icon: AlertTriangle },
 ];

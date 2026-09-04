@@ -3,15 +3,15 @@ import { generateReferenceId } from '@/utils/referenceId';
 
 export async function submitContactLead({ name, phone, email, service, message, consent }) {
   if (!isSupabaseConfigured) {
-    throw new Error('Backend is not configured yet. Please contact us directly by phone or email for now.');
+    throw new Error('Online submissions are temporarily unavailable. Please contact us directly by phone or email.');
   }
   const { error } = await supabase.from('leads_contact').insert({ name, phone, email, service, message, consent });
   if (error) throw error;
 }
 
-export async function submitServiceLead({ name, companyName, city, phone, email, message, consent, service }) {
+export async function submitServiceLead({ name, companyName, city, phone, email, message, consent, service, referralCode }) {
   if (!isSupabaseConfigured) {
-    throw new Error('Backend is not configured yet. Please contact us directly by phone or email for now.');
+    throw new Error('Online submissions are temporarily unavailable. Please contact us directly by phone or email.');
   }
   const { error } = await supabase.from('leads_service').insert({
     name,
@@ -23,13 +23,15 @@ export async function submitServiceLead({ name, companyName, city, phone, email,
     consent,
     service_slug: service.slug,
     service_title: service.title,
+    // Sales refer & earn: user ne jo code dala (optional, uppercase normalised)
+    referral_code: String(referralCode || '').trim().toUpperCase().slice(0, 20),
   });
   if (error) throw error;
 }
 
-export async function submitCourseEnrollment({ name, phone, email, college, consent, course }) {
+export async function submitCourseEnrollment({ name, phone, email, college, consent, course, referralCode }) {
   if (!isSupabaseConfigured) {
-    throw new Error('Backend is not configured yet. Please contact us directly by phone or email for now.');
+    throw new Error('Online submissions are temporarily unavailable. Please contact us directly by phone or email.');
   }
   // Generate the ID ourselves and include it in the insert, instead of asking
   // Supabase to return the inserted row afterward. Returning a row after
@@ -45,6 +47,8 @@ export async function submitCourseEnrollment({ name, phone, email, college, cons
     email,
     college: college || '',
     consent,
+    // Sales refer & earn: user ne jo code dala (optional, uppercase normalised)
+    referral_code: String(referralCode || '').trim().toUpperCase().slice(0, 20),
     course_slug: course.slug,
     course_title: course.title,
     price: course.price || '',
@@ -58,9 +62,9 @@ export async function submitCourseEnrollment({ name, phone, email, college, cons
   return { ...record, referenceId };
 }
 
-export async function submitWorkshopEnrollment({ name, phone, email, college, consent, workshop }) {
+export async function submitWorkshopEnrollment({ name, phone, email, college, consent, workshop, referralCode }) {
   if (!isSupabaseConfigured) {
-    throw new Error('Backend is not configured yet. Please contact us directly by phone or email for now.');
+    throw new Error('Online submissions are temporarily unavailable. Please contact us directly by phone or email.');
   }
   // Same reasoning as submitCourseEnrollment above: generate the ID
   // client-side and do a plain insert (no .select()) since leads_workshop is
@@ -74,6 +78,8 @@ export async function submitWorkshopEnrollment({ name, phone, email, college, co
     email,
     college: college || '',
     consent,
+    // Sales refer & earn: user ne jo code dala (optional, uppercase normalised)
+    referral_code: String(referralCode || '').trim().toUpperCase().slice(0, 20),
     workshop_slug: workshop.slug,
     workshop_title: workshop.title,
     price: workshop.price || '',

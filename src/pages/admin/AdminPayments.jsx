@@ -40,6 +40,15 @@ function getTypeLabel(r) {
   return r.lead_type === 'career' ? 'Career Application' : r.lead_type === 'workshop' ? 'Workshop' : 'Course';
 }
 
+// Offline payment ka method/note: naye columns na mile to raw_response se
+function getOffline(r) {
+  const raw = (r.raw_response && typeof r.raw_response === 'object') ? r.raw_response : {};
+  return {
+    method: r.offline_method || raw.method || 'Cash',
+    note: r.offline_note || raw.note || '',
+  };
+}
+
 // Slip ke liye payment row ka poora data (student/item/reference resolved)
 function buildSlipData(r) {
   return {
@@ -69,6 +78,7 @@ export default function AdminPayments() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [sourceFilter, setSourceFilter] = useState('all');
   const [slippingId, setSlippingId] = useState(null);
 
   const load = useCallback(async () => {
@@ -108,6 +118,8 @@ export default function AdminPayments() {
   const filteredRows = useMemo(() => {
     return rows.filter((r) => {
       if (statusFilter !== 'all' && r.status !== statusFilter) return false;
+      if (sourceFilter === 'offline' && r.payment_method !== 'offline') return false;
+      if (sourceFilter === 'online' && r.payment_method === 'offline') return false;
       if (dateFrom && new Date(r.created_at) < new Date(dateFrom)) return false;
       if (dateTo && new Date(r.created_at) > new Date(`${dateTo}T23:59:59`)) return false;
       if (search.trim()) {
@@ -116,17 +128,17 @@ export default function AdminPayments() {
         const haystack = [
           r.cashfree_order_id, r.cf_payment_id, getReferenceId(r),
           student?.name, student?.email, student?.phone, getItemTitle(r),
-          r.promo_code,
+          r.promo_code, r.referral_code,
         ].join(' ').toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
     });
-  }, [rows, search, dateFrom, dateTo, statusFilter]);
+  }, [rows, search, dateFrom, dateTo, statusFilter, sourceFilter]);
 
   const { visibleItems, hasMore, loadMore, total, shown } = useLoadMore(
     filteredRows,
-    `${search}|${dateFrom}|${dateTo}|${statusFilter}`
+    `${search}|${dateFrom}|${dateTo}|${statusFilter}|${sourceFilter}`
   );
 
   // Export ke liye FULL rows - student/item/reference sab resolved
@@ -141,6 +153,7 @@ export default function AdminPayments() {
     base_amount: r.base_amount ?? '',
     discount_amount: r.discount_amount ?? '',
     promo_code: r.promo_code || '',
+    referral_code: r.referral_code || '',
     platform_fee: r.platform_fee ?? '',
     currency: r.currency || 'INR',
     status: r.status || '',
@@ -148,6 +161,9 @@ export default function AdminPayments() {
     cf_payment_id: r.cf_payment_id || '',
     reference_id: getReferenceId(r),
     payment_method: r.payment_method || '',
+    offline_method: r.payment_method === 'offline' ? getOffline(r).method : '',
+    offline_note: r.payment_method === 'offline' ? getOffline(r).note : '',
+    source: r.payment_method === 'offline' ? 'Offline' : 'Online (Cashfree)',
     created_at: r.created_at || '',
   }));
 
@@ -170,10 +186,20 @@ export default function AdminPayments() {
     { key: 'lead_type', label: 'Type', render: (r) => getTypeLabel(r) },
     { key: 'amount', label: 'Total Pay', render: (r) => `\u20b9${r.amount}` },
     { key: 'promo_code', label: 'Promo Code', render: (r) => r.promo_code || '—' },
+    { key: 'referral_code', label: 'Referral Code', render: (r) => (r.referral_code ? <span className="font-mono text-xs font-bold text-primary">{r.referral_code}</span> : '—') },
     { key: 'cashfree_order_id', label: 'Order ID' },
     { key: 'cf_payment_id', label: 'Payment ID', render: (r) => r.cf_payment_id || '—' },
     { key: 'reference_id', label: 'Reference ID/Application ID', render: (r) => getReferenceId(r) || '—' },
-    { key: 'payment_method', label: 'Method', render: (r) => r.payment_method || '—' },
+    {
+      key: 'payment_method', label: 'Method', render: (r) => (
+        r.payment_method === 'offline' ? (
+          <span className="inline-flex flex-col">
+            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-1 border-2 border-amber-300 bg-amber-50 text-amber-700 whitespace-nowrap">Offline · {getOffline(r).method}</span>
+            {getOffline(r).note && <span className="text-[10px] text-muted normal-case mt-0.5 max-w-[180px]">{getOffline(r).note}</span>}
+          </span>
+        ) : (r.payment_method || '—')
+      ),
+    },
     {
       key: 'status',
       label: 'Status',
@@ -227,6 +253,18 @@ export default function AdminPayments() {
               <option value="failed">Failed</option>
               <option value="expired">Expired</option>
             </select>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wide text-muted mb-1">Source</label>
+              <select
+                value={sourceFilter}
+                onChange={(e) => setSourceFilter(e.target.value)}
+                className="border-2 border-secondary/20 focus:border-primary px-3 py-2 text-sm outline-none transition-colors bg-white"
+              >
+                <option value="all">All</option>
+                <option value="online">Online (Cashfree)</option>
+                <option value="offline">Offline</option>
+              </select>
+            </div>
           </div>
         }
       />

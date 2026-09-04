@@ -65,6 +65,35 @@ export function buildMentorMailto(mentor) {
 }
 
 /**
+ * Sales team member mail
+ * member: { name, email, salesId, commissionCourse, commissionWorkshop, commissionService, referralCode, dateOfJoining }
+ */
+export function buildSalesMailto(member) {
+  const subject = `NexRNN Technologies - Sales Team`;
+  const body = [
+    `Name: ${member.name || ''}`,
+    `Email: ${member.email || ''}`,
+    `Sales ID: ${member.salesId || '-'}`,
+    `Referral Code: ${member.referralCode || '-'}`,
+    `Commission (Course): ${member.commissionCourse ?? 0}%`,
+    `Commission (Workshop): ${member.commissionWorkshop ?? 0}%`,
+    `Commission (Service): ${member.commissionService ?? 0}%`,
+    `Date of Joining: ${member.dateOfJoining || '-'}`,
+    '',
+    `Hello ${member.name || 'there'},`,
+    '',
+    'Thank you for being part of the NexRNN Technologies sales team.',
+    'Please use the details above for any communication regarding your association.',
+    '',
+    'Warm regards,',
+    'NexRNN Technologies',
+    'https://www.nexrnntechnologies.in/',
+  ].join('\n');
+
+  return `mailto:${enc(member.email)}?subject=${enc(subject)}&body=${enc(body)}`;
+}
+
+/**
  * Career application mail
  * app: { fullName, email, applicationId, openingCode, openingTitle, domain, typeLabel }
  */

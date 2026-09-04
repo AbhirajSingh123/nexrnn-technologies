@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Loader2, CreditCard } from 'lucide-react';
+import { Loader2, CreditCard, Banknote } from 'lucide-react';
+import { markEnrollmentPaidOffline, OFFLINE_METHODS } from '@/data/offlinePaymentsRepo';
 import { supabase } from '@/services/supabaseClient';
 import { formatDateTimeWithDay } from '@/utils/formatDateTime';
 import Modal from '@/components/shared/Modal';
@@ -41,9 +42,15 @@ export default function AdminEnrollmentModal({ enrollment, table, titleField, pa
   const [saving, setSaving] = useState(false);
   const [payments, setPayments] = useState([]);
   const [loadingPayments, setLoadingPayments] = useState(false);
+  // Offline payment (admin ne cash/UPI/bank me paisa liya — gateway skip)
+  const [offOpen, setOffOpen] = useState(false);
+  const [offForm, setOffForm] = useState({ amount: '', method: 'Cash', note: '', countCommission: true });
+  const [offSaving, setOffSaving] = useState(false);
 
   useEffect(() => {
     if (enrollment) {
+      setOffOpen(false);
+      setOffForm({ amount: String(parseInt(String(enrollment.price ?? '').replace(/[^0-9]/g, ''), 10) || 0), method: 'Cash', note: '', countCommission: true });
       setForm({
         batch_id: enrollment.batch_id ?? '',
         enrollment_status: enrollment.enrollment_status ?? 'pending',
@@ -71,6 +78,30 @@ export default function AdminEnrollmentModal({ enrollment, table, titleField, pa
   if (!enrollment || !form) return null;
 
   const handleChange = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+
+  const handleOfflinePay = async () => {
+    if (!String(offForm.note).trim()) {
+      toast.error('A short note/reason is required for offline payments.');
+      return;
+    }
+    setOffSaving(true);
+    try {
+      await markEnrollmentPaidOffline({
+        leadType: table === 'leads_workshop' ? 'workshop' : 'course',
+        leadId: enrollment.id,
+        amount: Number(offForm.amount) || 0,
+        method: offForm.method,
+        note: offForm.note,
+        countCommission: offForm.countCommission,
+      });
+      toast.success('Payment marked as done (offline). Enrollment is now Paid + Enrolled.');
+      onSaved();
+    } catch (err) {
+      toast.error(err?.message || 'Could not mark the payment as done.');
+    } finally {
+      setOffSaving(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -113,8 +144,11 @@ export default function AdminEnrollmentModal({ enrollment, table, titleField, pa
                 <div>
                   <p className="text-xs font-semibold text-secondary normal-case">{p.cashfree_order_id}</p>
                   <p className="text-[11px] text-muted normal-case">
-                    ₹{p.amount} · {p.payment_method || 'method unknown'} · {formatDateTimeWithDay(p.created_at)}
+                    ₹{p.amount} · {p.payment_method === 'offline' ? `Offline (${p.offline_method || p.raw_response?.method || 'Cash'})` : p.payment_method || 'method unknown'} · {formatDateTimeWithDay(p.created_at)}
                   </p>
+                  {p.payment_method === 'offline' && (p.offline_note || p.raw_response?.note) && (
+                    <p className="text-[11px] text-muted normal-case">Note: {p.offline_note || p.raw_response?.note}</p>
+                  )}
                   {p.cf_payment_id && (
                     <p className="text-[11px] text-muted normal-case">Cashfree Payment ID: {p.cf_payment_id}</p>
                   )}
@@ -127,6 +161,90 @@ export default function AdminEnrollmentModal({ enrollment, table, titleField, pa
           </div>
         )}
       </div>
+
+      {/* Offline payment: gateway skip karke done mark karo */}
+      {(enrollment.payment_status ?? 'unpaid') !== 'paid' && (
+        <div className="mb-6 pb-6 border-b-2 border-secondary/10">
+          {!offOpen ? (
+            <button
+              type="button"
+              onClick={() => setOffOpen(true)}
+              className="inline-flex items-center gap-2 border-2 border-green-300 bg-green-50 px-4 py-2.5 text-xs font-bold text-green-700 hover:border-green-400 transition-colors"
+            >
+              <Banknote size={15} /> Mark as Paid — Offline (Cash / UPI / Bank)
+            </button>
+          ) : (
+            <div className="border-2 border-secondary/15 p-4 space-y-3.5">
+              <p className="text-xs font-bold uppercase tracking-wide text-secondary flex items-center gap-1.5">
+                <Banknote size={14} className="text-primary" /> Offline Payment
+              </p>
+              <div className="grid sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className={labelClass}>Amount Received (₹)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={inputClass}
+                    value={offForm.amount}
+                    onChange={(e) => setOffForm((f) => ({ ...f, amount: e.target.value }))}
+                    placeholder="e.g. 4999"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Method</label>
+                  <select
+                    className={inputClass}
+                    value={offForm.method}
+                    onChange={(e) => setOffForm((f) => ({ ...f, method: e.target.value }))}
+                  >
+                    {OFFLINE_METHODS.map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className={labelClass}>Note / Reason (required)</label>
+                <textarea
+                  rows={2}
+                  className={`${inputClass} resize-none`}
+                  value={offForm.note}
+                  onChange={(e) => setOffForm((f) => ({ ...f, note: e.target.value }))}
+                  placeholder="e.g. Fee collected in cash at the center"
+                />
+              </div>
+              {enrollment.referral_code ? (
+                <label className="flex items-start gap-2.5 text-xs text-secondary normal-case cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 accent-[#1d4ed8]"
+                    checked={offForm.countCommission}
+                    onChange={(e) => setOffForm((f) => ({ ...f, countCommission: e.target.checked }))}
+                  />
+                  <span>
+                    Count referral commission for this payment (referred by{' '}
+                    <b className="font-mono">{enrollment.referral_code}</b>). Untick if this member
+                    should NOT earn commission on it.
+                  </span>
+                </label>
+              ) : (
+                <p className="text-[11px] text-muted normal-case">No referral code on this enrollment — no commission will be counted.</p>
+              )}
+              <div className="flex items-center justify-end gap-2.5">
+                <button type="button" onClick={() => setOffOpen(false)} className="btn-secondary">Cancel</button>
+                <button
+                  type="button"
+                  onClick={handleOfflinePay}
+                  disabled={offSaving}
+                  className="btn-primary inline-flex items-center gap-2 disabled:opacity-60"
+                >
+                  {offSaving ? <><Loader2 size={15} className="animate-spin" /> Saving…</> : 'Confirm — Mark as Paid'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="space-y-4">
         <div>

@@ -25,6 +25,7 @@ function mapRow(row) {
     fullName: row.full_name || '',
     email: row.email || '',
     mobile: row.mobile || '',
+    referralCode: String(row.referral_code || '').trim(),
     gender: row.gender || '',
     city: row.city || '',
     state: row.state || '',
@@ -85,7 +86,7 @@ export async function validateResumeFile(file) {
 /** Resume private bucket me secure upload (public URL kabhi nahi deta) */
 export async function uploadResume(file) {
   if (!isSupabaseConfigured) {
-    throw new Error('Supabase is not configured.');
+    throw new Error('Submissions are temporarily unavailable. Please try again in a while or contact us directly.');
   }
   const ext = (file.name.split('.').pop() || 'pdf').toLowerCase();
   const path = `applications/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
@@ -102,7 +103,7 @@ export async function uploadResume(file) {
 /** Public: application submit (Application ID DB trigger se aata hai) */
 export async function submitApplication(payload) {
   if (!isSupabaseConfigured) {
-    throw new Error('Supabase is not configured.');
+    throw new Error('Submissions are temporarily unavailable. Please try again in a while or contact us directly.');
   }
 
   const record = {
@@ -126,6 +127,8 @@ export async function submitApplication(payload) {
     resume_path: payload.resumePath || '',
     resume_name: payload.resumeName || '',
     expectations: payload.expectations || '',
+    // Sales refer & earn attribution (optional, uppercase normalised)
+    referral_code: String(payload.referralCode || '').trim().toUpperCase().slice(0, 20),
     // Paid opening: pehle 'pending', payment success par edge function 'paid' karta hai
     payment_status: payload.paymentStatus === 'pending' ? 'pending' : 'free',
     payment_amount: Number(payload.paymentAmount) || 0,

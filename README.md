@@ -452,6 +452,90 @@ This README is updated **every time a task/feature is completed** — newest wor
   (from `promo_codes`) + platform fee (from `site_settings`) — frontend numbers are never trusted;
   `payments` rows now store base_amount / discount_amount / promo_code / platform_fee; new
   `validate-promo` edge function powers the popup's Apply button
+- ✅ **NexRNN Sales Panel (new)**: sales team `/nexrnn/panel/sales/login` (Sales ID + mobile,
+  same HMAC-token auth as mentors) — Dashboard, Services catalog (with service commission),
+  **Service Leads** (full access + WhatsApp chat links), **Refer & Earn** (permanent unique
+  7-digit referral code, copy/share), Sales Details, Withdrawal Payment (wallet NX-SW-… IDs,
+  slip download), Contact Us, Report an Issue. Blocked members see the standard block message
+- ✅ **Admin → Sales Team / Sales Team Payments / Sales Team Issues** (same UX as mentor pages):
+  members are added from admin only — Sales ID `NX-SAL-XXXXXXXX` and the 7-digit referral code are
+  **DB-generated (unique, permanent, not editable)**; commission % for course / workshop / service
+  set by admin; payments page accepts withdrawal requests (ref no + message + slip + mail);
+  issues page responds to member-raised tickets (sales-issues private bucket)
+- ✅ **Referral Code (optional) field** on every public form — service enquiry, course enroll,
+  workshop enroll, career/internship application. The code is saved on the lead row and copied
+  server-side onto the payments row by `create-cashfree-order` (client values never trusted);
+  sales wallet commission = paid payments carrying the member's referral code × their rate
+  for that lead type (course / workshop / service)
+- ✅ Migration **30** (`migration_30_sales_team.sql`): sales_members (IDs + referral trigger),
+  sales_withdrawals, sales_issues + sales-issues bucket, referral_code columns on
+  leads_course / leads_workshop / leads_service / internship_applications / payments
+- ✅ **Universal referral links (`?ref=CODE`)**: any site URL with `?ref=` (or `?referral=`)
+  captures the code before render, stores it locally and cleans the URL — then EVERY public
+  form (service enquiry, course enroll, workshop enroll, career apply) auto-fills the referral
+  code. So one normal link attributes everything the visitor submits or buys
+- ✅ Sales **Services page = shareable catalog** (Services / Courses / Workshops tabs): clicking
+  any item opens a share modal with the member's referral link (Copy / WhatsApp / More Apps / Open)
+- ✅ Sales **My Enrollments**: course/workshop enrollments through the member's referral code,
+  with a WhatsApp "Offer" button that pre-fills a greeting + the member's referral code
+- ✅ Sales members can **Add a Lead** from the panel (gets their referral code automatically)
+  and download **Offer Letter + Full Profile PDFs** from Sales Details (admin can download them
+  from Admin → Sales Team → View / Edit too)
+- ✅ **Service Leads manage (admin)**: new Manage modal — user's submitted data stays read-only;
+  admin edits Referral Code, Status, Amount (deal value, migration 31) and Message; WhatsApp +
+  Email quick-contact buttons on each lead; Referral Code and Amount columns added to the table,
+  search now covers referral codes
+- ✅ Migration **31** (`migration_31_service_lead_manage.sql`): leads_service.amount + admin
+  UPDATE policy
+- ✅ **Visibility pass (R27)**: sales panel shows money everywhere it matters — service leads
+  show Amount (deal value) + estimated commission, My Enrollments shows course/workshop price +
+  estimated commission, Refer & Earn shows lead value, dashboard adds a "Potential Commission"
+  card (my service deals value x my service %). Admin side: Referral Code now visible on course
+  enrollments, workshop enrollments, internship applications and Payments (also in search +
+  Excel/PDF/CSV exports); new **Promo Usage** admin page lists every payment that used a promo
+  code (promo-code filter, total discount given, revenue received, full export)
+- ✅ Friendly-message sweep: remaining setup-style errors (login, payments, submissions,
+  catalogs) never show backend/setup details
+- ✅ Migration **32** (`migration_32_offline_payments.sql`): payments.commission_eligible +
+  offline_method + offline_note, leads_service.updated_at
+- ✅ **Offline Payments (admin)**: Course/Workshop enrollment Manage modal and Career
+  application modal get "Mark as Paid — Offline" — method (Cash / Direct UPI / Bank Transfer /
+  Other), amount and a mandatory note; server-side edge `admin-offline-payment` (admin token
+  verified) creates a paid payment record (OFF-… reference, offline method + note), expires any
+  stuck online order and flips the enrollment/application to Paid (+ Enrolled). Commission
+  checkbox decides whether the referral member earns on it (untick = attribution stays but no
+  commission). Admin Payments shows an Offline badge + note and a Source filter (Online
+  Cashfree / Offline). Deploy check: the admin-offline-payment function code must start with
+  the comment mentioning 'admin-offline-payment' — if it mentions Cashfree, the wrong file was
+  pasted (create-cashfree-order's code) and marking will fail with its validation error.
+  If a "schema is out of sync" message appears after running migrations, run
+  `NOTIFY pgrst, 'reload schema';` in the SQL Editor (refreshes Supabase's API schema cache);
+  the offline insert no longer needs the new columns at all — method/note/commission flag are
+  stored in the old raw_response (jsonb) column and unticking commission clears the referral
+  code, so marking works even if the API schema cache is stale
+- ✅ ~~Live sidebar badges~~ **REMOVED (R34, user request)**: sidebar count badges caused
+  more noise than help — they are fully removed from all three panels (component + hooks
+  deleted, layouts reverted clean); the `badges` actions were also removed from
+  sales-data / mentor-data
+- ✅ **Admin → Important Links**: new section under Dashboard listing every public page of the
+  website (home, services, courses, workshops, blog, case studies, careers/internship/job,
+  application status, contact, FAQs, sitemap) plus all three panel logins — every link opens
+  in a new tab
+- ✅ Sales dashboard breakdown: My Referrals shows counts by type (Courses · Workshops ·
+  Services) and a new "Earnings Breakdown" row shows earned from Courses / Workshops /
+  Services separately; Refer & Earn "Earned Commission" records now show the Referred
+  Person's name (from the linked lead/application)
+- ✅ Fix: course/workshop leads store price as formatted text ("₹5,999") — sales-data now
+  parses it safely so Price / Est. Commission / Value show correctly for course & workshop
+  referrals too (service deals were already fine)
+- ✅ Sales panel polish: sidebar section renamed to **Services & Programs**; the green
+  "Your … Commission: X%" box now shows for all three tabs (Service / Course / Workshop —
+  rates come from the sales-data services action)
+- ✅ **Service deal commission now pays out**: when admin sets Amount + Status "Done" on a
+  service lead (migration 31 + 32), the member's service commission flows into Total Earned,
+  Wallet (available to withdraw), dashboard today/month earnings and the Refer & Earn
+  "Earned Commission" records (shown as "Service (Deal)") — withdrawal works on it like
+  other earnings
 - ✅ Popup crash-proofing: the course/workshop enroll modals snapshot the item title/id into
   state while open and render the payment popup with fully null-safe props — the popup can never
   read from a closed modal's context, so page load never crashes (real-browser tested: every
@@ -482,7 +566,9 @@ This README is updated **every time a task/feature is completed** — newest wor
 - ✅ **User-friendly error screens (no technical details shown)**: file/chunk load failures
   never reveal file paths — the error boundary and a global guard auto-reload once (loop-safe),
   then show a simple "We're making some updates / Something went wrong" screen with Reload + Contact Us.
-  Mentor-facing service error messages simplified too
+  Mentor-facing service error messages simplified too. All remaining setup-style errors
+  (admin/mentor/sales login, payments, lead submissions, catalog repos) now show friendly
+  "temporarily unavailable — please try again / contact us" messages — never backend/setup details
 - ✅ **Dynamic Sitemap + RSS (SEO core)**: `npm run build` now generates `public/sitemap.xml`
   (static pages + all published blogs, live courses/workshops, services, case studies with real lastmod
   dates) and `public/rss.xml` (latest 30 posts) straight from Supabase. Safe fallbacks: no env / DB
@@ -508,3 +594,53 @@ This README is updated **every time a task/feature is completed** — newest wor
 - ✅ Student email/mobile hidden from mentor registrations (UI + server)
 - ✅ Analytics pagination/range/live-since fixes; ₹ prices; newest-first ordering; mentor gender;
     block/unblock with exact message; admin LOR download; Total Mentors stat; English-only UI text
+
+## R34: Sales My Blogs (full parity), Announcements system, badges removed
+
+- ✅ **Sidebar badges fully removed (user request)**: NavBadge component, useNavBadges /
+  useAdminBadges hooks deleted; Admin/Sales/Mentor layouts back to clean nav; `badges`
+  action removed from sales-data and mentor-data edges (deploy these to pick it up)
+- ✅ **Sales → My Blogs (full mentor parity)**: sales members write/edit their own blog
+  posts exactly like mentors — New Post form (title, category from blog_categories, tags,
+  excerpt, cover image URL, markdown content + live word count, Published/Draft checkbox),
+  list with Blog ID (NX-B-…), status badge, views, date, View (opens /blog/slug) and Edit;
+  sales-data edge gets `blog_categories`, `blogs_list` and `blog_save` (author shows
+  "Sales, NexRNN Technologies"; ownership-checked — a member can edit ONLY their own posts,
+  403 otherwise; slug auto-generated title + time suffix, same as mentor)
+- ✅ Migration **33** (`migration_33_sales_blog_announcements.sql`):
+  `blog_posts.sales_uuid` (FK → sales_members, ON DELETE SET NULL) + index, and the new
+  `announcements` table (audience mentor/sales, target_uuid NULL = whole audience, title,
+  message, created_by, created_at) + (audience, created_at) index + admin-only RLS policy
+- ✅ **Admin → Announcements**: one new section with Mentor / Sales tabs; compose form =
+  Recipient ("All Mentors"/"All Sales" or one specific member from the dropdown) + title +
+  message; full send history below (newest first) showing recipient (All badge or member
+  name), date/time and message. Admin pages insert directly (existing admin RLS pattern)
+- ✅ **Announcements visible in both panels**: Mentor → Announcements and Sales →
+  Announcements nav items (megaphone icon) list notices addressed to the whole audience
+  or personally to that member ("Only you" badge), newest first, with date + signature;
+  a mentor never sees sales notices and vice versa (server-filtered by the edge function
+  from the member's own session token — never from the frontend)
+
+## R35: Announcements are now TWO-WAY (reactions + replies)
+
+- ✅ Migration **34** (`migration_34_announcements_two_way.sql`): `announcement_reactions`
+  (unique per member + emoji — one tap adds, second tap removes) and `announcement_replies`
+  (member name stored with the reply so history survives member deletion) + admin-only
+  RLS policies + indexes
+- ✅ **Mentor/Sales panels react + reply**: every announcement card has an emoji reaction bar
+  (👍 ❤️ 🎉 👏 🙏) with live counts — tap to react, tap again to remove (own reaction
+  highlighted); a Reply box lists the discussion (member name + time, own replies highlighted
+  as "You") and lets the member respond (up to 1000 chars). Optimistic UI — reaction shows
+  instantly, then syncs with the server response
+- ✅ New sales-data / mentor-data edge actions: `announcement_react` (server-side toggle;
+  validates the announcement is actually visible to THIS member from their session token)
+  and `announcement_reply`; the `announcements` action now returns reactions + replies
+  (audience-filtered) with each notice
+- ✅ **Admin sees the full response**: history under each notice now shows reaction chips
+  (emoji + count, hover/long-press shows the member names who reacted) and every reply
+  (name + date + message) — Mentor and Sales tabs stay separate; members only ever see
+  replies on their own audience's notices
+- ✅ Deploy steps for this round: run `migration_34_announcements_two_way.sql` in the Supabase
+  SQL Editor, then redeploy BOTH edge functions (sales-data AND mentor-data)
+- ✅ Deploy steps for this round: run `migration_33_sales_blog_announcements.sql` in the
+  Supabase SQL Editor, then redeploy BOTH edge functions (sales-data AND mentor-data)

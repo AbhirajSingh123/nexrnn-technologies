@@ -112,6 +112,7 @@ export default function AdminLeadsCourses() {
     { key: 'course_title', label: 'Course' },
     { key: 'reference_id', label: 'Reference ID', render: (r) => r.reference_id || '—' },
     { key: 'batch_id', label: 'Batch ID', render: (r) => r.batch_id || '—' },
+    { key: 'referral_code', label: 'Referral Code', render: (r) => (r.referral_code ? <span className="font-mono text-xs font-bold text-primary">{r.referral_code}</span> : '—') },
     {
       key: 'enrollment_status',
       label: 'Status',

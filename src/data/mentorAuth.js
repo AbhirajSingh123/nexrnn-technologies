@@ -45,7 +45,7 @@ export function mentorLogout() {
 
 /** Mentor ID + mobile se login (server-side validation) */
 export async function loginMentor(mentorId, phone) {
-  if (!isSupabaseConfigured) throw new Error('Backend is not configured yet. See README / Supabase setup.');
+  if (!isSupabaseConfigured) throw new Error('Login service is temporarily unavailable. Please try again in a while.');
   // fetch (invoke nahi) - taaki 401 ka exact error message dikhe
   let res;
   try {

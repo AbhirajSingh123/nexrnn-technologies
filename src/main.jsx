@@ -3,6 +3,11 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import '@/styles/index.css'
 import App from './App.jsx'
+import { captureReferralFromUrl } from '@/utils/referral'
+
+// Sales refer & earn: ?ref=CODE capture React render se PEHLE (taaki form
+// fields ko pehli hi render me auto-fill mile)
+captureReferralFromUrl()
 
 // ------------------------------------------------------------
 // Global resource-fail guard: koi JS/CSS chunk load na ho paye

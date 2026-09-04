@@ -18,7 +18,7 @@ async function extractFunctionErrorMessage(error, fallback) {
 // leadType: 'course' | 'workshop'
 export async function createCashfreeOrder({ leadId, leadType, amount, customerName, customerEmail, customerPhone, itemTitle, promoCode, itemId }) {
   if (!isSupabaseConfigured) {
-    throw new Error('Payment backend is not configured yet. Please contact us directly to enroll.');
+    throw new Error('Payments are temporarily unavailable. Please contact us directly to enroll.');
   }
   const { data, error } = await supabase.functions.invoke('create-cashfree-order', {
     body: { leadId, leadType, amount, customerName, customerEmail, customerPhone, itemTitle, promoCode: promoCode || '', itemId: itemId || null },
@@ -36,7 +36,7 @@ export async function createCashfreeOrder({ leadId, leadType, amount, customerNa
 
 export async function verifyCashfreePayment(orderId) {
   if (!isSupabaseConfigured) {
-    throw new Error('Payment backend is not configured yet.');
+    throw new Error('Payments are temporarily unavailable. Please try again in a while.');
   }
   const { data, error } = await supabase.functions.invoke('verify-cashfree-payment', {
     body: { orderId },

@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Send } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { serviceLeadSchema } from '@/utils/validation';
+import { getStoredReferral } from '@/utils/referral';
 import { submitServiceLead } from '@/data/leadsRepo';
 import { trackLead } from '@/utils/analytics';
 import { useServiceLeadModal } from '@/contexts/ServiceLeadContext';
@@ -21,7 +22,7 @@ export default function ServiceLeadModal() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm({ resolver: zodResolver(serviceLeadSchema), mode: 'onBlur' });
+  } = useForm({ resolver: zodResolver(serviceLeadSchema), mode: 'onBlur', defaultValues: { referralCode: getStoredReferral() } });
 
   const onSubmit = async (data) => {
     try {
@@ -71,6 +72,16 @@ export default function ServiceLeadModal() {
         <div>
           <label htmlFor="sl-message" className={labelClass}>Message (optional)</label>
           <textarea id="sl-message" rows={3} className={`${inputClass} resize-none`} {...register('message')} placeholder="Anything specific we should know?" />
+        </div>
+
+        <div>
+          <label htmlFor="sl-referral" className={labelClass}>Referral Code (optional)</label>
+          <input
+            id="sl-referral"
+            className={`${inputClass} uppercase`}
+            {...register('referralCode')}
+            placeholder="Enter referral code if you have one"
+          />
         </div>
 
         <ConsentCheckbox register={register} error={errors.consent} id="service-lead-consent" />

@@ -8,11 +8,15 @@ import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import RootLayout from '@/layouts/RootLayout';
 import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
 import { MentorAuthProvider } from '@/contexts/MentorAuthContext';
+import { SalesAuthProvider } from '@/contexts/SalesAuthContext';
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute';
 import MentorLayout from '@/layouts/MentorLayout';
 import MentorProtectedRoute from '@/components/MentorProtectedRoute';
+import SalesLayout from '@/layouts/SalesLayout';
+import SalesProtectedRoute from '@/components/SalesProtectedRoute';
 import { ADMIN_ROUTES } from '@/constants/adminRoutes';
 import { MENTOR_ROUTES } from '@/constants/mentorRoutes';
+import { SALES_ROUTES } from '@/constants/salesRoutes';
 import Home from '@/pages/Home';
 import { SITE, SOCIAL_LINKS } from '@/constants/siteData';
 import 'react-toastify/dist/ReactToastify.css';
@@ -46,6 +50,8 @@ const AdminLogin = lazy(() => import('@/pages/admin/AdminLogin'));
 const AdminLayout = lazy(() => import('@/layouts/AdminLayout'));
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
 const AdminAnalytics = lazy(() => import('@/pages/admin/AdminAnalytics'));
+const AdminImportantLinks = lazy(() => import('@/pages/admin/AdminImportantLinks'));
+const AdminAnnouncements = lazy(() => import('@/pages/admin/AdminAnnouncements'));
 const AdminBatchEnrollment = lazy(() => import('@/pages/admin/AdminBatchEnrollment'));
 const AdminLeadsContact = lazy(() => import('@/pages/admin/AdminLeadsContact'));
 const AdminLeadsServices = lazy(() => import('@/pages/admin/AdminLeadsServices'));
@@ -65,9 +71,27 @@ const MentorCommission = lazy(() => import('@/pages/mentor/MentorCommission'));
 const MentorContact = lazy(() => import('@/pages/mentor/MentorContact'));
 const MentorIssue = lazy(() => import('@/pages/mentor/MentorIssue'));
 const MentorBlog = lazy(() => import('@/pages/mentor/MentorBlog'));
+const MentorAnnouncements = lazy(() => import('@/pages/mentor/MentorAnnouncements'));
 const MentorWithdrawals = lazy(() => import('@/pages/mentor/MentorWithdrawals'));
 const AdminMentorPayments = lazy(() => import('@/pages/admin/AdminMentorPayments'));
 const AdminPromoCodes = lazy(() => import('@/pages/admin/AdminPromoCodes'));
+const AdminPromoUsage = lazy(() => import('@/pages/admin/AdminPromoUsage'));
+// Sales panel + admin sales pages
+const SalesLogin = lazy(() => import('@/pages/sales/SalesLogin'));
+const SalesDashboard = lazy(() => import('@/pages/sales/SalesDashboard'));
+const SalesServices = lazy(() => import('@/pages/sales/SalesServices'));
+const SalesLeads = lazy(() => import('@/pages/sales/SalesLeads'));
+const SalesReferrals = lazy(() => import('@/pages/sales/SalesReferrals'));
+const SalesEnrollments = lazy(() => import('@/pages/sales/SalesEnrollments'));
+const SalesDetails = lazy(() => import('@/pages/sales/SalesDetails'));
+const SalesWithdrawals = lazy(() => import('@/pages/sales/SalesWithdrawals'));
+const SalesIssues = lazy(() => import('@/pages/sales/SalesIssues'));
+const SalesContact = lazy(() => import('@/pages/sales/SalesContact'));
+const SalesBlog = lazy(() => import('@/pages/sales/SalesBlog'));
+const SalesAnnouncements = lazy(() => import('@/pages/sales/SalesAnnouncements'));
+const AdminSalesTeam = lazy(() => import('@/pages/admin/AdminSalesTeam'));
+const AdminSalesPayments = lazy(() => import('@/pages/admin/AdminSalesPayments'));
+const AdminSalesIssues = lazy(() => import('@/pages/admin/AdminSalesIssues'));
 const AdminServicesList = lazy(() => import('@/pages/admin/AdminServicesList'));
 const AdminServiceForm = lazy(() => import('@/pages/admin/AdminServiceForm'));
 const AdminCoursesList = lazy(() => import('@/pages/admin/AdminCoursesList'));
@@ -153,6 +177,7 @@ function App() {
 
       <AdminAuthProvider>
       <MentorAuthProvider>
+      <SalesAuthProvider>
         <ErrorBoundary>
           <Suspense fallback={<RouteFallback />}>
             <Routes>
@@ -214,9 +239,28 @@ function App() {
                   <Route path={MENTOR_ROUTES.details} element={<MentorDetails />} />
                   <Route path={MENTOR_ROUTES.commission} element={<MentorCommission />} />
                   <Route path={MENTOR_ROUTES.blog} element={<MentorBlog />} />
+                  <Route path={MENTOR_ROUTES.announcements} element={<MentorAnnouncements />} />
                   <Route path={MENTOR_ROUTES.withdrawals} element={<MentorWithdrawals />} />
                   <Route path={MENTOR_ROUTES.contact} element={<MentorContact />} />
                   <Route path={MENTOR_ROUTES.issue} element={<MentorIssue />} />
+                </Route>
+              </Route>
+
+              {/* SALES PANEL (alag auth - Sales ID + mobile, edge function token) */}
+              <Route path={SALES_ROUTES.login} element={<SalesLogin />} />
+              <Route element={<SalesProtectedRoute />}>
+                <Route element={<SalesLayout />}>
+                  <Route path={SALES_ROUTES.dashboard} element={<SalesDashboard />} />
+                  <Route path={SALES_ROUTES.services} element={<SalesServices />} />
+                  <Route path={SALES_ROUTES.leads} element={<SalesLeads />} />
+                  <Route path={SALES_ROUTES.referrals} element={<SalesReferrals />} />
+                  <Route path={SALES_ROUTES.enrollments} element={<SalesEnrollments />} />
+                  <Route path={SALES_ROUTES.details} element={<SalesDetails />} />
+                  <Route path={SALES_ROUTES.withdrawals} element={<SalesWithdrawals />} />
+                  <Route path={SALES_ROUTES.blog} element={<SalesBlog />} />
+                  <Route path={SALES_ROUTES.announcements} element={<SalesAnnouncements />} />
+                  <Route path={SALES_ROUTES.contact} element={<SalesContact />} />
+                  <Route path={SALES_ROUTES.issue} element={<SalesIssues />} />
                 </Route>
               </Route>
 
@@ -224,6 +268,8 @@ function App() {
                 <Route element={<AdminLayout />}>
                   <Route path={ADMIN_ROUTES.dashboard} element={<AdminDashboard />} />
                   <Route path={ADMIN_ROUTES.analytics} element={<AdminAnalytics />} />
+                  <Route path={ADMIN_ROUTES.importantLinks} element={<AdminImportantLinks />} />
+                  <Route path={ADMIN_ROUTES.announcements} element={<AdminAnnouncements />} />
                   <Route path={ADMIN_ROUTES.courseParticipantsPath} element={<AdminBatchEnrollment />} />
                   <Route path={ADMIN_ROUTES.workshopParticipantsPath} element={<AdminBatchEnrollment />} />
                   <Route path={ADMIN_ROUTES.leadsContact} element={<AdminLeadsContact />} />
@@ -232,6 +278,7 @@ function App() {
                   <Route path={ADMIN_ROUTES.leadsWorkshops} element={<AdminLeadsWorkshops />} />
                   <Route path={ADMIN_ROUTES.payments} element={<AdminPayments />} />
                   <Route path={ADMIN_ROUTES.promoCodes} element={<AdminPromoCodes />} />
+                  <Route path={ADMIN_ROUTES.promoUsage} element={<AdminPromoUsage />} />
                   <Route path={ADMIN_ROUTES.services} element={<AdminServicesList />} />
                   <Route path={ADMIN_ROUTES.serviceEditPath} element={<AdminServiceForm />} />
                   <Route path={ADMIN_ROUTES.serviceNew} element={<AdminServiceForm />} />
@@ -254,6 +301,9 @@ function App() {
                   <Route path={ADMIN_ROUTES.mentors} element={<AdminMentors />} />
                   <Route path={ADMIN_ROUTES.mentorIssues} element={<AdminMentorIssues />} />
                   <Route path={ADMIN_ROUTES.mentorPayments} element={<AdminMentorPayments />} />
+                  <Route path={ADMIN_ROUTES.salesTeam} element={<AdminSalesTeam />} />
+                  <Route path={ADMIN_ROUTES.salesPayments} element={<AdminSalesPayments />} />
+                  <Route path={ADMIN_ROUTES.salesIssues} element={<AdminSalesIssues />} />
                   <Route path={ADMIN_ROUTES.clientReviews} element={<AdminClientReviewsList />} />
                   <Route path={ADMIN_ROUTES.clientReviewEditPath} element={<AdminClientReviewForm />} />
                   <Route path={ADMIN_ROUTES.clientReviewNew} element={<AdminClientReviewForm />} />
@@ -269,6 +319,7 @@ function App() {
             </Routes>
           </Suspense>
         </ErrorBoundary>
+      </SalesAuthProvider>
       </MentorAuthProvider>
       </AdminAuthProvider>
 

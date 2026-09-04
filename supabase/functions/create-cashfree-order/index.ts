@@ -145,6 +145,20 @@ Deno.serve(async (req) => {
       lead_type: leadType,
     };
 
+    // Sales refer & earn attribution: lead par jo referral_code tha (form se
+    // aaya) wahi server-side payments row par copy hota hai - client number/
+    // code par bharosa nahi.
+    const leadTable = isCareer ? 'internship_applications' : leadType === 'course' ? 'leads_course' : 'leads_workshop';
+    const leadRowId = isCareer ? (applicationId || leadId) : leadId;
+    if (leadRowId) {
+      const { data: leadRow } = await supabase
+        .from(leadTable)
+        .select('referral_code')
+        .eq('id', leadRowId)
+        .maybeSingle();
+      if (leadRow?.referral_code) paymentRecord.referral_code = leadRow.referral_code;
+    }
+
     // Promo usage count badhao (sahi apply hua ho to)
     if (appliedPromo) {
       await supabase.rpc('increment_promo_used_count', { p_code: appliedPromo });

@@ -184,7 +184,7 @@ export async function fetchAdminBlogPostById(id) {
  */
 export async function saveBlogPost(formData, id = null) {
   if (!isSupabaseConfigured) {
-    throw new Error('Supabase is not configured.');
+    throw new Error('This section is temporarily unavailable. Please try again in a while.');
   }
 
   const payload = {
@@ -259,7 +259,7 @@ export async function incrementBlogViews(slug) {
  */
 export async function uploadBlogImage(file) {
   if (!isSupabaseConfigured) {
-    throw new Error('Supabase is not configured.');
+    throw new Error('This section is temporarily unavailable. Please try again in a while.');
   }
 
   // 10MB se badi image allow nahi (Supabase free limit + site speed)

@@ -107,7 +107,7 @@ export async function fetchAdminCaseStudyById(id) {
 /** Admin: save (insert ya update) */
 export async function saveCaseStudy(formData, id = null) {
   if (!isSupabaseConfigured) {
-    throw new Error('Supabase is not configured.');
+    throw new Error('This section is temporarily unavailable. Please try again in a while.');
   }
 
   const payload = {
@@ -169,7 +169,7 @@ export async function incrementCaseStudyViews(slug) {
 /** Admin: cover image upload (blog-assets bucket, case-studies folder) */
 export async function uploadCaseStudyImage(file) {
   if (!isSupabaseConfigured) {
-    throw new Error('Supabase is not configured.');
+    throw new Error('This section is temporarily unavailable. Please try again in a while.');
   }
 
   if (file.size > 10 * 1024 * 1024) {

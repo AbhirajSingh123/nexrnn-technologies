@@ -29,6 +29,7 @@ export const serviceLeadSchema = z.object({
   phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
   email: z.string().email('Enter a valid email'),
   message: z.string().optional().or(z.literal('')),
+  referralCode: z.string().max(20, 'Keep it under 20 characters').optional().or(z.literal('')),
   consent: consentField,
 });
 
@@ -37,5 +38,6 @@ export const courseEnrollSchema = z.object({
   phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit phone number'),
   email: z.string().email('Enter a valid email'),
   college: z.string().optional().or(z.literal('')),
+  referralCode: z.string().max(20, 'Keep it under 20 characters').optional().or(z.literal('')),
   consent: consentField,
 });

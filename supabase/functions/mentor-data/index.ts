@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   );
 
-  let body: { action?: string; kind?: string; issue?: string; attachment?: { name?: string; type?: string; data?: string } } = {};
+  let body: { action?: string; kind?: string; issue?: string; attachment?: { name?: string; type?: string; data?: string }; announcement_id?: string; emoji?: string; message?: string } = {};
   try {
     body = await req.json();
   } catch {
@@ -198,6 +198,7 @@ Deno.serve(async (req) => {
 
   try {
     // ================= DASHBOARD =================
+
     if (action === 'dashboard') {
       const courseLeads = await fetchAssignedLeads(false);
       const workshopLeads = await fetchAssignedLeads(true);
@@ -496,6 +497,119 @@ Deno.serve(async (req) => {
         return json({ error: msg }, 500);
       }
       return json({ post: createdPost });
+    }
+
+    // ================= ANNOUNCEMENTS (admin notices, 2-way) =================
+    if (action === 'announcements') {
+      const { data } = await supabase
+        .from('announcements')
+        .select('id, audience, target_uuid, title, message, created_by, created_at')
+        .eq('audience', 'mentor')
+        .or(`target_uuid.is.null,target_uuid.eq.${mentorUuid}`)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      const ids = (data ?? []).map((a) => a.id);
+      // Reactions + replies (sirf dikhne wali announcements ki)
+      let reacts = [];
+      let reps = [];
+      if (ids.length) {
+        const [r1, r2] = await Promise.all([
+          supabase.from('announcement_reactions').select('announcement_id, emoji, reactor_uuid').in('announcement_id', ids),
+          supabase.from('announcement_replies').select('announcement_id, id, replier_uuid, replier_name, message, created_at').in('announcement_id', ids).order('created_at', { ascending: true }),
+        ]);
+        reacts = r1.data ?? [];
+        reps = r2.data ?? [];
+      }
+      return json({
+        rows: (data ?? []).map((a) => {
+          const reactions = {};
+          const myReactions = [];
+          for (const r of reacts.filter((x) => x.announcement_id === a.id)) {
+            reactions[r.emoji] = (reactions[r.emoji] || 0) + 1;
+            if (r.reactor_uuid === mentorUuid) myReactions.push(r.emoji);
+          }
+          return {
+            id: a.id,
+            title: a.title,
+            message: a.message,
+            onlyMe: Boolean(a.target_uuid),
+            createdBy: a.created_by,
+            createdAt: a.created_at,
+            reactions,
+            myReactions,
+            replies: reps
+              .filter((x) => x.announcement_id === a.id)
+              .map((r) => ({ id: r.id, name: r.replier_name, message: r.message, createdAt: r.created_at, mine: r.replier_uuid === mentorUuid })),
+          };
+        }),
+      });
+    }
+
+    // ================= ANNOUNCEMENT REACT (emoji toggle) =================
+    if (action === 'announcement_react') {
+      const annId = String(body.announcement_id || '');
+      const emoji = String(body.emoji || '').trim().slice(0, 8);
+      if (!annId || !emoji) return json({ error: 'Missing reaction details.' }, 400);
+      // Sirf dikhne wali announcement par hi react ho sakta hai
+      const { data: ann } = await supabase
+        .from('announcements')
+        .select('id')
+        .eq('id', annId)
+        .eq('audience', 'mentor')
+        .or(`target_uuid.is.null,target_uuid.eq.${mentorUuid}`)
+        .maybeSingle();
+      if (!ann) return json({ error: 'Announcement not found.' }, 404);
+      const { data: existing } = await supabase
+        .from('announcement_reactions')
+        .select('id')
+        .eq('announcement_id', annId)
+        .eq('reactor_type', 'mentor')
+        .eq('reactor_uuid', mentorUuid)
+        .eq('emoji', emoji)
+        .maybeSingle();
+      if (existing) {
+        await supabase.from('announcement_reactions').delete().eq('id', existing.id);
+      } else {
+        const { error } = await supabase
+          .from('announcement_reactions')
+          .insert({ announcement_id: annId, reactor_type: 'mentor', reactor_uuid: mentorUuid, emoji });
+        if (error) return json({ error: 'Could not save reaction. Please try again.' }, 500);
+      }
+      // Fresh summary wapas bhejo
+      const { data: reacts } = await supabase
+        .from('announcement_reactions')
+        .select('emoji, reactor_uuid')
+        .eq('announcement_id', annId);
+      const reactions = {};
+      const myReactions = [];
+      for (const r of reacts ?? []) {
+        reactions[r.emoji] = (reactions[r.emoji] || 0) + 1;
+        if (r.reactor_uuid === mentorUuid) myReactions.push(r.emoji);
+      }
+      return json({ ok: true, reactions, myReactions });
+    }
+
+    // ================= ANNOUNCEMENT REPLY =================
+    if (action === 'announcement_reply') {
+      const annId = String(body.announcement_id || '');
+      const message = String(body.message || '').trim().slice(0, 1000);
+      if (!annId) return json({ error: 'Missing announcement.' }, 400);
+      if (!message) return json({ error: 'Reply is empty.' }, 400);
+      const { data: ann } = await supabase
+        .from('announcements')
+        .select('id')
+        .eq('id', annId)
+        .eq('audience', 'mentor')
+        .or(`target_uuid.is.null,target_uuid.eq.${mentorUuid}`)
+        .maybeSingle();
+      if (!ann) return json({ error: 'Announcement not found.' }, 404);
+      const { data: reply, error } = await supabase
+        .from('announcement_replies')
+        .insert({ announcement_id: annId, replier_type: 'mentor', replier_uuid: mentorUuid, replier_name: mentor.name || 'Mentor', message })
+        .select('id, replier_name, message, created_at')
+        .single();
+      if (error) return json({ error: 'Could not send reply. Please try again.' }, 500);
+      return json({ ok: true, reply: { id: reply.id, name: reply.replier_name, message: reply.message, createdAt: reply.created_at, mine: true } });
     }
 
     // ================= PROFILE =================

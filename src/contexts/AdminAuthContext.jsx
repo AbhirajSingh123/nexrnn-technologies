@@ -44,7 +44,7 @@ export function AdminAuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     if (!isSupabaseConfigured) {
-      throw new Error('Backend is not configured yet. Set up Supabase first — see the README.');
+      throw new Error('Login service is temporarily unavailable. Please try again in a while.');
     }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;

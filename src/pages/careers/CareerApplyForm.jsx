@@ -10,6 +10,7 @@ import { isSupabaseConfigured } from '@/services/supabaseClient';
 import { createCashfreeOrder } from '@/data/paymentsRepo';
 import PaymentConfirmModal from '@/components/shared/PaymentConfirmModal';
 import { startCashfreeCheckout } from '@/utils/cashfreeSdk';
+import { getStoredReferral } from '@/utils/referral';
 import {
   submitApplication, uploadResume, validateResumeFile, downloadApplicationPDF,
 } from '@/data/applicationsRepo';
@@ -65,6 +66,7 @@ export default function CareerApplyForm() {
     degreeOther: '',
     skills: '',
     expectations: '',
+    referralCode: getStoredReferral(),
     dec1: false,
     dec2: false,
     dec3: false,
@@ -178,6 +180,7 @@ export default function CareerApplyForm() {
         degreeOther: form.degree === 'Others' ? form.degreeOther.trim() : '',
         skills: form.skills.trim(),
         expectations: form.expectations.trim(),
+        referralCode: form.referralCode.trim().toUpperCase().slice(0, 20),
         resumePath: path,
         resumeName: name,
         paymentStatus: isPaid ? 'pending' : 'free',
@@ -217,6 +220,7 @@ export default function CareerApplyForm() {
         degreeOther: form.degree === 'Others' ? form.degreeOther.trim() : '',
         skills: form.skills.trim(),
         expectations: form.expectations.trim(),
+        referralCode: form.referralCode.trim().toUpperCase().slice(0, 20),
       };
       // Paid opening: PAYMENT CONFIRMATION POPUP (fee + platform fee + promo + Total Pay)
       if (isPaid) {
@@ -555,6 +559,13 @@ export default function CareerApplyForm() {
                 required
               >
                 <textarea name="expectations" rows={4} value={form.expectations} onChange={handleChange} className={`${inputClass} resize-y`} placeholder="Write 2-4 lines about your learning goals…" />
+              </FormField>
+              <FormField
+                id="referralCode"
+                label="Referral Code (optional)"
+                error={errors.referralCode}
+              >
+                <input name="referralCode" value={form.referralCode} onChange={handleChange} className={`${inputClass} uppercase`} placeholder="Enter referral code if you have one" />
               </FormField>
             </FormSection>
 
