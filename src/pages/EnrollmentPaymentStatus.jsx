@@ -45,7 +45,7 @@ export default function EnrollmentPaymentStatus() {
             If money was deducted, don&rsquo;t worry — contact us with your details and we&rsquo;ll confirm it manually.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href={`tel:${SITE.phone}`} className="btn-secondary"><Phone size={15} /> {SITE.phoneDisplay}</a>
+            {SITE.phone && <a href={`tel:${SITE.phone}`} className="btn-secondary"><Phone size={15} /> {SITE.phoneDisplay}</a>}
             <a href={`mailto:${SITE.email}`} className="btn-secondary"><Mail size={15} /> Email Us</a>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function EnrollmentPaymentStatus() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/course" className="btn-primary">Back to Courses</Link>
-            <a href={`tel:${SITE.phone}`} className="btn-secondary"><Phone size={15} /> {SITE.phoneDisplay}</a>
+            {SITE.phone && <a href={`tel:${SITE.phone}`} className="btn-secondary"><Phone size={15} /> {SITE.phoneDisplay}</a>}
           </div>
         </div>
       </section>

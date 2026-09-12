@@ -5,6 +5,8 @@ import { SITE } from '@/constants/siteData';
 import { useSalesAuth } from '@/contexts/SalesAuthContext';
 
 /** WhatsApp number (support) */
+const SUPPORT_PHONE = '7520424645';
+const SUPPORT_PHONE_DISPLAY = '+91 75204 24645';
 const WHATSAPP_NUM = '917520424645';
 
 export default function SalesContact() {
@@ -77,14 +79,14 @@ export default function SalesContact() {
         </a>
 
         <a
-          href={`tel:${SITE.phone.replace(/\s/g, '')}`}
+          href={`tel:${SUPPORT_PHONE}`}
           className="card-base bg-white p-7 border-2 border-transparent hover:border-primary transition-colors"
         >
           <span className="w-11 h-11 bg-primary/10 flex items-center justify-center mb-4">
             <Phone size={19} className="text-primary" />
           </span>
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted mb-1">Phone</p>
-          <p className="text-sm font-bold text-secondary">{SITE.phone}</p>
+          <p className="text-sm font-bold text-secondary">{SUPPORT_PHONE_DISPLAY}</p>
           <p className="text-[11px] text-muted normal-case mt-2">Click to call</p>
         </a>
       </div>

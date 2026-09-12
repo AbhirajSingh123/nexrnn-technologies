@@ -88,9 +88,11 @@ export default function Footer() {
             <a href={`mailto:${SITE.email}`} className="flex items-center gap-2.5 text-sm text-white/70 hover:text-primary transition-colors normal-case">
               <Mail size={14} className="shrink-0" /> {SITE.email}
             </a>
-            <a href={`tel:${SITE.phone}`} className="flex items-center gap-2.5 text-sm text-white/70 hover:text-primary transition-colors">
-              <Phone size={14} className="shrink-0" /> {SITE.phoneDisplay}
-            </a>
+            {SITE.phone && (
+              <a href={`tel:${SITE.phone}`} className="flex items-center gap-2.5 text-sm text-white/70 hover:text-primary transition-colors">
+                <Phone size={14} className="shrink-0" /> {SITE.phoneDisplay}
+              </a>
+            )}
             <p className="flex items-center gap-2.5 text-sm text-white/70 normal-case">
               <MapPin size={14} className="shrink-0" /> {SITE.address}
             </p>

@@ -83,7 +83,6 @@ const SECTIONS = [
     paras: ['To request a refund or report a duplicate payment, please contact us:'],
     bullets: [
       'Email: nexrnntechnologies@gmail.com',
-      'Phone: +91 75204 24645',
     ],
     parasAfter: ['For duplicate payments, please contact us within 24\u201348 hours of the payment.', 'Please include:'],
     bulletsAfter: [
@@ -156,7 +155,6 @@ const SECTIONS = [
     paras: ['For refund requests, duplicate-payment issues, or questions about this policy, please contact:'],
     bullets: [
       'Email: nexrnntechnologies@gmail.com',
-      'Phone: +91 75204 24645',
       'Website: https://www.nexrnntechnologies.in/',
     ],
     parasAfter: ['Please contact us as soon as possible if you notice a duplicate payment or any other payment issue.'],

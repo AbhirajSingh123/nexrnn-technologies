@@ -150,7 +150,7 @@ function App() {
                 name: SITE.name,
                 url: SITE.domain,
                 email: SITE.email,
-                telephone: SITE.phoneDisplay,
+                ...(SITE.phoneDisplay ? { telephone: SITE.phoneDisplay } : {}),
                 address: {
                   '@type': 'PostalAddress',
                   addressLocality: SITE.city,

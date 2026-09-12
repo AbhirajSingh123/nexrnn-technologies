@@ -768,3 +768,18 @@ This README is updated **every time a task/feature is completed** — newest wor
 - ✅ E2E 31/31 (redirect regression incl. request-level check, all headings, no draft text,
   footer links, viewport fit) — 0 console errors; build ✓, oxlint 8 warnings / 0 errors.
   No DB or edge changes this round — deploy the site and you're done
+
+## R40: Support phone number removed from the PUBLIC website (temporary, user request)
+
+- ✅ **+91 75204 24645 ab public website par kahin nahi hai**: Home (Talk to Our Team),
+  Contact Us (Phone card), Footer (call link), payment success/status pages, case study pages,
+  all 3 legal policies (contact sections), index.html schema (telephone field) aur llms.txt —
+  sab se hata diya. Schema/SEO markup se bhi number nikal diya taaki Google use na dikhaye
+- ✅ **Easy restore**: `siteData.js` me `phone` / `phoneDisplay` khali kiye hain — wapas number
+  website par lana ho to sirf wahaan number bhar do, saari jagah apne aap aa jayengi (saare
+  spots conditional hain, layout toota nahi)
+- ✅ **Admin + panels me number intact**: Mentor Contact aur Sales Contact (Call/WhatsApp the
+  admin) dono me number waisa hi dikhta hai — unhone SITE constant use kiya tha, unhe apne
+  local constants par shift kar diya taaki website ka change unko affect na kare
+- ✅ E2E 20/20: 9 public pages number-free + viewport fit; mentor/sales contact pages still
+  show the number; 0 console errors. No DB/edge changes — sirf site deploy karna hai

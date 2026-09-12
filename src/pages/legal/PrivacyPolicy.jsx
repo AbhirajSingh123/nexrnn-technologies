@@ -157,7 +157,6 @@ const SECTIONS = [
     paras: ['If you have any questions about this Privacy Policy or how we handle your information, please reach out:'],
     bullets: [
       'Email: nexrnntechnologies@gmail.com',
-      'Phone: +91 75204 24645',
       'Website: https://www.nexrnntechnologies.in/',
     ],
   },

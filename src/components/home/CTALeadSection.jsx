@@ -25,12 +25,14 @@ export default function CTALeadSection() {
               </p>
             </div>
             <div className="space-y-4">
-              <a href={`tel:${SITE.phone}`} className="flex items-center gap-3 hover:text-primary transition-colors">
-                <div className="w-10 h-10 bg-primary flex items-center justify-center shrink-0">
-                  <Phone size={16} />
-                </div>
-                <span className="text-sm font-semibold">{SITE.phoneDisplay}</span>
-              </a>
+              {SITE.phone && (
+                <a href={`tel:${SITE.phone}`} className="flex items-center gap-3 hover:text-primary transition-colors">
+                  <div className="w-10 h-10 bg-primary flex items-center justify-center shrink-0">
+                    <Phone size={16} />
+                  </div>
+                  <span className="text-sm font-semibold">{SITE.phoneDisplay}</span>
+                </a>
+              )}
               <a href={`mailto:${SITE.email}`} className="flex items-center gap-3 hover:text-primary transition-colors">
                 <div className="w-10 h-10 bg-primary flex items-center justify-center shrink-0">
                   <Mail size={16} />

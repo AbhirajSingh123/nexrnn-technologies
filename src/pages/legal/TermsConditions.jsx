@@ -210,7 +210,6 @@ const SECTIONS = [
     paras: ['If you have questions about these Terms, please contact us:'],
     bullets: [
       'Email: nexrnntechnologies@gmail.com',
-      'Phone: +91 75204 24645',
       'Website: https://www.nexrnntechnologies.in/',
     ],
     parasAfter: ['We recommend contacting us for any clarification before making a payment or starting a project.'],

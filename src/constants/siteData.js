@@ -7,8 +7,10 @@ export const SITE = {
   shortName: 'NexRNN',
   tagline: 'Your Digital Growth & Technology Partner',
   domain: 'https://www.nexrnntechnologies.in',
-  phone: '7520424645',
-  phoneDisplay: '+91 75204 24645',
+  // Phone PUBLIC WEBSITE se temporarily hataya gaya (user request) — admin/panels me abhi bhi hai.
+  // Wapas website par lana ho to yahaan number bhar do, saare jagah apne aap aa jayenge.
+  phone: '',
+  phoneDisplay: '',
   email: 'nexrnntechnologies@gmail.com',
   address: 'Lucknow, Uttar Pradesh - 226017',
   city: 'Lucknow',

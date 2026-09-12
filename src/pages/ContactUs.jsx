@@ -130,15 +130,17 @@ export default function ContactUs() {
                     <p className="text-sm font-bold text-secondary normal-case">{SITE.email}</p>
                   </div>
                 </a>
-                <a href={`tel:${SITE.phone}`} className="flex items-center gap-4 hover:opacity-80 transition-opacity">
-                  <div className="w-12 h-12 bg-secondary flex items-center justify-center shrink-0">
-                    <Phone size={20} className="text-white" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted mb-0.5">Phone</p>
-                    <p className="text-sm font-bold text-secondary normal-case">{SITE.phoneDisplay}</p>
-                  </div>
-                </a>
+                {SITE.phone && (
+                  <a href={`tel:${SITE.phone}`} className="flex items-center gap-4 hover:opacity-80 transition-opacity">
+                    <div className="w-12 h-12 bg-secondary flex items-center justify-center shrink-0">
+                      <Phone size={20} className="text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted mb-0.5">Phone</p>
+                      <p className="text-sm font-bold text-secondary normal-case">{SITE.phoneDisplay}</p>
+                    </div>
+                  </a>
+                )}
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white border-2 border-secondary flex items-center justify-center shrink-0">
                     <MapPin size={20} className="text-secondary" />

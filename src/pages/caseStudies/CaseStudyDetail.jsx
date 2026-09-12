@@ -142,12 +142,14 @@ export default function CaseStudyDetail() {
             <Link to="/Contect-us" className="btn-primary inline-flex items-center gap-2">
               Get Free Consultation <ArrowRight size={16} />
             </Link>
-            <a
-              href={`tel:${SITE.phone}`}
-              className="inline-flex items-center gap-2 border-2 border-white/30 text-white px-6 py-2.5 text-sm font-bold hover:border-primary hover:text-primary transition-colors"
-            >
-              <Phone size={15} /> {SITE.phoneDisplay}
-            </a>
+            {SITE.phone && (
+              <a
+                href={`tel:${SITE.phone}`}
+                className="inline-flex items-center gap-2 border-2 border-white/30 text-white px-6 py-2.5 text-sm font-bold hover:border-primary hover:text-primary transition-colors"
+              >
+                <Phone size={15} /> {SITE.phoneDisplay}
+              </a>
+            )}
           </div>
         </div>
       </section>
