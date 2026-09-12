@@ -3,6 +3,7 @@ import { openCookieSettings } from '@/utils/cookieConsent';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { FaInstagram, FaLinkedinIn, FaFacebookF, FaYoutube } from 'react-icons/fa';
 import { SITE, SOCIAL_LINKS } from '@/constants/siteData';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { SERVICES } from '@/data/services';
 import { ACTIVE_COURSES } from '@/data/courses';
 
@@ -11,6 +12,8 @@ const FOOTER_SERVICES = SERVICES.filter((s) =>
 );
 
 export default function Footer() {
+  const { settings } = useSiteSettings();
+
   return (
     <footer className="bg-secondary text-white pt-16 pb-8">
       <div className="container-section grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
@@ -50,7 +53,7 @@ export default function Footer() {
             <li><Link to="/services" className="text-sm text-white/70 hover:text-primary transition-colors">Services</Link></li>
             <li><Link to="/course" className="text-sm text-white/70 hover:text-primary transition-colors">Courses</Link></li>
             <li><Link to="/workshop" className="text-sm text-white/70 hover:text-primary transition-colors">Workshops</Link></li>
-            <li><Link to="/blog" className="text-sm text-white/70 hover:text-primary transition-colors">Blog</Link></li>
+            {settings.showBlog && <li><Link to="/blog" className="text-sm text-white/70 hover:text-primary transition-colors">Blog</Link></li>}
             <li><Link to="/case-studies" className="text-sm text-white/70 hover:text-primary transition-colors">Case Studies</Link></li>
             <li><Link to="/faqs" className="text-sm text-white/70 hover:text-primary transition-colors">FAQs</Link></li>
             <li><Link to="/sitemap" className="text-sm text-white/70 hover:text-primary transition-colors">Sitemap</Link></li>

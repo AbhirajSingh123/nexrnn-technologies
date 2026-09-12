@@ -1,3 +1,4 @@
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -12,6 +13,7 @@ import { fetchBlogPosts } from '@/data/blogRepo';
  * Navbar ke search icon se khulta hai. Live results ke saath.
  */
 export default function SearchOverlay({ onClose }) {
+  const { settings } = useSiteSettings();
   const [query, setQuery] = useState('');
   const [items, setItems] = useState({ services: [], courses: [], workshops: [], blogs: [] });
   const [loading, setLoading] = useState(true);
@@ -122,7 +124,7 @@ export default function SearchOverlay({ onClose }) {
               {renderGroup('Services', Briefcase, results.services, '/services', (i) => i.title)}
               {renderGroup('Courses', GraduationCap, results.courses, '/course', (i) => i.title)}
               {renderGroup('Workshops', CalendarDays, results.workshops, '/workshop', (i) => i.title)}
-              {renderGroup('Blogs', BookOpen, results.blogs, '/blog', (i) => i.title)}
+              {settings.showBlog && renderGroup('Blogs', BookOpen, results.blogs, '/blog', (i) => i.title)}
             </>
           )}
         </div>

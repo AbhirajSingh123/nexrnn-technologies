@@ -16,12 +16,11 @@ export const SITE = {
   city: 'Lucknow',
 };
 
-// Social links are intentionally '#' placeholders — business owner will supply real URLs later.
 export const SOCIAL_LINKS = {
-  instagram: '#',
-  linkedin: '#',
-  facebook: '#',
-  youtube: '#',
+  instagram: 'https://www.instagram.com/nexrnntechnologies',
+  linkedin: 'https://www.linkedin.com/company/nexrnn-technologies-lko',
+  facebook: 'https://www.facebook.com/nexrnntechnologies',
+  youtube: 'https://www.youtube.com/@NexRNNTechnologies',
 };
 
 export const NAV_LINKS = [
@@ -29,7 +28,7 @@ export const NAV_LINKS = [
   { label: 'Services', href: '/services', settingsKey: 'showServices' },
   { label: 'Courses', href: '/course', settingsKey: 'showCourses' },
   { label: 'Workshops', href: '/workshop', settingsKey: 'showWorkshops' },
-  { label: 'Blog', href: '/blog' },
+  { label: 'Blog', href: '/blog', settingsKey: 'showBlog' },
   { label: 'About Us', href: '/about-us' },
   { label: 'Contact Us', href: '/Contect-us' },
 ];

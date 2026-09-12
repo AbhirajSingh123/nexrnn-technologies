@@ -783,3 +783,30 @@ This README is updated **every time a task/feature is completed** — newest wor
   local constants par shift kar diya taaki website ka change unko affect na kare
 - ✅ E2E 20/20: 9 public pages number-free + viewport fit; mentor/sales contact pages still
   show the number; 0 console errors. No DB/edge changes — sirf site deploy karna hai
+
+## R40: Site Settings — Client Reviews & Blog show/hide + Social links + SEO/GEO/AEO/LLMS update
+
+- ✅ **Admin → Site Settings me 2 naye toggles** (Section Visibility me):
+  - "Show Client Reviews on website" → Services page ka video-review slider (What Our Clients
+    Say section) on/off
+  - "Show Blog on website" → Blog section on/off. OFF hone par: navbar + footer Blog link
+    gayab, search overlay me Blogs group gayab, aur /blog + /blog/:slug pages home par
+    redirect ho jate hain
+- ✅ Naye site_settings columns: `show_client_reviews`, `show_blog` (dono boolean, default true).
+  **Deploy me ye 2 SQL lines chalana (migration folder nahi hai):**
+  ```sql
+  ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS show_client_reviews boolean DEFAULT true;
+  ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS show_blog boolean DEFAULT true;
+  ```
+- ✅ **Social links update** (siteData SOCIAL_LINKS — footer, contact page, JSON-LD sab
+  same constant use karte hain): Instagram instagram.com/nexrnntechnologies, LinkedIn
+  linkedin.com/company/nexrnn-technologies-lko, Facebook facebook.com/nexrnntechnologies,
+  YouTube youtube.com/@NexRNNTechnologies. Saare '#' placeholders hat gaye
+- ✅ **SEO update**: index.html ke static ProfessionalService schema me `sameAs` array (4
+  social profiles) + App.jsx ka dynamic JSON-LD bhi SOCIAL_LINKS se sameAs deta hai
+- ✅ **GEO/AEO/LLMS update**: public/llms.txt me "Official Social Profiles" section add kiya
+  (4 links + note ki ye hi official accounts hain — AI engines ke liye)
+- ✅ E2E 26/26: admin login (stubbed GoTrue) → settings page dono toggles default ON →
+  uncheck + save → PATCH body me dono false → public side OFF state (slider gayab, /blog
+  redirect, links gayab) → ON state (sab wapas) → 4 social URLs home/contact/schema/llms.txt
+  me; 0 console errors. Deploy = site + upar wali 2 SQL lines (koi edge change nahi)

@@ -1,11 +1,12 @@
 import { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { ToastContainer } from 'react-toastify';
 import AnalyticsLoader from '@/components/analytics/AnalyticsLoader';
 import CookieConsent from '@/components/shared/CookieConsent';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import RootLayout from '@/layouts/RootLayout';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
 import { MentorAuthProvider } from '@/contexts/MentorAuthContext';
 import { SalesAuthProvider } from '@/contexts/SalesAuthContext';
@@ -120,6 +121,13 @@ function RouteFallback() {
   );
 }
 
+// Blog site-settings se hide ho to /blog pages home par bhej do
+function BlogVisibilityGate({ children }) {
+  const { settings, loading } = useSiteSettings();
+  if (!loading && !settings.showBlog) return <Navigate to="/" replace />;
+  return children;
+}
+
 function App() {
   return (
     <HelmetProvider>
@@ -189,8 +197,8 @@ function App() {
                 <Route path="/course/:slug" element={<CourseDetail />} />
                 <Route path="/workshop" element={<Workshops />} />
                 <Route path="/workshop/:slug" element={<WorkshopDetail />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogDetail />} />
+                <Route path="/blog" element={<BlogVisibilityGate><Blog /></BlogVisibilityGate>} />
+                <Route path="/blog/:slug" element={<BlogVisibilityGate><BlogDetail /></BlogVisibilityGate>} />
                 <Route path="/case-studies" element={<CaseStudies />} />
                 <Route path="/case-studies/:slug" element={<CaseStudyDetail />} />
                 <Route path="/faqs" element={<Faqs />} />

@@ -62,7 +62,7 @@ export default function Services() {
         </div>
       </section>
 
-      <ReviewVideoSlider />
+      {settings.showClientReviews && <ReviewVideoSlider />}
 
       <section className="section-padding bg-secondary bg-grid-light">
         <div className="container-section">
