@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { supabase } from '@/services/supabaseClient';
+import EmailLink from '@/components/shared/EmailLink';
 import { formatDateTimeWithDay } from '@/utils/formatDateTime';
 import { formatINR } from '@/utils/format';
 import AdminTable from '@/components/admin/AdminTable';
@@ -296,12 +297,12 @@ export default function AdminLeadsServices() {
                 >
                   <MessageCircle size={14} /> WhatsApp
                 </a>
-                <a
+                <EmailLink
                   href={mailtoHref(detail)}
                   className="inline-flex items-center gap-2 border-2 border-secondary/20 bg-white px-3.5 py-2 text-xs font-bold text-secondary hover:border-primary hover:text-primary transition-colors"
                 >
                   <Mail size={14} /> Email
-                </a>
+                </EmailLink>
               </div>
 
               {/* Admin editable fields */}

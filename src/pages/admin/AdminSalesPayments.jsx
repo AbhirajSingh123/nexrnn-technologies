@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { X, Loader2, Building2, Smartphone, Download, Mail } from 'lucide-react';
 import { fetchSalesWithdrawals, updateSalesWithdrawal } from '@/data/salesWithdrawalsRepo';
+import EmailLink from '@/components/shared/EmailLink';
 import { downloadWithdrawalSlipPDF } from '@/data/mentorDocumentsRepo';
 import { formatDateTimeWithDay } from '@/utils/formatDateTime';
 import { formatINR } from '@/utils/format';
@@ -325,12 +326,12 @@ export default function AdminSalesPayments() {
                 >
                   {slipping ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />} Download Slip
                 </button>
-                <a
+                <EmailLink
                   href={buildPaymentMailto(detail)}
                   className="inline-flex items-center gap-2 border-2 border-secondary/20 bg-white px-3.5 py-2 text-xs font-bold text-secondary hover:border-primary hover:text-primary transition-colors"
                 >
                   <Mail size={14} /> Mail to Member
-                </a>
+                </EmailLink>
               </div>
 
               {/* Admin fill karne wale fields */}

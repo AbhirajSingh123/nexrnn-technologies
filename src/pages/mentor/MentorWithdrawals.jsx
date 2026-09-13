@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import EmailLink from '@/components/shared/EmailLink';
 import { toast } from 'react-toastify';
 import { Loader2, Wallet, IndianRupee, TrendingUp, Clock, Building2, Smartphone, X, Download, Mail } from 'lucide-react';
 import useMentorData, { inr } from '@/hooks/useMentorData';
@@ -340,12 +341,12 @@ function DetailBtn({ row, mentor }) {
               >
                 {busy ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />} Download Slip
               </button>
-              <a
+              <EmailLink
                 href={buildQueryMailto(row, mentor)}
                 className="inline-flex items-center gap-2 border-2 border-secondary/20 bg-white px-3.5 py-2 text-xs font-bold text-secondary hover:border-primary hover:text-primary transition-colors"
               >
                 <Mail size={14} /> Mail NexRNN
-              </a>
+              </EmailLink>
             </div>
             <div className="flex items-start justify-between px-5 sm:px-7 pt-5">
               <div>

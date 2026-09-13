@@ -810,3 +810,50 @@ This README is updated **every time a task/feature is completed** — newest wor
   uncheck + save → PATCH body me dono false → public side OFF state (slider gayab, /blog
   redirect, links gayab) → ON state (sab wapas) → 4 social URLs home/contact/schema/llms.txt
   me; 0 console errors. Deploy = site + upar wali 2 SQL lines (koi edge change nahi)
+
+## R40: mailto links har device par kaam karenge (EmailLink — Gmail web fallback)
+
+- **Problem**: desktop/laptop par default mail app configured nahi hota (bina Outlook/Mail
+  setup ke) — mailto: click karne par Chrome me khaali "Untitled" tab khulta hai, kuch nahi
+  hota. Code broken nahi tha, device me mail client nahi tha
+- **Fix**: naya `src/utils/email.js` (toEmailHref) + `src/components/shared/EmailLink.jsx`:
+  - **Desktop**: mailto ki jagah **Gmail web compose** (mail.google.com/?view=cm) naye tab me
+    khulta hai — to/subject/body sab pre-filled, Gmail login me direct draft ready
+  - **Mobile**: pehle jaisa mailto: (Gmail/Mail app khud handle karte hain), target=_blank nahi
+- **Saari jagah lagaya** (14 anchors + 1 PDF link): Home CTA "Talk to Our Team" email, Footer
+  email, Contact Us email card, Enrollment Payment Status + Enrollment Success "Email Us",
+  enrollment PDF ka email link, BlogDetail "Publish Your Article", Mentor Contact + Sales
+  Contact email card (subject me Name/ID pre-filled rehta hai), Mentor/Sales Withdrawals "Mail
+  NexRNN / Mail Query", Admin Leads Email, Admin Mentor/Sales Payments "Mail to Mentor/Member"
+- E2E 11/11: desktop par home/contact/mentor/sales ke email links Gmail compose + to/subject/
+  body preserved + target=_blank; zero raw mailto anchors on home; mobile UA par wahi links
+  native mailto (bina _blank); 0 console errors. Deploy = sirf site (no DB/edge change)
+
+## R40: Internship form RLS error FIX (edge function) + poore project ka audit
+
+### Fix: "new row violates row-level security policy for table internship_applications"
+
+- **Wajah**: apply form browser se DIRECT `internship_applications` table me insert karta tha.
+  Table par RLS ON hai aur anon ke liye insert policy nahi thi → Supabase ne block kiya.
+  Anon ko wide policy dena data leak karta (sab applicants ka naam/email/mobile public), isliye
+  safe fix liya
+- **Fix**: naya edge function **`internship-apply`** — service role (RLS bypass) ke saath insert
+  karta hai, validation ke saath (name/email/mobile, length caps, referral uppercase, paid
+  pending ke liye opening zaroori). `application_id` waisa hi DB trigger se aata hai. Client
+  (`applicationsRepo.submitApplication`) ab is function ko call karta hai — table anon ke liye
+  lock rahegi, koi read leak nahi
+- Resume upload pehle jaisa client-side hai (storage policy already anon allow karti hai —
+  screenshot me upload ke BAAD insert fail hua tha)
+
+### Deploy (zaroori — pehle function, phir site):
+```bash
+supabase functions deploy internship-apply
+```
+(Function deploy hone se pehle site deploy kiya to form "Submission service is being set up"
+dikhayega — ye expected hai.) Baaki koi SQL/migration nahi.
+
+### Poore project ka audit (sab green):
+- Route crawl: 15 public pages + 10 panel pages + 5 admin pages + contact form = **65/65
+  render checks pass, 0 console errors**, mobile viewport fit bhi clean
+- oxlint: 8 warnings / 0 errors (baseline). Build ✓ 1.6s. Bug-pattern sweep: koi doubled-braces,
+  duplicate imports, raw mailto anchors, '#' social placeholders, ya stray console.log nahi bacha

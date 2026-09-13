@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import EmailLink from '@/components/shared/EmailLink';
 import { toast } from 'react-toastify';
 import { Loader2, Wallet, IndianRupee, TrendingUp, Clock, Building2, Smartphone, X, Download, Mail } from 'lucide-react';
 import useSalesData, { inr } from '@/hooks/useSalesData';
@@ -378,12 +379,12 @@ export default function SalesWithdrawals() {
                 >
                   {slipping ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />} Download Slip
                 </button>
-                <a
+                <EmailLink
                   href={buildQueryMailto(detail, member)}
                   className="inline-flex items-center gap-2 border-2 border-secondary/20 bg-white px-3.5 py-2 text-xs font-bold text-secondary hover:border-primary hover:text-primary transition-colors"
                 >
                   <Mail size={14} /> Mail Query to NexRNN
-                </a>
+                </EmailLink>
               </div>
 
               <div className="flex items-center justify-end">

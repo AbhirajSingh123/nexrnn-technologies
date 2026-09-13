@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import EmailLink from '@/components/shared/EmailLink';
 import { toast } from 'react-toastify';
 import {
   ArrowLeft,
@@ -460,12 +461,12 @@ export default function BlogDetail() {
                 </p>
               </div>
 
-              <a
+              <EmailLink
                 href={articleSubmitMailto}
                 className="btn-primary !py-3 !px-6 inline-flex items-center gap-2 shrink-0"
               >
                 <PenLine size={15} /> Publish Your Article
-              </a>
+              </EmailLink>
             </div>
           </div>
 

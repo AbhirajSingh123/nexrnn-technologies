@@ -6,6 +6,7 @@ import { Loader2, Send, Mail, Phone, MapPin } from 'lucide-react';
 import { FaInstagram, FaLinkedinIn, FaFacebookF, FaYoutube } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { SITE, SOCIAL_LINKS, CONSULTATION_SERVICE_OPTIONS } from '@/constants/siteData';
+import EmailLink from '@/components/shared/EmailLink';
 import { contactFormSchema } from '@/utils/validation';
 import { submitContactLead } from '@/data/leadsRepo';
 import { trackLead } from '@/utils/analytics';
@@ -121,7 +122,7 @@ export default function ContactUs() {
             <Reveal direction="right" className="card-base bg-white p-8">
               <h2 className="text-xl text-secondary normal-case mb-6">Business Information</h2>
               <div className="space-y-5">
-                <a href={`mailto:${SITE.email}`} className="flex items-center gap-4 hover:opacity-80 transition-opacity">
+                <EmailLink href={`mailto:${SITE.email}`} className="flex items-center gap-4 hover:opacity-80 transition-opacity">
                   <div className="w-12 h-12 bg-primary flex items-center justify-center shrink-0">
                     <Mail size={20} className="text-white" />
                   </div>
@@ -129,7 +130,7 @@ export default function ContactUs() {
                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted mb-0.5">Email</p>
                     <p className="text-sm font-bold text-secondary normal-case">{SITE.email}</p>
                   </div>
-                </a>
+                </EmailLink>
                 {SITE.phone && (
                   <a href={`tel:${SITE.phone}`} className="flex items-center gap-4 hover:opacity-80 transition-opacity">
                     <div className="w-12 h-12 bg-secondary flex items-center justify-center shrink-0">

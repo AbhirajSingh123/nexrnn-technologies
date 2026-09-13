@@ -4,6 +4,7 @@ import { Mail, Phone, MapPin } from 'lucide-react';
 import { FaInstagram, FaLinkedinIn, FaFacebookF, FaYoutube } from 'react-icons/fa';
 import { SITE, SOCIAL_LINKS } from '@/constants/siteData';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import EmailLink from '@/components/shared/EmailLink';
 import { SERVICES } from '@/data/services';
 import { ACTIVE_COURSES } from '@/data/courses';
 
@@ -88,9 +89,9 @@ export default function Footer() {
             ))}
           </ul>
           <div className="space-y-2.5">
-            <a href={`mailto:${SITE.email}`} className="flex items-center gap-2.5 text-sm text-white/70 hover:text-primary transition-colors normal-case">
+            <EmailLink href={`mailto:${SITE.email}`} className="flex items-center gap-2.5 text-sm text-white/70 hover:text-primary transition-colors normal-case">
               <Mail size={14} className="shrink-0" /> {SITE.email}
-            </a>
+            </EmailLink>
             {SITE.phone && (
               <a href={`tel:${SITE.phone}`} className="flex items-center gap-2.5 text-sm text-white/70 hover:text-primary transition-colors">
                 <Phone size={14} className="shrink-0" /> {SITE.phoneDisplay}

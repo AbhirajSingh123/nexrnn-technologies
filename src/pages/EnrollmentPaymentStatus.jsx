@@ -5,6 +5,7 @@ import { XCircle, Clock, Phone, Mail } from 'lucide-react';
 import { verifyCashfreePayment } from '@/data/paymentsRepo';
 import { trackPurchase } from '@/utils/analytics';
 import { SITE } from '@/constants/siteData';
+import EmailLink from '@/components/shared/EmailLink';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 
 export default function EnrollmentPaymentStatus() {
@@ -46,7 +47,7 @@ export default function EnrollmentPaymentStatus() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {SITE.phone && <a href={`tel:${SITE.phone}`} className="btn-secondary"><Phone size={15} /> {SITE.phoneDisplay}</a>}
-            <a href={`mailto:${SITE.email}`} className="btn-secondary"><Mail size={15} /> Email Us</a>
+            <EmailLink href={`mailto:${SITE.email}`} className="btn-secondary"><Mail size={15} /> Email Us</EmailLink>
           </div>
         </div>
       </section>

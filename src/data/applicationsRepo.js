@@ -4,7 +4,7 @@
  * - Admin: list/update/download-resume
  * Application ID database-side trigger se banta hai (NRT-INT-YYMMM####).
  */
-import { supabase, isSupabaseConfigured } from '@/services/supabaseClient';
+import { supabase, isSupabaseConfigured, supabaseUrlFinal, supabaseAnonKeyFinal } from '@/services/supabaseClient';
 
 const RESUME_BUCKET = 'internship-resumes';
 const RESUME_MAX_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -136,14 +136,28 @@ export async function submitApplication(payload) {
     // submitted_at/submission_date DB default (server clock)
   };
 
-  const { data, error } = await supabase
-    .from('internship_applications')
-    .insert(record)
-    .select('id, application_id')
-    .single();
-
-  if (error) throw new Error(error.message || 'Application submit failed.');
-  return { id: data?.id || '', applicationId: data?.application_id || '' };
+  // RLS fix: direct table insert (anon) "new row violates row-level security policy" deta tha.
+  // Ab insert edge function ke through hota hai (service role, RLS bypass, koi data leak nahi).
+  let res;
+  try {
+    res = await fetch(`${supabaseUrlFinal}/functions/v1/internship-apply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: supabaseAnonKeyFinal, Authorization: `Bearer ${supabaseAnonKeyFinal}` },
+      body: JSON.stringify(record),
+    });
+  } catch {
+    throw new Error('Network error — please check your connection and try again.');
+  }
+  const out = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = String(out.error || '');
+    throw new Error(
+      msg.includes('Functions') || msg.includes('not found') || res.status === 404
+        ? 'Submission service is being set up. Please try again in a while or contact us directly.'
+        : msg || 'Application submit failed. Please try again.'
+    );
+  }
+  return { id: out.id || '', applicationId: out.applicationId || '' };
 }
 
 /** Admin: saari applications (latest first) */

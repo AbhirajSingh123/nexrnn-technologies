@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import EmailLink from '@/components/shared/EmailLink';
+import { toEmailHref } from '@/utils/email';
 import { useLocation, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { CheckCircle2, Mail, MessageCircle, Download } from 'lucide-react';
@@ -86,7 +88,7 @@ async function downloadEnrollmentPDF({ name, itemTitle, referenceId, batchId, fe
 
   // Email (clickable mailto)
   doc.textWithLink('Email: nexrnntechnologies@gmail.com', 130, y + 74, {
-    url: 'mailto:nexrnntechnologies@gmail.com',
+    url: toEmailHref('mailto:nexrnntechnologies@gmail.com'),
   });
 
   doc.setFont('helvetica', 'normal');
@@ -209,9 +211,9 @@ export default function EnrollmentSuccess() {
           )}
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href={`mailto:${SITE.email}`} className="btn-secondary">
+            <EmailLink href={`mailto:${SITE.email}`} className="btn-secondary">
               <Mail size={15} /> Email Us
-            </a>
+            </EmailLink>
             <Link to="/" className="btn-primary">
               Back to Home
             </Link>

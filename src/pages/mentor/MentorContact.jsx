@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Mail, Phone, MessageCircle } from 'lucide-react';
 import { SITE } from '@/constants/siteData';
+import EmailLink from '@/components/shared/EmailLink';
 import { useMentorAuth } from '@/contexts/MentorAuthContext';
 
 /** WhatsApp number (support) */
@@ -52,7 +53,7 @@ export default function MentorContact() {
       </div>
 
       <div className="grid sm:grid-cols-3 gap-5 max-w-3xl">
-        <a
+        <EmailLink
           href={mailto}
           className="card-base bg-white p-7 border-2 border-transparent hover:border-primary transition-colors"
         >
@@ -61,8 +62,8 @@ export default function MentorContact() {
           </span>
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted mb-1">Email</p>
           <p className="text-sm font-bold text-secondary break-all normal-case">{SITE.email}</p>
-          <p className="text-[11px] text-muted normal-case mt-2">Opens your mail app with details attached</p>
-        </a>
+          <p className="text-[11px] text-muted normal-case mt-2">Opens email draft with details attached</p>
+        </EmailLink>
 
         <a
           href={whatsapp}

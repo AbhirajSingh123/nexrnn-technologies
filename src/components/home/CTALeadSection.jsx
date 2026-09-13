@@ -1,6 +1,7 @@
 import { Phone, Mail, CalendarDays } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SITE } from '@/constants/siteData';
+import EmailLink from '@/components/shared/EmailLink';
 import Reveal from '@/components/shared/Reveal';
 import SectionHeading from '@/components/shared/SectionHeading';
 import LeadForm from '@/components/shared/LeadForm';
@@ -33,12 +34,12 @@ export default function CTALeadSection() {
                   <span className="text-sm font-semibold">{SITE.phoneDisplay}</span>
                 </a>
               )}
-              <a href={`mailto:${SITE.email}`} className="flex items-center gap-3 hover:text-primary transition-colors">
+              <EmailLink href={`mailto:${SITE.email}`} className="flex items-center gap-3 hover:text-primary transition-colors">
                 <div className="w-10 h-10 bg-primary flex items-center justify-center shrink-0">
                   <Mail size={16} />
                 </div>
                 <span className="text-sm font-semibold normal-case">{SITE.email}</span>
-              </a>
+              </EmailLink>
             </div>
           </Reveal>
 
